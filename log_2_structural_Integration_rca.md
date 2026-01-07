@@ -148,3 +148,21 @@ end
 
 <p><b>How this code executes the goal:</b><br>
 The <code>#20</code> wait is our "settling time." Since each 1-bit adder has a 1ns delay, a 16-bit ripple takes 16ns to reach the end. Waiting 20ns ensures the ripple is finished before we check the answer. Casting inputs to <code>17'</code> ensures the reference math has enough headroom to hold
+
+<hr>
+<hr>
+
+<h2>📝 Log 2 Final Summary</h2>
+
+<ul>
+    <li><b>✅ Structural Hierarchy:</b> We successfully moved beyond single-gate logic by implementing a hierarchical design. By nesting the <b>Full Adder</b> leaf cell within the <b>Ripple Carry</b> top-module, we established how to manage complex port mappings and internal signal nets between different levels of hardware.</li>
+    <li><b>✅ Scalability with Generics:</b> We utilized <code>generate</code> loops and <code>genvar</code> to create a <b>Parameterizable Design</b>. This allows the hardware to scale from 4-bit to 64-bit (or more) automatically, demonstrating the industry standard for writing reusable and flexible RTL.</li>
+    <li><b>✅ Simulation Timing Realism:</b> We integrated <b>inertial delays</b> (<code>#1</code>) to model the physical "settling time" of a carry chain. This gives us a visual representation in GTKWave of how data "ripples" through logic gates over time, helping us understand propagation delay and the fundamentals of Timing Analysis.</li>
+    <li><b>✅ Automated Self-Checking:</b> We developed a "Golden Reference" testbench strategy. By comparing our structural hardware results against SystemVerilog’s high-level mathematical operators, we created an automated system that ensures 100% arithmetic accuracy across random data sets.</li>
+</ul>
+
+
+
+<hr>
+
+<p align="center"><i>Log 2 Complete. Ready to move to <b>Log 3: Synchronous Logic and FIFOs?</b></i></p>

@@ -5,14 +5,17 @@
   <i>Moving from combinational gates to sequential buffering logic.</i>
 </p>
 
-<hr>
+
 
 <h3>🚀 The Mission: Sequential Logic & Buffering</h3>
 <p>In Log 2, we built an adder where signals "rippled" through gates. Now, we move into <b>Sequential Logic</b>. We are building a <b>Synchronous FIFO (First-In, First-Out)</b>. Think of this as the "waiting room" of digital design—it’s a buffer used to manage data flow between different modules.</p>
 
 <hr>
+<hr>
 
-<h3>🏗️ Part 1: The Interface and Memory Array</h3>
+<h2>🧪 The Module (<code>fifo.sv</code>)</h2>
+
+<h3>🏗️ 1. The Interface and Memory Array</h3>
 
 <p><b>The Goal:</b><br>
 We need a storage buffer that handles data in a specific order: the first piece of data written must be the first one read. Our first step is to define the interface (how the world talks to us) and the physical storage (where the data sits).</p>
@@ -66,7 +69,7 @@ endmodule
 
 <hr>
 
-<h3>🚩 Part 2: Status Flags (The Early Warning System)</h3>
+<h3>🚩 2. Status Flags (The Early Warning System)</h3>
 
 <p><b>The Goal:</b><br>
 Before we move pointers, we need to know the limits. We need signals that tell us when the FIFO is totally full or empty, but we also want "Almost" flags.</p>
@@ -98,7 +101,7 @@ endmodule
 
 <hr>
 
-<h3>🧠 Part 3: Control Logic (Pointers & Counter)</h3>
+<h3>🧠 3. Control Logic (Pointers & Counter)</h3>
 
 <p><b>The Goal:</b><br>
 Now we need the "brain" to manage our pointers. We need to track where to write next and where to read from.</p>
@@ -148,7 +151,7 @@ We create two pointers: <code>wr_ptr</code> and <code>rd_ptr</code>. We treat th
 
 <hr>
 
-<h3>📦 Part 4: Data Path (The Move)</h3>
+<h3>📦 4. Data Path (The Move)</h3>
 
 <p><b>The Goal:</b><br>
 Finally, we connect the logic to the actual storage. This is where the bits are physically latched into the memory array based on our pointers.</p>
@@ -188,7 +191,7 @@ No design is complete without proof. We need to create a test environment that t
 
 <hr>
 
-<h3>🏗️ TB Step 1: Parameters, Signals, and the Golden Queue</h3>
+<h3>🏗️ 1. Parameters, Signals, and the Golden Queue</h3>
 <p><b>The Goal:</b><br>
 First, we set up the environment. This includes defining the clock, matching the RTL parameters, and connecting our "Device Under Test" (DUT).</p>
 
@@ -249,7 +252,7 @@ endmodule
 
 <hr>
 
-<h3>🛠️ TB Step 2: Verification Tasks (The Drivers)</h3>
+<h3>🛠️  2. Verification Tasks (The Drivers)</h3>
 <p><b>The Goal:</b><br>
 Instead of toggling signals manually for every operation, we use <b>Tasks</b> to handle the communication with the hardware.</p>
 
@@ -302,7 +305,7 @@ A <code>task</code> in SystemVerilog is a block of code that can be called multi
 
 <hr>
 
-<h3>🚦 TB Step 3: The Test Sequence (Initial Block)</h3>
+<h3>🚦  3. The Test Sequence (Initial Block)</h3>
 <p><b>The Goal:</b><br>
 This is where we initialize and execute the actual test plan.</p>
 
@@ -367,7 +370,7 @@ endmodule
 </details>
 
 <hr>
-
+<hr>
 <h2>⚙️ The Execution Layer: C++ Harness & Automation</h2>
 
 <p>Like always, to run our simulation we will need to bridge the gap between our hardware code and our computer's processor. We use <b>Verilator</b> to transform our SystemVerilog into a high-performance C++ model, then use a C++ "Harness" to drive the clock and a Makefile to automate the entire process.</p>
@@ -437,10 +440,10 @@ RTL_DIR = rtl
 DV_DIR = dv
 TOP_MODULE = tb_fifo
 
-# List all source files
+// List all source files
 SRCS = $(RTL_DIR)/fifo.sv $(DV_DIR)/tb_fifo.sv $(DV_DIR)/tb_fifo.cpp
 
-# Build rules
+// Build rules
 compile:
 	$(VERILATOR) -Wall --trace --timing -sv --cc --exe --build \
 		-I$(RTL_DIR) \

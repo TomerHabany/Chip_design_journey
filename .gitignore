@@ -1,0 +1,15 @@
+obj_dir/
+*.vcd
+.vscode-server/
+.vscode/
+node_modules/
+.cache/
+.config/
+.dotnet/
+.vscode-server/
+.bash_history/
+.bash_logout/  
+.bashrc/
+.profile/
+.motd_shown/
+.sudo_as_admin_successful/

@@ -1,0 +1,48 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomer Habany | Chip Design Journey</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; color: #24292e; max-width: 800px; margin: 0 auto; padding: 40px 20px; background-color: #f6f8fa; }
+        h1 { border-bottom: 2px solid #eaecef; padding-bottom: 0.3em; color: #0366d6; }
+        .log-card { background: white; border: 1px solid #e1e4e8; border-radius: 6px; padding: 20px; margin-bottom: 15px; transition: transform 0.2s; }
+        .log-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .log-link { font-size: 1.25rem; font-weight: 600; text-decoration: none; color: #0366d6; }
+        .log-meta { font-size: 0.9rem; color: #586069; margin-top: 5px; }
+        .status-chip { display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 500; border-radius: 10px; background: #dbedff; color: #005cc5; }
+    </style>
+</head>
+<body>
+
+    <h1>Chip Design Journey</h1>
+    <p>A chronological log of my progress in FPGA design and SystemVerilog.</p>
+
+    <div class="log-card">
+        <span class="status-chip">Latest Update</span>
+        <br>
+        <a class="log-link" href="uart/UART_Transmitter_Log/index.html">Log 4: UART Transmitter</a>
+        <div class="log-meta">Implementing serialization and precision baud rate generation.</div>
+    </div>
+
+    <div class="log-card">
+        <a class="log-link" href="log_3_fifo.md">Log 3: Synchronous FIFO Design</a>
+        <div class="log-meta">Mastering data buffering.</div>
+    </div>
+
+    <div class="log-card">
+        <a class="log-link" href="log_2_structural_integration_rca.md">Log 2: Structural Integration & RCA</a>
+        <div class="log-meta">Building arithmetic logic units.</div>
+    </div>
+
+    <div class="log-card">
+        <a class="log-link" href="log01_environment_setup.md">Log 1: Environment Setup</a>
+        <div class="log-meta">Setting up the toolchain and workspace.</div>
+    </div>
+
+</body>
+</html>

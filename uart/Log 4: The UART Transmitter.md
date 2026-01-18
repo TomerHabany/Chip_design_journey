@@ -1,128 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log 4: The UART Transmitter</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f7f6;
-        }
-        h1, h2, h3 {
-            color: #2c3e50;
-        }
-        .log-container {
-            background-color: #fff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .image-placeholder {
-            background-color: #eaeaea;
-            border: 2px dashed #bbb;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-            font-style: italic;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-            border-radius: 4px;
-        }
-        details {
-            background-color: #282c34;
-            color: #abb2bf;
-            padding: 10px;
-            border-radius: 4px;
-            margin: 15px 0;
-        }
-        summary {
-            cursor: pointer;
-            font-weight: bold;
-            color: #61afef;
-            outline: none;
-        }
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-        }
-        .step-list {
-            list-style-type: decimal;
-            margin-left: 20px;
-        }
-        .step-list li {
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        .step-list span {
-            font-weight: normal;
-        }
-    </style>
-</head>
-<body>
+Yes, if you change the format to **Markdown (.md)**, GitHub will automatically render it as a formatted webpage when you click on the file in your repository. You won't need to configure GitHub Pages or use external previewers.
 
-<div class="log-container">
-    <h1>Log 4: The UART Transmitter – Precision Timing & State Machines</h1>
-    <p>In our previous log, we mastered data buffering with the FIFO. Now, we will build the bridge that sends that data out of our chip. We are moving into communication protocols, starting with the UART (Universal Asynchronous Receiver-Transmitter). Specifically, we will focus on the Transmitter (TX) side.</p>
+However, you **will** need to update the syntax slightly for the images and code blocks to work within the Markdown standard.
 
-    <h2>What is a UART?</h2>
-    <p>UART will be the "translator" of our digital world. Inside our chip, the CPU works with parallel data—sending 8 bits all at once across 8 wires. However, most external devices only have one wire to listen on. Our UART’s job will be to take that parallel byte and "serialize" it, sending it out bit-by-bit over time.</p>
+### Where to save the images?
 
-    <h3>The Life of a Transmission: A Step-by-Step Example</h3>
-    <p>Imagine our CPU wants to send the letter 'A' (ASCII 8'h41, or binary 01000001). Here is exactly how we will handle the flow:</p>
-    
-    <ul class="step-list">
-        <li>The Trigger: <span>The CPU will place 8'b01000001 on the din bus and pulse tx_start.</span></li>
-        <li>The Wake-up (Start Bit): <span>The UART will immediately pull the tx_out line from High to Low ('0'). This tells the receiver, "Pay attention, data is coming!"</span></li>
-        <li>The Data Payload: <span>The UART will then send each bit of the 'A' one by one. It will start with the Least Significant Bit (LSB) and end with the MSB.</span></li>
-        <li>The Close (Stop Bit): <span>After all 8 bits are sent, the UART will pull the line back to High ('1'). This resets the line for the next message.</span></li>
-        <li>The Finish Line: <span>The UART will pulse tx_done to let the CPU know it can send the next character.</span></li>
-    </ul>
+To keep your Git repository clean, you should create an `images` folder. Your file structure in VS Code should look like this:
 
-    <p>Every transmission will follow this '0' -> Data -> '1' frame.</p>
+* `log4.md`
+* `images/`
+* `image1.png`
+* `image2.png`
+* `image3.png`
+* `image4.png`
 
-    <h3>Controlling the Timing: The 16x Over-Sampling Concept</h3>
-    <p>How will we ensure the receiver doesn't miss a bit? We will use a concept called Over-sampling. We won't just send a bit and hope for the best; we will divide the time for a single bit (the Bit Period) into 16 smaller segments called sample_tick pulses.</p>
 
-    <p>Our UART will hold the value of each bit on tx_out for exactly 16 of these ticks. We do this because the receiver on the other end is designed to wait for the 8th tick—the dead center of the bit—to sample the value. By holding our bit for 16 ticks, we give the receiver the best possible chance to capture the data accurately, even if there is slight clock drift.</p>
 
-    <div class="image-placeholder">
-        <img src="images/image1.png" alt="UART Block Diagram">
-        [INSERT IMAGE 1: Block Diagram from Page 1 of PDF]
-    </div>
-    <p>This diagram shows the high-level flow from the CPU, through our UART and Baud Generator blocks, out to the Receiver.</p>
+---
 
-    <h2>Deep Dive 1: The Baud Rate Generator</h2>
-    <p>To get those 16 ticks per bit, we will need a heartbeat. This will be our Baud Rate Generator.</p>
+### The Updated Markdown Code
 
-    <h3>The Logic: Why we won't let it run free</h3>
-    <p>We don't want our baud_gen to be free-running; instead, we want it to only be enabled when a transmission starts.</p>
+Copy and paste this into your `log4.md` file. I have adjusted the image paths to `images/imageX.png`.
 
-    <p>If the generator is free-running, it is constantly counting in the background. If the tx_start signal arrives just as the generator was about to finish a count, our first bit (the Start Bit) might be cut extremely short. In a worst-case scenario, the '0' bit that signals the start of communication would only be a few clock cycles wide instead of the full 16-tick period. This would cause the receiver to miss the message entirely. By using a baud_en signal from the UART, we will "reset" the timer so it starts fresh at the exact moment we begin sending data.</p>
+```markdown
+# Log 4: The UART Transmitter – Precision Timing & State Machines
 
-    <div class="image-placeholder">
-        <img src="images/image2.png" alt="Baud Generator Timing Diagram">
-        [INSERT IMAGE 2: Timing Diagram from Page 2 of PDF]
-    </div>
-    <p>This illustrates the timing collision that happens if we don't synchronize the generator.</p>
+In our previous log, we mastered data buffering with the FIFO. Now, we will build the bridge that sends that data out of our chip. We are moving into communication protocols, starting with the UART (Universal Asynchronous Receiver-Transmitter). Specifically, we will focus on the Transmitter (TX) side.
 
-    <h3>Implementation: Step-by-Step</h3>
-    <p><strong>Step 1: Defining the Interface and the Math</strong> We will start by defining our parameters. We need the CLOCK_FREQ of our board and the BAUD_RATE we want to achieve. We will then use a localparam to calculate the TICK_LIMIT. This limit tells our counter exactly how many system clock cycles must pass to equal one sample_tick.</p>
+## What is a UART?
+UART will be the "translator" of our digital world. [cite_start]Inside our chip, the CPU [cite: 1] works with parallel data—sending 8 bits all at once across 8 wires. However, most external devices only have one wire to listen on. Our UART’s job will be to take that parallel byte and "serialize" it, sending it out bit-by-bit over time.
 
-    <details>
-        <summary>View Code: Interface and Math</summary>
-        <pre>
+### The Life of a Transmission: A Step-by-Step Example
+Imagine our CPU wants to send the letter 'A' (ASCII 8'h41, or binary 01000001). Here is exactly how we will handle the flow:
+
+1. [cite_start]**The Trigger:** The CPU will place 8'b01000001 on the din bus [cite: 4, 17] [cite_start]and pulse tx_start[cite: 3, 18].
+2. [cite_start]**The Wake-up (Start Bit):** The UART will immediately pull the tx_out line [cite: 10, 20] [cite_start]from High to Low ('0')[cite: 27]. [cite_start]This tells the receiver[cite: 11], "Pay attention, data is coming!"
+3. **The Data Payload:** The UART will then send each bit of the 'A' one by one. It will start with the Least Significant Bit (LSB) and end with the MSB.
+4. [cite_start]**The Close (Stop Bit):** After all 8 bits are sent, the UART will pull the line back to High ('1')[cite: 58]. This resets the line for the next message.
+5. [cite_start]**The Finish Line:** The UART will pulse tx_done [cite: 2, 21, 23] to let the CPU know it can send the next character.
+
+Every transmission will follow this '0' -> Data -> '1' frame.
+
+### Controlling the Timing: The 16x Over-Sampling Concept
+How will we ensure the receiver doesn't miss a bit? We will use a concept called Over-sampling. [cite_start]We won't just send a bit and hope for the best; we will divide the time for a single bit (the Bit Period) into 16 smaller segments called sample_tick pulses[cite: 6, 19, 34].
+
+[cite_start]Our UART will hold the value of each bit on tx_out for exactly 16 of these ticks[cite: 43, 60]. We do this because the receiver on the other end is designed to wait for the 8th tick—the dead center of the bit—to sample the value. [cite_start]By holding our bit for 16 ticks, we give the receiver the best possible chance to capture the data accurately[cite: 44].
+
+![Block Diagram](images/image1.png)
+*This diagram shows the high-level flow from the CPU, through our UART and Baud Generator blocks, out to the Receiver.*
+
+---
+
+## Deep Dive 1: The Baud Rate Generator
+To get those 16 ticks per bit, we will need a heartbeat. [cite_start]This will be our Baud Rate Generator[cite: 5].
+
+### The Logic: Why we won't let it run free
+[cite_start]We don't want our baud_gen to be free-running; instead, we want it to only be enabled when a transmission starts[cite: 26].
+
+If the generator is free-running, it is constantly counting in the background. [cite_start]If the tx_start signal arrives just as the generator was about to finish a count, our first bit (the Start Bit) might be cut extremely short[cite: 37, 38]. [cite_start]In a worst-case scenario, the '0' bit that signals the start of communication would only be a few clock cycles wide instead of the full 16-tick period[cite: 39, 43]. This would cause the receiver to miss the message entirely. [cite_start]By using a baud_en signal [cite: 13, 24] from the UART, we will "reset" the timer so it starts fresh at the exact moment we begin sending data.
+
+![Timing Diagram](images/image2.png)
+*This illustrates the timing collision that happens if we don't synchronize the generator.*
+
+### Implementation: Step-by-Step
+
+**Step 1: Defining the Interface and the Math**
+We will start by defining our parameters. We need the CLOCK_FREQ of our board and the BAUD_RATE we want to achieve.
+
+<details>
+<summary>View Code Snippet</summary>
+
+```systemverilog
 module baud_gen #(
     parameter CLOCK_FREQ = 100_000_000,
     parameter BAUD_RATE  = 115200
@@ -130,17 +77,20 @@ module baud_gen #(
     input  logic clk, rst_n, en,
     output logic sample_tick
 );
-    // Formula: System Clock / (Desired Baud * 16 ticks per bit)
     localparam TICK_LIMIT = CLOCK_FREQ / (BAUD_RATE * 16);
     logic [$clog2(TICK_LIMIT)-1:0] count;
-        </pre>
-    </details>
 
-    <p><strong>Step 2: The Counting Logic</strong> Now we will implement the actual counter. When en is high, the counter will increment. Once it hits the TICK_LIMIT, it will pulse the sample_tick for exactly one clock cycle and wrap back to zero. If en is low, the counter will be held at zero, ensuring we are perfectly synchronized for the next start bit.</p>
+```
 
-    <details>
-        <summary>View Code: Counting Logic</summary>
-        <pre>
+</details>
+
+**Step 2: The Counting Logic**
+When en is high, the counter will increment. Once it hits the TICK_LIMIT, it will pulse the sample_tick for exactly one clock cycle and wrap back to zero.
+
+<details>
+<summary>View Code Snippet</summary>
+
+```systemverilog
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             count <= 0;
@@ -159,41 +109,35 @@ module baud_gen #(
         end
     end
 endmodule
-        </pre>
-    </details>
 
-    <h2>Deep Dive 2: The UART TX Controller</h2>
-    <p>Now that we have our baud_gen to control the timing, we can start working on the UART_TX itself. This will be the "Brain" of the operation.</p>
+```
 
-    <h3>Designing for Stability: The Registered Moore Machine</h3>
-    <p>We will implement a Moore State Machine, where the output is determined solely by the current state. To ensure our output is perfectly stable and free of combinational logic "glitches," we will make it a Registered State Machine. This means we will use a register to hold the state, ensuring that the tx_out signal only changes exactly on the clock edge.</p>
+</details>
 
-    <div class="image-placeholder">
-        <img src="images/image3.png" alt="State Register Block Diagram">
-        [INSERT IMAGE 3: State Register Block Diagram from Page 3 of PDF]
-    </div>
-    <p>Our architecture for latching the next state into the state register.</p>
+---
 
-    <p>Building on our architecture, we will now implement the <code>uart_tx</code> module. This is where we will separate the "thinking" from the "doing" to create a professional-grade sequencer.</p>
+## Deep Dive 2: The UART TX Controller
 
-    <h3>The Philosophy of Registered State Machines</h3>
-    <p>As we move into professional-grade RTL, we will adopt the industry-standard practice of separating our logic into two distinct domains. For every signal that controls our output—the state, the data buffer, and internal counters—we will create a <code>_next</code> (combinational) and a <code>_reg</code> (sequential) pair.</p>
+Now that we have our baud_gen to control the timing, we can start working on the UART_TX  itself.
 
-    <ul>
-        <li><strong>Combinational Logic (<code>_next</code>):</strong> This acts as the "brain," calculating the next value based on current inputs and the current state.</li>
-        <li><strong>Sequential Logic (<code>_reg</code>):</strong> This acts as the "memory," latching those values exactly on the clock edge.</li>
-    </ul>
+### Designing for Stability: The Registered Moore Machine
 
-    <p>We are doing this to separate the combinational logic from the sequential logic. This is the industry standard because it prevents electrical "glitches" (tiny, unwanted pulses) from appearing on our output pins and ensures our design can meet strict timing requirements. By latching the next state into a register, our signals remain stable and clean for the rest of the hardware.</p>
+We will implement a Moore State Machine. To ensure our output is perfectly stable and free of combinational logic "glitches," we will make it a Registered State Machine. This means we will use a state register to hold the state, ensuring that the tx_out signal only changes exactly on the clock edge.
 
-    <h3>Engineering Specification: <code>uart_tx.sv</code></h3>
+Our architecture for latching the next state into the state register to maintain stability.
 
-    <h4>1. Parameters and Ports</h4>
-    <p>We will define the interface of our sequencer. We use <code>TICKS_PER_BIT</code> (typically 16) and <code>DATA_WIDTH</code> (8 bits) as parameters to make the module reusable. Our ports include the system clock, reset, and the control signals from the CPU and the pulse from the Baud Generator.</p>
+### The Philosophy of Registered State Machines
 
-    <details>
-        <summary>View Code: Parameters and Ports</summary>
-        <pre>
+For every signal that controls our output—the state, the data buffer, and internal counters—we will create a `_next` (combinational) and a `_reg` (sequential) pair.
+
+* **Combinational Logic (`_next`):** This acts as the "brain," calculating the next value based on current inputs.
+* **Sequential Logic (`_reg`):** This acts as the "memory," latching those values exactly on the clock edge.
+
+### Engineering Specification: `uart_tx.sv`
+
+#### 1. Parameters and Ports
+
+```systemverilog
 module uart_tx
 #(
     parameter TICKS_PER_BIT = 16, 
@@ -209,193 +153,21 @@ module uart_tx
     output logic tx_done,
     output logic baude_en
 );
-        </pre>
-    </details>
 
-    <h4>2. Internal Signals</h4>
-    <p>We will declare the registers and their corresponding combinational "next" signals. Every internal signal that controls our output generation—including the <code>tick_count_reg</code> (to track the 16 ticks) and <code>bit_count_reg</code> (to track which of the 8 bits we are sending)—will have a matching <code>_next</code> signal. We use <code>$clog2</code> to determine the exact number of bits needed for our counters to save hardware area.</p>
+```
 
-    <details>
-        <summary>View Code: Internal Signals</summary>
-        <pre>
-    // 1. output logic and register
-    logic tx_next; 
-    logic tx_reg; 
+#### 2. State Machine Logic
 
-    // 2. tick counter (0-TICKS_PER_BIT-1)
-    logic [$clog2(TICKS_PER_BIT)-1:0] tick_count_next; 
-    logic [$clog2(TICKS_PER_BIT)-1:0] tick_count_reg; 
+We will implement the sequencer  using a `case` statement. Our controller will follow the pre-determined path: `IDLE` -> `START` -> `DATA` -> `STOP`. In each state, we will count 16 `sample_tick` pulses before moving to the next. In the `DATA` state, we will use the right-shift operator to move the next bit into position.
 
-    // 3. bit counter (0- DATA_WIDTH -1)
-    logic [$clog2(DATA_WIDTH)-1:0] bit_count_next; 
-    logic [$clog2(DATA_WIDTH)-1:0] bit_count_reg; 
+The visual sequence of our UART states.
 
-    // 4. transmit data combinational and register logic
-    logic [DATA_WIDTH-1:0] tx_data_next; 
-    logic [DATA_WIDTH-1:0] tx_data_reg; 
+### Complete Code: `uart_tx.sv`
 
-    // 5. transmission done signal
-    logic tx_done_next;
-    logic tx_done_reg;
+<details>
+<summary>Click to expand full code</summary>
 
-    // 6. baude enable signal
-    logic baude_en_next;
-    logic baude_en_reg;
-        </pre>
-    </details>
-
-    <h4>3. State Machine Sequential Logic</h4>
-    <p>We will use an <code>typedef enum</code> to define our states. This replaces "magic numbers" with human-readable labels (<code>IDLE</code>, <code>START</code>, <code>DATA</code>, <code>STOP</code>), making the FSM logic easy to follow and debug.</p>
-
-    <details>
-        <summary>View Code: State Machine Enum</summary>
-        <pre>
-typedef enum logic [1:0] {
-    IDLE,
-    START,
-    DATA,
-    STOP
-} state_t; 
-state_t state_next;
-state_t state_reg;
-        </pre>
-    </details>
-
-    <h4>4. Combinational Assignments</h4>
-    <p>We will link our physical output ports directly to our internal registers. This ensures that the outside world only sees the stable, latched values from our registers.</p>
-
-    <details>
-        <summary>View Code: Combinational Assignments</summary>
-        <pre>
-assign tx_out = tx_reg;
-assign tx_done = tx_done_reg;
-assign baude_en = baude_en_reg;
-        </pre>
-    </details>
-
-    <h4>5. Sequential Logic</h4>
-    <p>This is the only section where we use the <code>posedge clk</code>. On a reset (<code>rst_n</code> low), we will initialize our registers to safe values—specifically, <code>tx_reg</code> will be set to '1' (the idle state). On every clock edge, we will simply move the "next" values into the "registers."</p>
-
-    <details>
-        <summary>View Code: Sequential Logic</summary>
-        <pre>
-always_ff @(posedge clk or negedge rst_n) begin
-    if(!rst_n) begin
-        state_reg <= IDLE;
-        tx_reg <= 1'b1;
-        tick_count_reg <= '0;
-        bit_count_reg <= '0;
-        tx_data_reg <= '0;
-        tx_done_reg <= 1'b0;
-        baude_en_reg <= 1'b0;
-    end else begin
-        state_reg <= state_next;
-        tx_reg <= tx_next;
-        tick_count_reg <= tick_count_next;
-        bit_count_reg <= bit_count_next;
-        tx_data_reg <= tx_data_next;
-        tx_done_reg <= tx_done_next;
-        baude_en_reg <= baude_en_next;
-    end
-end
-        </pre>
-    </details>
-
-    <h4>6. Combinational Logic</h4>
-    <p>In this block, we will define the defaults to prevent "latches." We will ensure <code>baude_en_next</code> is automatically high whenever we are not in <code>IDLE</code>, which keeps our timing generator active exactly when we need it.</p>
-
-    <details>
-        <summary>View Code: Combinational Logic Defaults</summary>
-        <pre>
-always_comb begin
-     state_next = state_reg;
-     tx_next = tx_reg;
-     tick_count_next = tick_count_reg;
-     bit_count_next = bit_count_reg;
-     tx_data_next = tx_data_reg;
-     tx_done_next = 1'b0; 
-     baude_en_next = (state_reg != IDLE);
-        </pre>
-    </details>
-
-    <h4>7. State Machine Case Logic</h4>
-    <p>We will implement the sequencer using a <code>case</code> statement. Our controller will follow the pre-determined path: <code>IDLE</code> -> <code>START</code> -> <code>DATA</code> -> <code>STOP</code>. In each state, we will count 16 <code>sample_tick</code> pulses before moving to the next. In the <code>DATA</code> state, we will use the right-shift operator (<code>>></code>) to move the next bit into position every time a bit period finishes.</p>
-
-    <div class="image-placeholder">
-        <img src="images/image4.png" alt="FSM State Diagram">
-        [INSERT IMAGE 4: FSM State Diagram from Page 4 of PDF]
-    </div>
-    <p>The visual sequence of our UART states.</p>
-
-    <details>
-        <summary>View Code: State Machine Logic</summary>
-        <pre>
-     case(state_reg)
-        IDLE: begin
-            tx_next = 1'b1;
-            if (tx_start) begin
-                state_next = START;
-                tx_data_next = din; 
-                tick_count_next = '0;
-            end
-        end   
-
-        START: begin
-            tx_next = 1'b0; 
-            if (sample_tick) begin
-                if (tick_count_reg == TICKS_PER_BIT - 1) begin
-                    state_next = DATA;
-                    tick_count_next = '0;
-                    bit_count_next = '0;
-                end else begin
-                    tick_count_next = tick_count_reg + 1;
-                end
-            end
-        end
-
-        DATA: begin 
-            tx_next = tx_data_reg[0];
-            if (sample_tick) begin
-                if (tick_count_reg == TICKS_PER_BIT - 1) begin
-                    tick_count_next = '0; 
-                    if (bit_count_reg == DATA_WIDTH - 1) begin
-                        state_next = STOP;
-                        bit_count_next = '0;
-                    end else begin
-                        bit_count_next = bit_count_reg + 1;
-                        tx_data_next = tx_data_reg >> 1; 
-                    end
-                end else begin
-                    tick_count_next = tick_count_reg + 1;
-                end
-            end
-        end
-
-        STOP: begin
-            tx_next = 1'b1; 
-            if (sample_tick) begin
-                if (tick_count_reg == TICKS_PER_BIT - 1) begin
-                    state_next = IDLE;
-                    tx_done_next = 1'b1;
-                    tick_count_next = '0;
-                end else begin
-                    tick_count_next = tick_count_reg + 1;
-                end
-            end
-        end
-    endcase
-end
-        </pre>
-    </details>
-
-    <hr>
-
-    <h3>Complete Code: <code>uart_tx.sv</code></h3>
-    <p>Here is the full implementation, combining all the steps above into a single, clean module that we can copy-paste into our project.</p>
-
-    <details>
-        <summary>View Full <code>uart_tx.sv</code> Code</summary>
-        <pre>
+```systemverilog
 `timescale 1ns / 1ps
 module uart_tx
 #(
@@ -526,9 +298,19 @@ module uart_tx
          endcase
     end
 endmodule
-        </pre>
-    </details>
-</div>
 
-</body>
-</html>
+```
+
+</details>
+
+```
+
+### Final Step:
+
+1.  Save the code above as `log4.md`.
+2.  Make sure your 4 images are in a folder named `images`.
+3.  Push to Git. GitHub will now show the formatted text and the diagrams automatically when you open the `.md` file.
+
+Would you like me to explain how to customize the theme of this Markdown log if you decide to use it for a portfolio later?
+
+```

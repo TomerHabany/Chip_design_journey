@@ -8,103 +8,138 @@ layout: null
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log 1: Environment Setup & Toolchain</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
-            line-height: 1.6; 
-            color: #24292e; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 40px 20px; 
-            background-color: #fff; 
+        :root {
+            --space-black: #0b0e14;
+            --deep-slate: #161b22;
+            --nebula-purple: #6e40c9;
+            --star-blue: #58a6ff;
+            --stardust: #e6edf3;
+            --border-color: #30363d;
+            --code-bg: #0d1117;
         }
-        h1, h3, h4 { color: #0366d6; }
-        h3 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; margin-top: 1.5em; }
-        hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #e1e4e8; border: 0; }
-        blockquote { padding: 0 1em; color: #6a737d; border-left: 0.25em solid #dfe2e5; margin: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--stardust);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a1f2e 0%, var(--space-black) 100%);
+            background-attachment: fixed;
+        }
+        h1, h2, h3, h4 { color: var(--star-blue); margin-top: 1.5em; }
+        
+        .log-container {
+            background-color: var(--deep-slate);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* SECTION STYLING: Line at the bottom of each section */
+        .section {
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section:last-of-type { border-bottom: none; }
+
+        .back-link { 
+            margin-bottom: 20px; 
+            display: inline-block; 
+            text-decoration: none; 
+            color: var(--nebula-purple); 
+            font-weight: bold; 
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--star-blue); }
+        
+        details {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+        summary { cursor: pointer; font-weight: bold; color: var(--star-blue); outline: none; }
         pre { 
-            background-color: #f6f8fa; 
-            padding: 16px; 
-            border-radius: 6px; 
-            overflow: auto; 
-            font-size: 85%; 
-            line-height: 1.45; 
-            border: 1px solid #e1e4e8;
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 14px; 
+            color: #d1d5db;
+            margin: 0;
         }
-        code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
-        details { 
-            border: 1px solid #aaa; 
-            border-radius: 4px; 
-            padding: 0.5em 0.5em 0; 
-            margin-bottom: 1em;
-        }
-        summary { font-weight: bold; margin: -0.5em -0.5em 0; padding: 0.5em; cursor: pointer; }
-        details[open] { padding: 0.5em; }
-        .back-link { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #0366d6; font-weight: bold; }
+        code { background: #21262d; padding: 2px 5px; border-radius: 4px; color: var(--star-blue); font-family: 'Consolas', monospace; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        blockquote { border-left: 4px solid var(--nebula-purple); margin: 20px 0; padding-left: 15px; font-style: italic; }
+        a { color: var(--star-blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <a href="../../index.html" class="back-link">← Back to Portfolio</a>
-
+<div class="log-container">
+    <a href="../../index.html" class="back-link">← Back to Galaxy Map</a>
+    
     <h1>Log 1: Building the Spacecraft - Environment Setup & Toolchain</h1>
+    
+    <div class="section">
+        <h3>Introduction</h3>
+        <p>Our first step as chip designers is to establish a development environment that mimics industry standards. Most Electronic Design Automation (EDA) tools are native to Linux; therefore, we will use <strong>Ubuntu (WSL2)</strong> as our foundation.</p>
+        <p>This log covers the installation of Verilator, GTKWave, and Make, followed by the configuration of VS Code and GitHub for hardware development. Finally, we implement our very first RTL module and testbench to ensure everything is firing correctly.</p>
+    </div>
 
-    <hr>
+    <div class="section">
+        <h3>Log Objectives</h3>
+        <p>To get this environment ready, we will navigate through these stages:</p>
+        <ul>
+            <li><strong>Operating System:</strong> Implementing Ubuntu/WSL2 as the Linux foundation.</li>
+            <li><strong>The Toolchain:</strong> Installing and configuring Verilator, GTKWave, and Make.</li>
+            <li><strong>Project Structure:</strong> Organizing files into standard RTL and Verification folders.</li>
+            <li><strong>Editor:</strong> Installing VS Code and connecting it to our Linux environment.</li>
+            <li><strong>GitHub:</strong> Setting up our own Git directly in VS Code.</li>
+            <li><strong>Hardware Verification:</strong> Simulating an 8-bit counter to confirm the tools are working.</li>
+        </ul>
+    </div>
 
-    <h3>📥 Introduction</h3>
-    <p>Our first step as chip designers is to establish a development environment that mimics industry standards. Most Electronic Design Automation (EDA) tools are native to Linux; therefore, we will use <b>Ubuntu (WSL2)</b> as our foundation.</p>
+    <div class="section">
+        <h3>The Operating System: Why Linux?</h3>
+        <p>In the world of silicon engineering, Linux is the non-negotiable standard. By using <strong>WSL2 (Windows Subsystem for Linux)</strong>, we gain access to a full Linux kernel without needing to leave Windows, providing a stable bridge for our development tools.</p>
 
-    <p>This log covers the installation of Verilator, GTKWave, and Make, followed by the configuration of VS Code and GitHub for hardware development. Finally, we implement our very first RTL module and testbench to ensure everything is firing correctly.</p>
+        <h4>1. Installing WSL2</h4>
+        <p>If you haven't set up your Linux subsystem yet, follow this guide:</p>
+        <blockquote>
+            <a href="https://www.youtube.com/watch?v=eId6K8d0v6o" target="_blank">How to install WSL2 (Credit: TechTime)</a>
+        </blockquote>
 
-    <hr>
+        <h4>2. The Toolchain: Verilator, GTKWave, and Make</h4>
+        <p>Install the complete toolchain with this command in your Ubuntu terminal:</p>
+        <pre><code>sudo apt update && sudo apt install -y verilator gtkwave build-essential make</code></pre>
+    </div>
 
-    <h3>🎯 Log Objectives</h3>
-    <p>To get this environment ready, we will navigate through these stages:</p>
-    <ul>
-      <li><b>Operating System:</b> Implementing Ubuntu/WSL2 as the Linux foundation.</li>
-      <li><b>The Toolchain:</b> Installing and configuring Verilator, GTKWave, and Make.</li>
-      <li><b>Project Structure:</b> Organizing files into standard RTL and Verification folders.</li>
-      <li><b>Editor:</b> Installing VS Code and connecting it to our Linux environment.</li>
-      <li><b>GitHub:</b> Setting up our own Git directly in VS Code.</li>
-      <li><b>Hardware Verification:</b> Simulating an 8-bit counter to confirm the tools are working.</li>
-    </ul>
+    <div class="section">
+        <h3>Project Directory Structure</h3>
+        <p>Professional RTL development requires a clean separation between design files and verification environment. Run the following command in your Ubuntu terminal:</p>
+        <pre><code>mkdir -p galaxy_project/{rtl,dv,sim}</code></pre>
+        <ul>
+            <li><strong>rtl/</strong>: Hardware design files (SystemVerilog).</li>
+            <li><strong>dv/</strong>: Design Verification (Testbenches and C++ wrappers).</li>
+            <li><strong>sim/</strong>: Temporary build files and simulation outputs.</li>
+        </ul>
+    </div>
 
-    <hr>
-
-    <h3>🛠️ The Operating System: Why Linux?</h3>
-    <p>In the world of silicon engineering, Linux is the non-negotiable standard. By using <b>WSL2 (Windows Subsystem for Linux)</b>, we gain access to a full Linux kernel without needing to leave Windows.</p>
-
-    <h4>1. Installing WSL2</h4>
-    <p>If you haven't set up your Linux subsystem yet, follow this guide:</p>
-    <blockquote>
-      <a href="https://www.youtube.com/watch?v=eId6K8d0v6o">🎥 How to install WSL2 (Credit: TechTime)</a>
-    </blockquote>
-
-    <h4>2. The Toolchain: Verilator, GTKWave, and Make</h4>
-    <p>Install the complete toolchain with this command in your Ubuntu terminal:</p>
-    <pre><code>sudo apt update && sudo apt install -y verilator gtkwave build-essential make</code></pre>
-
-    <hr>
-
-    <h3>📂 Project Directory Structure</h3>
-    <p>Professional RTL development requires a clean separation between design files and verification environment. Run the following command in your Ubuntu terminal:</p>
-
-    <pre><code>mkdir -p galaxy_project/{rtl,dv,sim}</code></pre>
-
-    <ul>
-      <li><b>rtl/</b>: Hardware design files (SystemVerilog).</li>
-      <li><b>dv/</b>: Design Verification (Testbenches and C++ wrappers).</li>
-      <li><b>sim/</b>: Temporary build files and simulation outputs.</li>
-    </ul>
-
-    <hr>
-
-    <h3>🚀 Hardware Verification: The 8-bit Counter</h3>
-    <p>To confirm the environment is fully functional, we will build an 8-bit counter. Verification in Verilator is a "co-simulation" process: we write the hardware in <b>SystemVerilog</b> and the test harness in <b>C++</b>.</p>
-
-    <h4>Step 1: The RTL Design </h4>
-    <details>
-    <summary>📄 rtl/counter.sv</summary>
-    <pre><code>
+    <div class="section">
+        <h3>Hardware Verification: The 8-bit Counter</h3>
+        <p>To confirm the environment is fully functional, we will build an 8-bit counter. Verification in Verilator is a "co-simulation" process: we write the hardware in <strong>SystemVerilog</strong> and the test harness in <strong>C++</strong>.</p>
+        
+        <h4>Step 1: The RTL Design</h4>
+        <p>First, we define the actual hardware logic. This module increments a value on every clock edge when enabled.</p>
+        <details>
+            <summary>Source: rtl/counter.sv</summary>
+            <pre><code>
 module counter #( 
     parameter width = 8 
 )(
@@ -119,13 +154,14 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if (en) count <= count + 1;
 end
 endmodule
-    </code></pre>
-    </details>
+            </code></pre>
+        </details>
 
-    <h4>Step 2: The SystemVerilog Testbench </h4>
-    <details>
-    <summary>🧪 dv/tb_top.sv</summary>
-    <pre><code>
+        <h4>Step 2: The SystemVerilog Testbench</h4>
+        <p>We wrap our design in a top-level testbench. This allows us to define the test sequence (resetting, waiting, and enabling) using hardware-centric timing.</p>
+        <details>
+            <summary>Source: dv/tb_top.sv</summary>
+            <pre><code>
 module tb_top ( 
     input logic clk,  
     output logic [7:0] count  
@@ -148,13 +184,14 @@ initial begin
     $finish;
 end
 endmodule
-    </code></pre>
-    </details>
+            </code></pre>
+        </details>
 
-    <h4>Step 3: The C++ Simulation Driver </h4>
-    <details>
-    <summary>⚙️ dv/sim_main.cpp</summary>
-    <pre><code>
+        <h4>Step 3: The C++ Simulation Driver</h4>
+        <p>Verilator converts SystemVerilog into C++. We need a C++ "wrapper" to act as the physical world: it generates the clock signal, handles the waveform dumping (.vcd), and drives the execution loop.</p>
+        <details>
+            <summary>Source: dv/sim_main.cpp</summary>
+            <pre><code>
 #include "Vtb_top.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
@@ -179,13 +216,14 @@ int main(int argc, char** argv) {
     delete top;
     return 0;
 }
-    </code></pre>
-    </details>
+            </code></pre>
+        </details>
 
-    <h4>Step 4: The Makefile </h4>
-    <details>
-    <summary>📜 Makefile</summary>
-    <pre><code>
+        <h4>Step 4: The Makefile</h4>
+        <p>The Makefile automates the three-stage process: <strong>Verilate</strong> (SV to C++), <strong>Compile</strong> (C++ to Binary), and <strong>Run</strong> (Execute Simulation).</p>
+        <details>
+            <summary>Source: Makefile</summary>
+            <pre><code>
 VERILATOR = verilator
 RTL_DIR = rtl
 DV_DIR = dv
@@ -206,17 +244,20 @@ run:
 
 clean:
 	rm -rf obj_dir sim/waveform.vcd
-    </code></pre>
-    </details>
+            </code></pre>
+        </details>
+    </div>
 
-    <hr>
-    <h3>📝 Log 1 Summary</h3>
-    <p>We have successfully established an industry-standard development environment.</p>
-    <ul>
-      <li>✅ Infrastructure: Ubuntu (WSL2).</li>
-      <li>✅ Toolchain: Verilator, GTKWave, and Make.</li>
-      <li>✅ Hardware Baseline: Simulated an 8-bit counter.</li>
-    </ul>
+    <div class="section">
+        <h3>Log 1 Summary</h3>
+        <p>We have successfully established an industry-standard development environment.</p>
+        <ul>
+            <li><strong>Infrastructure:</strong> Ubuntu (WSL2).</li>
+            <li><strong>Toolchain:</strong> Verilator, GTKWave, and Make.</li>
+            <li><strong>Hardware Baseline:</strong> Simulated an 8-bit counter.</li>
+        </ul>
+    </div>
+</div>
 
 </body>
 </html>

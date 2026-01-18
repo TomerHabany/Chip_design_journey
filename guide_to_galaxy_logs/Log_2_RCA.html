@@ -8,70 +8,102 @@ layout: null
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log 2: The Architecture of Addition</title>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
-            line-height: 1.6; 
-            color: #24292e; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 40px 20px; 
-            background-color: #fff; 
+        :root {
+            --space-black: #0b0e14;
+            --deep-slate: #161b22;
+            --nebula-purple: #6e40c9;
+            --star-blue: #58a6ff;
+            --stardust: #e6edf3;
+            --border-color: #30363d;
+            --code-bg: #0d1117;
         }
-        h1, h2, h3 { color: #0366d6; }
-        h3 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; margin-top: 1.5em; }
-        hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #e1e4e8; border: 0; }
-        blockquote { padding: 1em; color: #6a737d; border-left: 0.25em solid #dfe2e5; margin: 1em 0; background-color: #f6f8fa; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--stardust);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a1f2e 0%, var(--space-black) 100%);
+            background-attachment: fixed;
+        }
+        h1, h2, h3, h4 { color: var(--star-blue); margin-top: 1.5em; }
+        
+        .log-container {
+            background-color: var(--deep-slate);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .section {
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section:last-of-type { border-bottom: none; }
+
+        .back-link { 
+            margin-bottom: 20px; 
+            display: inline-block; 
+            text-decoration: none; 
+            color: var(--nebula-purple); 
+            font-weight: bold; 
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--star-blue); }
+        
+        details {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+        summary { cursor: pointer; font-weight: bold; color: var(--star-blue); outline: none; }
         pre { 
-            background-color: #f6f8fa; 
-            padding: 16px; 
-            border-radius: 6px; 
-            overflow: auto; 
-            font-size: 85%; 
-            line-height: 1.45; 
-            border: 1px solid #e1e4e8;
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 14px; 
+            color: #d1d5db;
+            margin: 0;
         }
-        code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
-        details { 
-            border: 1px solid #e1e4e8; 
-            border-radius: 6px; 
-            padding: 0.5em 0.5em 0; 
-            margin-bottom: 1em;
-            background-color: #ffffff;
-        }
-        summary { font-weight: bold; margin: -0.5em -0.5em 0; padding: 0.5em; cursor: pointer; }
-        .back-link { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #0366d6; font-weight: bold; }
-        .center { text-align: center; }
+        code { background: #21262d; padding: 2px 5px; border-radius: 4px; color: var(--star-blue); font-family: 'Consolas', monospace; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        blockquote { border-left: 4px solid var(--nebula-purple); margin: 20px 0; padding-left: 15px; font-style: italic; }
+        .subtitle { color: #8b949e; font-style: italic; margin-top: -10px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="back-link">← Back to Portfolio</a>
-
+<div class="log-container">
+    <a href="../../index.html" class="back-link">← Back to Portfolio</a>
+    
     <h1>🌌 Log 2: The Architecture of Addition</h1>
+    <p class="subtitle">A Journey from Fresh Graduate to Silicon Engineer<br>
+    Moving from behavioral modeling to structural hardware design.</p>
+    
+    <div class="section">
+        <h3>The Mission: Structural Integration</h3>
+        <p>In Log 2, we move from behavioral modeling (letting the tools decide the logic) to <strong>Structural Modeling</strong>. We are building a <strong>Parameterizable Ripple Carry Adder (RCA)</strong>. This log isn't just about addition; it's about learning how to build a scalable system from small, verified sub-modules.</p>
+    </div>
 
-    <p class="center">
-      <b>A Journey from Fresh Graduate to Silicon Engineer</b><br>
-      <i>Moving from behavioral modeling to structural hardware design.</i>
-    </p>
+    <div class="section">
+        <h3>Part 1: The Leaf Cell (adder_1bit.sv)</h3>
+        <p><strong>The Goal:</strong> Build a "Full Adder"—the smallest unit of addition. It takes two bits (a, b) and a "Carry-In" (cin), then outputs a <em>sum</em> and a <em>cout</em>.</p>
 
-    <hr>
+        
 
-    <h3>🚀 The Mission: Structural Integration</h3>
-    <p>In Log 2, we move from behavioral modeling (letting the tools decide the logic) to <b>Structural Modeling</b>. We are building a <b>Parameterizable Ripple Carry Adder (RCA)</b>. This log isn't just about addition; it's about learning how to build a scalable system from small, verified sub-modules.</p>
+        <blockquote>
+            <strong>Important Note:</strong> Adding <code>#1</code> delays makes this code <strong>non-synthesizable</strong>. In real production RTL, you wouldn't include these because timing is determined by physical silicon. For simulation, they are vital for visualizing the "ripple" effect.
+        </blockquote>
 
-    <hr>
-
-    <h3>🧩 Part 1: The Leaf Cell (adder_1bit.sv)</h3>
-
-    <p><b>The Goal:</b> Build a "Full Adder"—the smallest unit of addition. It takes two bits (<i>a, b</i>) and a "Carry-In" (<i>cin</i>), then outputs a <i>sum</i> and a <i>cout</i>.</p>
-
-    <blockquote>
-      <b>⚠️ Important Note:</b> Adding <code>#1</code> delays makes this code <b>non-synthesizable</b>. In real production RTL, you wouldn't include these because timing is determined by physical silicon. For simulation, they are vital for visualizing the "ripple" effect.
-    </blockquote>
-
-    <details open>
-    <summary>📄 rtl/adder_1bit.sv</summary>
-    <pre><code>
+        <details>
+            <summary>Source: rtl/adder_1bit.sv</summary>
+            <pre><code>
 `timescale 1ns/1ps
 module adder_1bit (
     input logic  a, b, cin,
@@ -81,18 +113,19 @@ module adder_1bit (
     assign #1 sum  = a ^ b ^ cin;
     assign #1 cout = (a & b) | (cin & (a ^ b));
 endmodule
-    </code></pre>
-    </details>
+            </code></pre>
+        </details>
+    </div>
 
-    <hr>
+    <div class="section">
+        <h3>Part 2: The Scalable Top-Level (rca.sv)</h3>
+        <p><strong>The Goal:</strong> Chain 1-bit adders to handle larger numbers using a design that scales automatically based on a <code>WIDTH</code> variable.</p>
 
-    <h3>🏗️ Part 2: The Scalable Top-Level (rca.sv)</h3>
+        
 
-    <p><b>The Goal:</b> Chain 1-bit adders to handle larger numbers using a design that scales automatically based on a <code>WIDTH</code> variable.</p>
-
-    <details open>
-    <summary>📄 rtl/rca.sv</summary>
-    <pre><code>
+        <details>
+            <summary>Source: rtl/rca.sv</summary>
+            <pre><code>
 module rca #( parameter WIDTH = 8 ) (
     input  logic [WIDTH-1:0] a, b,
     input  logic             cin,
@@ -118,18 +151,17 @@ module rca #( parameter WIDTH = 8 ) (
 
     assign cout = carry_chain[WIDTH];
 endmodule
-    </code></pre>
-    </details>
+            </code></pre>
+        </details>
+    </div>
 
-    <hr>
-
-    <h3>🧪 Part 3: The Automated Testbench (tb_rca.sv)</h3>
-
-    <p><b>The Goal:</b> Verify 16-bit math by comparing our structural <b>RCA module</b> against <b>SystemVerilog’s built-in + operator</b> reference.</p>
-
-    <details open>
-    <summary>🧪 dv/tb_rca.sv</summary>
-    <pre><code>
+    <div class="section">
+        <h3>Part 3: The Automated Testbench (tb_rca.sv)</h3>
+        <p><strong>The Goal:</strong> Verify 16-bit math by comparing our structural <strong>RCA module</strong> against <strong>SystemVerilog’s built-in + operator</strong> reference.</p>
+        
+        <details>
+            <summary>Source: dv/tb_rca.sv</summary>
+            <pre><code>
 initial begin
     repeat (20) begin
         a = 16'($urandom_range(0, 2**WIDTH-1));
@@ -148,21 +180,21 @@ initial begin
             $display("PASS: %0d + %0d = %0d", a, b, {cout, sum});
     end
 end
-    </code></pre>
-    </details>
+            </code></pre>
+        </details>
+    </div>
 
-    <hr>
-
-    <h2>📝 Log 2 Final Summary</h2>
-    <ul>
-        <li><b>✅ Structural Hierarchy:</b> Successfully implemented a hierarchical design by nesting leaf cells within a top-module.</li>
-        <li><b>✅ Scalability with Generics:</b> Used <code>generate</code> loops to create a Parameterizable Design.</li>
-        <li><b>✅ Simulation Timing Realism:</b> Integrated inertial delays to model propagation delay.</li>
-        <li><b>✅ Automated Self-Checking:</b> Developed a "Golden Reference" testbench strategy for 100% accuracy.</li>
-    </ul>
-
-    <hr>
-    <p class="center"><i>Log 2 Complete. Ready to move to <b>Log 3: Synchronous Logic and FIFOs?</b></i></p>
+    <div class="section">
+        <h3>Log 2 Final Summary</h3>
+        <ul>
+            <li><strong>Structural Hierarchy:</strong> Successfully implemented a hierarchical design by nesting leaf cells within a top-module.</li>
+            <li><strong>Scalability with Generics:</strong> Used <code>generate</code> loops to create a Parameterizable Design.</li>
+            <li><strong>Simulation Timing Realism:</strong> Integrated inertial delays to model propagation delay.</li>
+            <li><strong>Automated Self-Checking:</strong> Developed a "Golden Reference" testbench strategy for 100% accuracy.</li>
+        </ul>
+        
+    </div>
+</div>
 
 </body>
 </html>

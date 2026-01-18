@@ -1,0 +1,164 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log 3: The Synchronous FIFO</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #24292e; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+            background-color: #fff; 
+        }
+        h1, h2, h3 { color: #0366d6; }
+        h3 { border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; margin-top: 1.5em; }
+        hr { height: 0.25em; padding: 0; margin: 24px 0; background-color: #e1e4e8; border: 0; }
+        pre { 
+            background-color: #f6f8fa; 
+            padding: 16px; 
+            border-radius: 6px; 
+            overflow: auto; 
+            font-size: 85%; 
+            line-height: 1.45; 
+            border: 1px solid #e1e4e8;
+        }
+        code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+        details { 
+            border: 1px solid #e1e4e8; 
+            border-radius: 6px; 
+            padding: 0.5em 0.5em 0; 
+            margin-bottom: 1em;
+            background-color: #ffffff;
+        }
+        summary { font-weight: bold; margin: -0.5em -0.5em 0; padding: 0.5em; cursor: pointer; }
+        .back-link { margin-bottom: 20px; display: inline-block; text-decoration: none; color: #0366d6; font-weight: bold; }
+        .center { text-align: center; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-link">← Back to Portfolio</a>
+
+    <h1>🌌 Log 3: The Synchronous FIFO</h1>
+
+    <p class="center">
+      <b>A Journey from Fresh Graduate to Silicon Engineer</b><br>
+      <i>Moving from combinational gates to sequential buffering logic.</i>
+    </p>
+
+    <h3>🚀 The Mission: Sequential Logic & Buffering</h3>
+    <p>In Log 2, we built an adder where signals "rippled" through gates. Now, we move into <b>Sequential Logic</b>. We are building a <b>Synchronous FIFO (First-In, First-Out)</b>. Think of this as the "waiting room" of digital design—a buffer used to manage data flow between different modules.</p>
+
+    <hr>
+
+    <h2>🧪 The Module (<code>fifo.sv</code>)</h2>
+
+    <h3>🏗️ 1. The Interface and Memory Array</h3>
+    <p>We need a storage buffer that handles data in order. Our first step is defining the interface and the physical storage shelves (memory array) using parameters for scalability.</p>
+
+    <details open>
+    <summary>📄 rtl/fifo.sv (Interface)</summary>
+    <pre><code>
+module fifo #(
+    parameter DATA_WIDTH = 8,
+    parameter DEPTH = 16
+)(
+    input  logic clk,
+    input  logic rst_n,
+    input  logic wr_en,
+    input  logic rd_en,
+    input  logic [DATA_WIDTH-1:0] din,
+    output logic [DATA_WIDTH-1:0] dout,
+    output logic full,
+    output logic empty,
+    output logic almost_full,
+    output logic almost_empty
+);
+    logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
+    localparam PTR_WIDTH = $clog2(DEPTH);
+    logic [PTR_WIDTH-1:0] wr_ptr, rd_ptr;
+    logic [PTR_WIDTH:0] count; 
+endmodule
+    </code></pre>
+    </details>
+
+    <hr>
+
+    <h3>🚩 2. Status Flags (The Early Warning System)</h3>
+    <p>We implement <b>Almost Full/Empty</b> flags. In high-speed designs, these act as an <b>Early Warning</b>, telling the sender to "Slow down" before an actual overflow occurs.</p>
+
+    <details open>
+    <summary>📄 rtl/fifo.sv (Flags)</summary>
+    <pre><code>
+    assign full         = (count == (PTR_WIDTH+1)'(DEPTH));
+    assign empty        = (count == 0);
+    assign almost_full  = (count >= (PTR_WIDTH+1)'(DEPTH - 2)); 
+    assign almost_empty = (count <= 2);
+    </code></pre>
+    </details>
+
+    <hr>
+
+    <h3>🧠 3. Control Logic (Pointers & Counter)</h3>
+    <p>We manage pointers using a <b>Circular Buffer</b> strategy—wrapping back to zero when the last shelf is reached.</p>
+
+    <details open>
+    <summary>📄 rtl/fifo.sv (Control Logic)</summary>
+    <pre><code>
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            wr_ptr <= 0; rd_ptr <= 0; count <= 0;
+        end else begin
+            if (wr_valid) wr_ptr <= (wr_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : wr_ptr + 1'b1;
+            if (rd_valid) rd_ptr <= (rd_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : rd_ptr + 1'b1;
+            case ({wr_valid, rd_valid})
+                2'b10: count <= count + 1'b1;
+                2'b01: count <= count - 1'b1;
+            endcase
+        end
+    end
+    </code></pre>
+    </details>
+
+    <hr>
+
+    <h3>🧪 The Automated Testbench</h3>
+    <p>We verify the hardware using a <b>Golden Reference Queue</b> in SystemVerilog. By mirroring every hardware move in software, we can automatically detect data mismatches.</p>
+
+    <details open>
+    <summary>🧪 dv/tb_fifo.sv (Tasks)</summary>
+    <pre><code>
+    task read_data();
+        expected_data = queue.pop_front(); 
+        @(negedge clk);
+        rd_en = 1;
+        @(negedge clk);
+        rd_en = 0;
+        if (dout !== expected_data) 
+            $error("Data mismatch! Expected: %h, Got: %h", expected_data, dout);
+    endtask
+    </code></pre>
+    </details>
+
+    <hr>
+
+    <h2>📝 Log 3 Final Summary</h2>
+    <ul>
+        <li><b>✅ RTL Design:</b> Implemented a Parameterized Synchronous FIFO with Early Warning flags.</li>
+        <li><b>✅ Automated Verification:</b> Used SystemVerilog Tasks and a Golden Reference Queue for 100% data checking.</li>
+        <li><b>✅ Stress Testing:</b> Verified throughput, overflow (Full), and underflow (Empty) scenarios.</li>
+    </ul>
+
+    <hr>
+    <p class="center"><i>Log 3 Complete.</i></p>
+
+</body>
+</html>

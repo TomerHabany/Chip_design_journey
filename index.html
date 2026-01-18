@@ -6,42 +6,124 @@ layout: null
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tomer Habany | Chip Design Journey</title>
+    <title>Chip Designer's Guide to the Galaxy</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; line-height: 1.6; color: #24292e; max-width: 800px; margin: 0 auto; padding: 40px 20px; background-color: #f6f8fa; }
-        h1 { border-bottom: 2px solid #eaecef; padding-bottom: 0.3em; color: #0366d6; }
-        .log-card { background: white; border: 1px solid #e1e4e8; border-radius: 6px; padding: 20px; margin-bottom: 15px; transition: transform 0.2s; }
-        .log-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .log-link { font-size: 1.25rem; font-weight: 600; text-decoration: none; color: #0366d6; }
-        .log-meta { font-size: 0.9rem; color: #586069; margin-top: 5px; }
-        .status-chip { display: inline-block; padding: 2px 8px; font-size: 12px; font-weight: 500; border-radius: 10px; background: #dbedff; color: #005cc5; }
+        :root {
+            --space-black: #0b0e14;
+            --nebula-purple: #6e40c9;
+            --star-blue: #58a6ff;
+            --stardust: #e6edf3;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            color: var(--stardust); 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+            background: radial-gradient(circle at center, #1a1f2e 0%, var(--space-black) 100%);
+            background-attachment: fixed;
+        }
+        h1 { 
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--star-blue);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
+        }
+        .subtitle {
+            text-align: center;
+            font-style: italic;
+            color: #8b949e;
+            margin-bottom: 50px;
+        }
+        .timeline {
+            position: relative;
+            border-left: 2px solid var(--nebula-purple);
+            margin-left: 20px;
+            padding-left: 30px;
+        }
+        .log-card { 
+            background: rgba(22, 27, 34, 0.8); 
+            border: 1px solid #30363d; 
+            border-radius: 12px; 
+            padding: 25px; 
+            margin-bottom: 30px; 
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .log-card::before {
+            content: '';
+            position: absolute;
+            left: -41px;
+            top: 28px;
+            width: 20px;
+            height: 20px;
+            background: var(--space-black);
+            border: 2px solid var(--star-blue);
+            border-radius: 50%;
+        }
+        .log-card:hover { 
+            transform: scale(1.02);
+            border-color: var(--star-blue);
+            box-shadow: 0 0 20px rgba(110, 64, 201, 0.3);
+        }
+        .log-link { 
+            font-size: 1.4rem; 
+            font-weight: bold; 
+            text-decoration: none; 
+            color: var(--star-blue); 
+        }
+        .log-meta { 
+            font-size: 0.95rem; 
+            color: #8b949e; 
+            margin-top: 10px; 
+        }
+        .status-chip { 
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            background: var(--nebula-purple);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Chip Design Journey</h1>
-    <p>A chronological log of my progress in FPGA design and SystemVerilog.</p>
+    <h1>The Chip Designer's Guide to the Galaxy</h1>
+    <p class="subtitle">Chronicles of RTL Engineering and SystemVerilog Exploration</p>
 
-    <div class="log-card">
-        <span class="status-chip">Latest Update</span>
-        <br>
-        <a class="log-link" href="uart/UART_Transmitter_Log/index.html">Log 4: UART Transmitter</a>
-        <div class="log-meta">Implementing serialization and precision baud rate generation.</div>
-    </div>
+    <div class="timeline">
 
-    <div class="log-card">
-        <a class="log-link" href="log_3_fifo.md">Log 3: Synchronous FIFO Design</a>
-        <div class="log-meta">Mastering data buffering.</div>
-    </div>
+        <div class="log-card">
+            <span class="status-chip">Phase 1</span><br>
+            <a class="log-link" href="galaxy_projects/guide_to_galaxy_logs/Log_1_environment_setup.html">Log 1: Building the Spacecraft</a>
+            <div class="log-meta">Establishing the Linux foundation, toolchain setup (Verilator/GTKWave), and the first 8-bit counter simulation.</div>
+        </div>
 
-    <div class="log-card">
-        <a class="log-link" href="log_2_structural_integration_rca.md">Log 2: Structural Integration & RCA</a>
-        <div class="log-meta">Building arithmetic logic units.</div>
-    </div>
+        <div class="log-card">
+            <span class="status-chip">Phase 2</span><br>
+            <a class="log-link" href="galaxy_projects/guide_to_galaxy_logs/Log_2_RCA.html">Log 2: The Architecture of Addition</a>
+            <div class="log-meta">Structural modeling of a Parameterizable Ripple Carry Adder and automated self-checking testbenches.</div>
+        </div>
 
-    <div class="log-card">
-        <a class="log-link" href="log01_environment_setup.md">Log 1: Environment Setup</a>
-        <div class="log-meta">Setting up the toolchain and workspace.</div>
+        <div class="log-card">
+            <span class="status-chip">Phase 3</span><br>
+            <a class="log-link" href="galaxy_projects/guide_to_galaxy_logs/Log_3_FIFO.html">Log 3: The Synchronous FIFO Buffer</a>
+            <div class="log-meta">Sequential logic buffering, circular pointer management, and "Early Warning" status flags.</div>
+        </div>
+
+        <div class="log-card">
+            <span class="status-chip">Current Mission</span><br>
+            <a class="log-link" href="galaxy_projects/guide_to_galaxy_logs/Log_4_UART_TX.html">Log 4: UART Transmitter Protocol</a>
+            <div class="log-meta">Implementing serialization and precision baud rate generation for inter-galactic communication.</div>
+        </div>
+
     </div>
 
 </body>

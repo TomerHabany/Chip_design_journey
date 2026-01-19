@@ -122,31 +122,132 @@ layout: null
 
     <div class="section">
         <h3>Project Directory Structure</h3>
-        <p>Professional RTL development requires a clean separation between design files and verification environment. Run the following command in your Ubuntu terminal:</p>
-        <pre><code>mkdir -p galaxy_project/{rtl,dv,sim}</code></pre>
+        <p>Professional RTL development requires a clean separation between design files and verification environment. for each project we will open a folder with the name of the project, and in it two seperate folders called rtl and dv to keep our designing order.  Run the following command in your Ubuntu terminal:</p>
+        <pre><code>mkdir -p galaxy_project/first_module/{rtl,dv}</code></pre>
         <ul>
             <li><strong>rtl/</strong>: Hardware design files (SystemVerilog).</li>
             <li><strong>dv/</strong>: Design Verification (Testbenches and C++ wrappers).</li>
-            <li><strong>sim/</strong>: Temporary build files and simulation outputs.</li>
+           
         </ul>
     </div>
 
+ <div class="section">
+    <h2>3. The Editor: VS Code & Remote Development</h2>
+    <p>
+        While the tools run in Linux, we want a modern graphical editor to write our code. <strong>Visual Studio Code (VS Code)</strong> is the industry favorite because of its "Remote Development" capabilities, which allow us to edit files living inside Ubuntu as if they were on our local Windows machine.
+    </p>
+
+    <h3>Step 1: Installation</h3>
+    <p>Download and install the Windows version of <a href="https://code.visualstudio.com/" target="_blank">VS Code</a>.</p>
+
+    <h3>Step 2: The WSL Extension</h3>
+    <p>To bridge the gap between Windows and your Linux environment, you must install the <strong>WSL Extension</strong> within VS Code:</p>
+    <ul>
+        <li>Open VS Code.</li>
+        <li>Click the <strong>Extensions</strong> icon on the left sidebar (or press <code>Ctrl+Shift+X</code>).</li>
+        <li>Search for "WSL" and click <strong>Install</strong>.</li>
+    </ul>
+
+    <h3>Step 3: Connecting to Ubuntu</h3>
+    <p>
+        Now we connect the editor to our Linux filesystem. Open your Ubuntu terminal, navigate to your project folder, and type:
+    </p>
+    <pre><code>code .</code></pre>
+    <p>
+        VS Code will launch in Windows, but you are now working directly inside Linux. You can verify this by checking the green badge in the bottom-left corner, which should read <strong>WSL: Ubuntu</strong>.
+    </p>
+    
+    <p><strong>Integrated Terminal:</strong></p>
+    <p>
+        One of the biggest advantages of this setup is the <strong>Integrated Terminal</strong>. You can access the Ubuntu command prompt directly inside VS Code by pressing <code>Ctrl + `</code> (backtick) or going to <strong>Terminal > New Terminal</strong> in the top menu. This allows you to run your Verilator simulations and Makefiles without ever leaving the editor.
+    </p>
+
+    <p><em>Recommendation:</em> I highly suggest installing the <strong>"SystemVerilog - Language Support"</strong> extension by <strong>Eirik Prestegårdshus</strong> for professional syntax highlighting.</p>
+    </div>
+    
+</section>
+
+  
+
+ <div class="section">
+    <h2>4. GitHub: Version Control Integration</h2>
+    <p>
+        As an engineer, your code is your portfolio. Setting up <strong>Git</strong> allows you to track your development progress and ensures your work is backed up and visible to potential employers.
+    </p>
+
+    <h3>Step 1: Initialize Git in Ubuntu</h3>
+    <p>In your VS Code terminal (which is already pointed at your Linux environment), initialize your repository:</p>
+    <pre><code>git init
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"</code></pre>
+
+    <h3>Step 2: Connecting to GitHub</h3>
+    <p>
+        VS Code makes Git management simple through its "Source Control" tab (the branching icon on the left). After creating a new repository on <a href="https://github.com/" target="_blank">GitHub</a>, you can click <strong>Publish to GitHub</strong> or <strong>Add Remote</strong>. VS Code will handle the authentication and linking for you.
+    </p>
+
+    <h3>Step 3: The .gitignore</h3>
+    <p>
+        To keep your repository clean, you need to create a <code>.gitignore</code> file in your <strong>root folder</strong> (if you followed my previous instructions, this is the <code>galaxy_project</code> folder). This file tells Git to ignore temporary simulation files and binaries that don't need to be tracked.
+    </p>
+    <p>Create the file and add these lines:</p>
+    <pre><code>obj_dir/
+sim/waveform.vcd
+*.o
+*.d</code></pre>
+</p>
+<strong>With that we have officially finished setting up our enviroment! in the next section of the log we will verify its working by building and simulating our very first model!</strong>
+</p>
+<br>
+<hr>
+  
+  
+</section>
+
     <div class="section">
-        <h3>Hardware Verification: The 8-bit Counter</h3>
-        <p>To confirm the environment is fully functional, we will build an 8-bit counter. Verification in Verilator is a "co-simulation" process: we write the hardware in <strong>SystemVerilog</strong> and the test harness in <strong>C++</strong>.</p>
-        
-        <h4>Step 1: The RTL Design</h4>
-        <p>First, we define the actual hardware logic. This module increments a value on every clock edge when enabled.</p>
-        <details>
-            <summary>Source: rtl/counter.sv</summary>
-            <pre><code>
+      
+    <h2>Module 1: The Parameterizable Synchronous Counter</h2>
+    <p>
+        The first step in any hardware journey is the "Hello World" of RTL: the Counter. While simple in concept, it introduces the fundamental building blocks of digital design: sequential logic, reset strategies, and parameterization.
+    </p>
+
+    <h3>1. Functional Specification</h3>
+    <p>A counter is a state machine that tracks an integer value over time.</p>
+    <ul>
+        <li><strong>Core Behavior:</strong> On every rising edge of the clock, the counter evaluates its inputs. If enabled, it increments its internal state by 1.</li>
+        <li><strong>Overflow Handling:</strong> Once the counter reaches its maximum value (determined by its bit-width), it wraps back to zero on the next increment.</li>
+        <li><strong>Reset State:</strong> A dedicated reset signal ensures the hardware starts in a known state (0) upon power-up.</li>
+    </ul>
+
+    <h3>2. The Interface (Ports & Parameters)</h3>
+    <p>In professional RTL, we use parameters to make modules reusable across different designs.</p>
+    <ul>
+        <li><strong>Parameter WIDTH:</strong> Defines the bit-size of the counter (defaulted to 8 bits).</li>
+        <li><strong>clk (Input):</strong> The system clock.</li>
+        <li><strong>rst_n (Input):</strong> An active-low asynchronous reset. It forces the count to zero regardless of other inputs.</li>
+        <li><strong>en (Input):</strong> The count enable. When 0, the counter holds its current value even as the clock continues to pulse.</li>
+        <li><strong>count (Output):</strong> The current value bus, sized based on the WIDTH parameter.</li>
+    </ul>
+
+    <h3>3. Internal Logic Strategy</h3>
+    <p>We use an <code>always_ff</code> block to describe the synchronous hardware. The logic follows a strict priority:</p>
+    <ol>
+        <li><strong>Reset:</strong> We check <code>!rst_n</code> first. This is an asynchronous reset because it is included in the sensitivity list.</li>
+        <li><strong>Enable:</strong> If not in reset, the hardware checks the <code>en</code> signal.</li>
+        <li><strong>The Increment:</strong> If enabled, the hardware calculates <code>count + 1</code>.</li>
+    </ol>
+
+    <h3>4. Implementation (SystemVerilog)</h3>
+    <details>
+        <summary>View Source: counter.sv</summary>
+        <pre><code class="language-systemverilog">
 module counter #( 
-    parameter width = 8 
+    parameter WIDTH = 8 
 )(
     input logic clk,    
     input logic rst_n,  
     input logic en,     
-    output logic [width-1:0] count 
+    output logic [WIDTH-1:0] count 
 );
 // Standard synchronous logic with active-low asynchronous reset
 always_ff @(posedge clk or negedge rst_n) begin
@@ -154,14 +255,35 @@ always_ff @(posedge clk or negedge rst_n) begin
     else if (en) count <= count + 1;
 end
 endmodule
-            </code></pre>
-        </details>
+        </code></pre>
+    </details>
+   
+</section>
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
-        <h4>Step 2: The SystemVerilog Testbench</h4>
-        <p>We wrap our design in a top-level testbench. This allows us to define the test sequence (resetting, waiting, and enabling) using hardware-centric timing.</p>
-        <details>
-            <summary>Source: dv/tb_top.sv</summary>
-            <pre><code>
+<section id="verification-strategy">
+    <h2>Verification: The Co-Simulation Strategy</h2>
+    <p>
+        Verification in Verilator is a "co-simulation" process. Since Verilator does not natively have a built-in event scheduler like commercial simulators, we use a C++ wrapper to act as the "physical world" (generating the clock) and a SystemVerilog top-level to handle the hardware test sequence.
+    </p>
+
+    <h3>1. The SystemVerilog Testbench (tb_top.sv)</h3>
+    <p>
+        The testbench serves as the primary environment for verifying the counter's behavior. The process begins with <strong>instantiating the Unit Under Test (UUT)</strong>. Here, we map the top-level signals to the counter's ports and override the <code>WIDTH</code> parameter if necessary.
+    </p>
+    <p>To verify the logic, we define a structured test sequence within an <code>initial</code> block:</p>
+    <ul>
+        <li><strong>Reset Initialization:</strong> We start by asserting <code>rst_n</code> (0) and de-asserting <code>en</code> (0). Using the <code>repeat</code> statement, we hold this state for 10 clock cycles to ensure the registers are cleared.</li>
+        <li><strong>Reset Release:</strong> We set <code>rst_n</code> to 1 and wait for 5 more cycles. At this point, the counter should stay at zero because <code>en</code> is still low.</li>
+        <li><strong>Active Counting:</strong> We assert <code>en</code> (1) and allow the counter to run for 50 cycles. This provides enough time to observe consistent incrementing.</li>
+        <li><strong>Result Reporting:</strong> Finally, we use <code>$display</code> to print the final value of the counter to the console, followed by <code>$finish</code> to stop the simulation.</li>
+    </ul>
+
+    
+
+    <details>
+        <summary>View Source: tb_top.sv</summary>
+        <pre><code class="language-systemverilog">
 module tb_top ( 
     input logic clk,  
     output logic [7:0] count  
@@ -169,7 +291,7 @@ module tb_top (
 logic rst_n, en;
 
 // Instantiate the Unit Under Test (UUT)
-counter #(.width(8)) u_counter (
+counter #(.WIDTH(8)) u_counter (
     .clk(clk), .rst_n(rst_n), .en(en), .count(count)
 );
 
@@ -184,14 +306,17 @@ initial begin
     $finish;
 end
 endmodule
-            </code></pre>
-        </details>
+        </code></pre>
+    </details>
 
-        <h4>Step 3: The C++ Simulation Driver</h4>
-        <p>Verilator converts SystemVerilog into C++. We need a C++ "wrapper" to act as the physical world: it generates the clock signal, handles the waveform dumping (.vcd), and drives the execution loop.</p>
-        <details>
-            <summary>Source: dv/sim_main.cpp</summary>
-            <pre><code>
+    <h3>2. The C++ Simulation Driver (sim_main.cpp)</h3>
+    <p>
+        In a Verilator workflow, the C++ file acts as the executable wrapper for the translated hardware. While C++ is essential for generating the clock heartbeat and managing waveform dumping (.vcd) for GTKWave, <strong>I will not be delving deep into the C++ implementation details</strong>. The focus of this blog remains centered on RTL design; the C++ code provided below is a standard template used to drive the evaluation loop and record signal states.
+    </p>
+
+    <details>
+        <summary>View Source: sim_main.cpp</summary>
+        <pre><code class="language-cpp">
 #include "Vtb_top.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
@@ -216,47 +341,126 @@ int main(int argc, char** argv) {
     delete top;
     return 0;
 }
-            </code></pre>
-        </details>
+        </code></pre>
+    </details>
 
-        <h4>Step 4: The Makefile</h4>
-        <p>The Makefile automates the three-stage process: <strong>Verilate</strong> (SV to C++), <strong>Compile</strong> (C++ to Binary), and <strong>Run</strong> (Execute Simulation).</p>
-        <details>
-            <summary>Source: Makefile</summary>
-            <pre><code>
+    <h3>3. Automation with the Makefile</h3>
+    <p>
+        Building a Verilator project requires several steps: translating the SystemVerilog into C++, compiling the generated files, and linking them into a final binary. Writing these commands into the command prompt manually every time is inefficient and prone to error. The <strong>Makefile</strong> automates this entire flow into simple commands, allowing us to build and run the entire simulation with a single keyword.
+    </p>
+
+    <details>
+        <summary>View Source: Makefile</summary>
+        <pre><code class="language-makefile">
+# Toolchain variables
 VERILATOR = verilator
+# Updated paths to match your folder structure
 RTL_DIR = rtl
 DV_DIR = dv
 TOP_MODULE = tb_top
+V_BINARY = V$(TOP_MODULE)
 
+# Default target: Compile and Run
 all: compile run
 
 compile:
-	@echo "--- Verilating and Building ---"
+	@echo "--- Step 1: Verilating and Building C++ Model ---"
+	# --trace: enables waveform dumping
+	# --timing: allows the use of @(posedge clk) in SystemVerilog
+	# -I$(RTL_DIR): tells Verilator where to find counter.sv
 	$(VERILATOR) -Wall --trace --timing --cc -I$(RTL_DIR) \
 		$(DV_DIR)/$(TOP_MODULE).sv --top-module $(TOP_MODULE) \
 		--exe $(DV_DIR)/sim_main.cpp
-	make -C obj_dir -f V$(TOP_MODULE).mk V$(TOP_MODULE)
+	
+	@echo "--- Step 2: Compiling Binary via Make ---"
+	# Build the executable from the translated C++ code
+	make -C obj_dir -f $(V_BINARY).mk $(V_BINARY)
 
 run:
-	@echo "--- Running Simulation ---"
-	./obj_dir/V$(TOP_MODULE)
+	@echo "--- Step 3: Executing Simulation ---"
+	# Run the binary generated in Step 2
+	./obj_dir/$(V_BINARY)
+	@echo "--- Simulation Complete. Waveform generated as waveform.vcd ---"
+
+view:
+	@echo "--- Opening GTKWave ---"
+	gtkwave waveform.vcd
 
 clean:
-	rm -rf obj_dir sim/waveform.vcd
-            </code></pre>
-        </details>
+	@echo "--- Cleaning Workspace ---"
+	rm -rf obj_dir waveform.vcd
+        </code></pre>
+    </details>
+</section>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 80px 0 40px 0;">
+
+<section id="simulation-verification">
+    <h2>Simulation</h2>
+    <p>
+        With the RTL and testbench ready, we can now execute the simulation. This is the moment of truth: if the simulation runs successfully, it validates that your entire toolchain Ubuntu, Verilator, and the C++ wrapper is configured correctly. You are now working with a professional-grade engineering setup.
+    </p>
+
+    <h3>1. Executing the Simulation</h3>
+    <p>
+        To compile and run the project, use the <strong>Makefile</strong> we created. In your VS Code terminal, run:
+    </p>
+    <pre><code>make</code></pre>
+    <p>
+        This command automates the build and executes the binary. The terminal will display the results of our SystemVerilog <code>$display</code> tasks.
+    </p>
+
+    <div style="background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin: 20px 0; text-align: center;">
+        <img src="../hello_verilator/waveform_image/counter_sim.png" alt="Terminal Simulation Success" style="max-width: 100%; border-radius: 4px; border: 1px solid #30363d;">
+        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px;">
+            The terminal output confirms the environment is working, reaching the target count of 50.
+        </p>
     </div>
 
-    <div class="section">
-        <h3>Log 1 Summary</h3>
-        <p>We have successfully established an industry-standard development environment.</p>
-        <ul>
-            <li><strong>Infrastructure:</strong> Ubuntu (WSL2).</li>
-            <li><strong>Toolchain:</strong> Verilator, GTKWave, and Make.</li>
-            <li><strong>Hardware Baseline:</strong> Simulated an 8-bit counter.</li>
-        </ul>
+    <h3>2. Visualizing Waveforms</h3>
+    <p>
+        To inspect the actual timing and signal behavior, launch the waveform viewer:
+    </p>
+    <pre><code>make view</code></pre>
+    <p>
+        This opens <strong>GTKWave</strong>. By dragging the signals into the window, you can see exactly how the hardware behaves cycle-by-cycle.
+    </p>
+
+    <div style="background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin: 20px 0; text-align: center;">
+        <img src="../hello_verilator/waveform_image/counter_wave.png" alt="GTKWave Counter Waveforms" style="max-width: 100%; border-radius: 4px; border: 1px solid #30363d;">
+        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px;">
+            Waveform Analysis: Verification of the reset sequence and synchronous counting logic.
+        </p>
     </div>
+
+    <h3>3. Verification Highlights</h3>
+    <p>The waveforms confirm the logic works exactly as intended:</p>
+    <ul>
+        <li><strong>Reset:</strong> The <code>count</code> stays at zero while <code>rst_n</code> is low.</li>
+        <li><strong>Enable:</strong> The <code>count</code> only increments when <code>en</code> is high.</li>
+        <li><strong>Accuracy:</strong> The final value reaches 50, matching our testbench requirements.</li>
+    </ul>
+
+<br>
+<hr>
+<hr>
+<section id="log-summary">
+    <h2>Log 1: Summary</h2>
+    <p>
+        The foundation is laid. We have successfully transitioned from a blank OS to a fully operational hardware development environment. This log confirms that the toolchain is verified and flight-ready.
+    </p>
+
+    <h3>Major Accomplishments</h3>
+    <ul>
+        <li><strong>OS & Workflow:</strong> Established a Linux foundation via <strong>WSL2</strong> and integrated <strong>VS Code</strong> for a professional remote development interface.</li>
+        <li><strong>Toolchain & Automation:</strong> Configured <strong>Verilator</strong> and <strong>GTKWave</strong> with a custom <strong>Makefile</strong> to automate the build-and-simulate pipeline.</li>
+        <li><strong>Infrastructure:</strong> Organized the workspace into standard <strong>RTL/DV</strong> directories and initialized <strong>Git</strong> version control.</li>
+        <li><strong>Verification:</strong> Validated the setup by simulating an <strong>8-bit counter</strong>, confirming functional resets and synchronous timing.</li>
+    </ul>
+
+    <p style="margin-top: 20px; font-weight: bold;">
+        With the environment stable and the verification flow proven, we are now ready to move from infrastructure setup to high-level digital design.
+    </p>
+</section>
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
 </div>
 

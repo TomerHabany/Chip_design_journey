@@ -10,20 +10,48 @@ layout: null
     <style>
         :root {
             --space-black: #0b0e14;
+            --deep-slate: #161b22;
             --nebula-purple: #6e40c9;
             --star-blue: #58a6ff;
             --stardust: #e6edf3;
+            --border-color: #30363d;
         }
+
+        /* Scroll Snapping setup on the HTML/Body */
+        html {
+            scroll-snap-type: y proximity;
+            scroll-behavior: smooth;
+        }
+
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             line-height: 1.6; 
             color: var(--stardust); 
             max-width: 900px; 
             margin: 0 auto; 
-            padding: 40px 20px; 
+            padding: 0 20px; /* Removed top/bottom padding to allow snapping */
             background: radial-gradient(circle at center, #1a1f2e 0%, var(--space-black) 100%);
             background-attachment: fixed;
         }
+
+        /* Each section takes up a significant portion of the view */
+        .intro-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            scroll-snap-align: start;
+            padding: 40px 0;
+        }
+
+        .timeline-section {
+            min-height: 100vh;
+            scroll-snap-align: start;
+            padding: 60px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
         h1 { 
             text-align: center;
             font-size: 2.5rem;
@@ -33,18 +61,50 @@ layout: null
             margin-bottom: 10px;
             text-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
         }
+
         .subtitle {
             text-align: center;
             font-style: italic;
             color: #8b949e;
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
+
+        .mission-container {
+            background-color: rgba(22, 27, 34, 0.9);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .mission-container h2 {
+            color: var(--star-blue);
+            margin-top: 0;
+            font-size: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mission-content strong { color: var(--star-blue); }
+
+        /* Timeline Styling */
         .timeline {
             position: relative;
             border-left: 2px solid var(--nebula-purple);
             margin-left: 20px;
             padding-left: 30px;
+            /* Animation for "popping" into view */
+            animation: appear linear;
+            animation-timeline: view();
+            animation-range: entry 20% cover 40%;
         }
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .log-card { 
             background: rgba(22, 27, 34, 0.8); 
             border: 1px solid #30363d; 
@@ -54,6 +114,7 @@ layout: null
             transition: all 0.3s ease;
             position: relative;
         }
+
         .log-card::before {
             content: '';
             position: absolute;
@@ -65,22 +126,26 @@ layout: null
             border: 2px solid var(--star-blue);
             border-radius: 50%;
         }
+
         .log-card:hover { 
             transform: scale(1.02);
             border-color: var(--star-blue);
             box-shadow: 0 0 20px rgba(110, 64, 201, 0.3);
         }
+
         .log-link { 
             font-size: 1.4rem; 
             font-weight: bold; 
             text-decoration: none; 
             color: var(--star-blue); 
         }
+
         .log-meta { 
             font-size: 0.95rem; 
             color: #8b949e; 
             margin-top: 10px; 
         }
+
         .status-chip { 
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -91,40 +156,80 @@ layout: null
             margin-bottom: 10px;
             display: inline-block;
         }
+
+        /* Scroll indicator for UX */
+        .scroll-hint {
+            text-align: center;
+            color: var(--star-blue);
+            font-size: 0.8rem;
+            margin-top: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
     </style>
 </head>
 <body>
 
-    <h1>The Chip Designer's Guide to the Galaxy</h1>
-    <p class="subtitle">Chronicles of RTL Engineering and SystemVerilog Exploration</p>
+    <section class="intro-section">
+        <h1>The Chip Designer's Guide to the Galaxy</h1>
+        <p class="subtitle">Chronicles of RTL Engineering and SystemVerilog Exploration</p>
 
-    <div class="timeline">
+        <div class="mission-container">
+            <h2>Project Overview & Mission</h2>
+            <div class="mission-content">
+                <p>I am a recent engineering graduate documenting my transition from university theory to practical silicon engineering. Moving into the world of hardware description languages (HDLs) and professional workflows is a significant challenge, and I created this project to bridge that gap through structured, hands-on learning.</p>
+                
+                <p><strong>The Project Goal:</strong> My objective is to build a functional library of digital modules from the ground up—starting with basic arithmetic and progressing toward integrating a RISC-V CPU. I am documenting this process to demonstrate the architectural reasoning and functional verification strategies required for professional RTL design.</p>
+                
+                <p><strong>In this project, you can expect to find:</strong></p>
+                <ul>
+                     <li><strong>Tooling & Environment:</strong> A roadmap for setting up a professional-grade local environment using open-source tools like Verilator, GTKWave, and Makefiles.</li>
+                    <li><strong>RTL Design:</strong> Synthesizable SystemVerilog modules built with a focus on clean, scalable architecture.</li>
+                    <li><strong>Functional Verification:</strong> Self-checking testbenches and reference models used to ensure logic correctness before system integration.</li>
+                   
+                </ul>
 
-        <div class="log-card">
-            <span class="status-chip">Phase 1</span><br>
-            <a class="log-link" href="guide_to_galaxy_logs/Log_1_environment_setup.html">Log 1: Building the Spacecraft</a>
-            <div class="log-meta">Establishing the Linux foundation, toolchain setup (Verilator/GTKWave), and the first 8-bit counter simulation.</div>
+                <p><strong>For Fellow Graduates:</strong> I have designed these logs to be the guide I wish I had when I started. By following these entries, a fresh engineer can easily set up their own development environment, master the essential tools, and begin building their own hardware blocks. There is a lot to learn in this field, and I am focused on building a solid technical foundation one module at a time.</p>
+            </div>
         </div>
+        <div class="scroll-hint">Scroll to view mission logs ▼</div>
+    </section>
 
-        <div class="log-card">
-            <span class="status-chip">Phase 2</span><br>
-            <a class="log-link" href="guide_to_galaxy_logs/Log_2_RCA.html">Log 2: The Architecture of Addition</a>
-            <div class="log-meta">Structural modeling of a Parameterizable Ripple Carry Adder and automated self-checking testbenches.</div>
+    <section class="timeline-section">
+        <h2 style="color: var(--star-blue); text-align: center; margin-bottom: 40px;">Mission Logs</h2>
+        <div class="timeline">
+
+            <div class="log-card">
+                <span class="status-chip">Phase 1</span><br>
+                <a class="log-link" href="guide_to_galaxy_logs/Log_1_environment_setup.html">Log 1: Building the Spacecraft</a>
+                <div class="log-meta">Establishing the Linux foundation, toolchain setup (Verilator/GTKWave), and the first 8-bit counter simulation.</div>
+            </div>
+
+            <div class="log-card">
+                <span class="status-chip">Phase 2</span><br>
+                <a class="log-link" href="guide_to_galaxy_logs/Log_2_RCA.html">Log 2: The Architecture of Addition</a>
+                <div class="log-meta">Structural modeling of a Parameterizable Ripple Carry Adder and automated self-checking testbenches.</div>
+            </div>
+
+            <div class="log-card">
+                <span class="status-chip">Phase 3</span><br>
+                <a class="log-link" href="guide_to_galaxy_logs/Log_3_FIFO.html">Log 3: The Synchronous FIFO Buffer</a>
+                <div class="log-meta">Sequential logic buffering, circular pointer management, and "Early Warning" status flags.</div>
+            </div>
+
+            <div class="log-card">
+                <span class="status-chip">Current Mission</span><br>
+                <a class="log-link" href="guide_to_galaxy_logs/Log_4_UART_TX.html">Log 4: UART Transmitter Protocol</a>
+                <div class="log-meta">Implementing serialization and precision baud rate generation for inter-galactic communication.</div>
+            </div>
+
         </div>
-
-        <div class="log-card">
-            <span class="status-chip">Phase 3</span><br>
-            <a class="log-link" href="guide_to_galaxy_logs/Log_3_FIFO.html">Log 3: The Synchronous FIFO Buffer</a>
-            <div class="log-meta">Sequential logic buffering, circular pointer management, and "Early Warning" status flags.</div>
-        </div>
-
-        <div class="log-card">
-            <span class="status-chip">Current Mission</span><br>
-            <a class="log-link" href="guide_to_galaxy_logs/Log_4_UART_TX.html">Log 4: UART Transmitter Protocol</a>
-            <div class="log-meta">Implementing serialization and precision baud rate generation for inter-galactic communication.</div>
-        </div>
-
-    </div>
+    </section>
 
 </body>
 </html>

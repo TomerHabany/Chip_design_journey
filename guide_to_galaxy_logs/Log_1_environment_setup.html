@@ -396,7 +396,7 @@ sim/waveform.vcd
             alt="Synchronous Counter Block Diagram" 
             class="clickable-img"
         >
-        <p class="img-caption">Click image to enlarge diagram</p>
+        
     </div>
 
     <div class="space-y-4">
@@ -746,14 +746,17 @@ clean:
     <p>
         The terminal will display the build process followed by the simulation logs. Successful execution is confirmed by the simulation reaching the terminal count:
     </p>
-
-    <div style="background: #0d1117; padding: 20px; border-radius: 12px; border: 1px solid #30363d; text-align: center; margin: 20px 0;">
-        <img src="../hello_verilator/waveform_image/counter_sim.png" alt="Terminal Simulation Success" class="clickable-img" style="max-width: 100%; border-radius: 4px;">
-        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic;">
-            Log Verification: Simulation completed successfully, validating the 8-bit counter limit.
-        </p>
+  <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: left; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Successful Build & Simulation</h4>
+        <img 
+            id="zoomTrigger" 
+            src="../hello_verilator/waveform_image/counter_sim.png"
+            alt="Synchronous Counter Block Diagram" 
+            class="clickable-img"
+        >
+        
     </div>
-
+   
     <h3>Waveform Analysis</h3>
     <p>
         To inspect signal transitions and timing relationships cycle-by-cycle, launch the waveform viewer by typing the command:
@@ -763,13 +766,17 @@ clean:
         GTKWave should now open on your screen, enabling you to see the waveforms:
      </p>
         
+    <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: left; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Waveform Viewer Output</h4>
+        <img 
+            id="zoomTrigger" 
+            src="../hello_verilator/waveform_image/counter_wave.png"
+            alt="Synchronous Counter Block Diagram" 
+            class="clickable-img"
+        >
         
-    <div style="background: #0d1117; padding: 20px; border-radius: 12px; border: 1px solid #30363d; text-align: center; margin: 20px 0;">
-        <img src="../hello_verilator/waveform_image/counter_wave.png" alt="GTKWave Results" class="clickable-img" style="max-width: 100%; border-radius: 4px;">
-        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic;">
-            Timing Diagram: Verification of synchronous increment and asynchronous reset priority.
-        </p>
     </div>
+   
 
     <p>The waveform analysis confirms three critical behaviors:</p>
     <ul style="list-style-type: disc; margin-left: 20px; margin-bottom: 20px; ;">

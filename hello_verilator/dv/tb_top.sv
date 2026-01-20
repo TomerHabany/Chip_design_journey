@@ -6,7 +6,7 @@ module tb_top (
 logic rst_n;
 logic en;
 // connect the counter
-counter #(.width(8)) u_counter (
+counter #(.WIDTH(8)) u_counter (
     .clk(clk),
     .rst_n(rst_n),
     .en(en),

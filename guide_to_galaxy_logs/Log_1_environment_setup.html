@@ -391,7 +391,7 @@ sim/waveform.vcd
     <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
         <h4 style="margin-top: 0; text-align: left; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Logic Block Diagram</h4>
         <img 
-            id="zoomTrigger" 
+            class="clickable-img zoom-trigger"
             src="images/counter_block_diagram.png" 
             alt="Synchronous Counter Block Diagram" 
             class="clickable-img"
@@ -749,7 +749,7 @@ clean:
   <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
         <h4 style="margin-top: 0; text-align: left; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Successful Build & Simulation</h4>
         <img 
-            id="zoomTrigger" 
+            class="clickable-img zoom-trigger"
             src="../hello_verilator/waveform_image/counter_sim.png"
             alt="Synchronous Counter Block Diagram" 
             class="clickable-img"
@@ -769,7 +769,7 @@ clean:
     <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
         <h4 style="margin-top: 0; text-align: left; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Waveform Viewer Output</h4>
         <img 
-            id="zoomTrigger" 
+            class="clickable-img zoom-trigger"
             src="../hello_verilator/waveform_image/counter_wave.png"
             alt="Synchronous Counter Block Diagram" 
             class="clickable-img"
@@ -803,15 +803,17 @@ clean:
 
 <script>
     const modal = document.getElementById("imageModal");
-    const img = document.getElementById("zoomTrigger");
     const modalImg = document.getElementById("img01");
+    // Select all images with the zoom-trigger class
+    const images = document.querySelectorAll(".zoom-trigger");
 
-    if (img) {
+    // Loop through each image and add the click event
+    images.forEach(img => {
         img.onclick = function() {
             modal.style.display = "block";
             modalImg.src = this.src;
         }
-    }
+    });
 </script>
 
 </body>

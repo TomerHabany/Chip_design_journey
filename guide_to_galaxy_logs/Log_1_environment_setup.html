@@ -37,7 +37,7 @@ layout: null
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* SECTION STYLING: Line at the bottom of each section */
+        /* SECTION STYLING */
         .section {
             padding-bottom: 20px;
             margin-bottom: 30px;
@@ -77,6 +77,53 @@ layout: null
         blockquote { border-left: 4px solid var(--nebula-purple); margin: 20px 0; padding-left: 15px; font-style: italic; }
         a { color: var(--star-blue); text-decoration: none; }
         a:hover { text-decoration: underline; }
+
+        /* Interface Table Styling */
+        .interface-table-wrapper {
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 20px 0;
+            background: #ffffff;
+        }
+        .interface-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #1e293b;
+        }
+        .interface-table th {
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .interface-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+        }
+        .interface-table tr:hover { background-color: #f8fafc; }
+        .signal-name {
+            font-family: 'Consolas', monospace;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* Image Zoom Styling */
+        .clickable-img {
+            cursor: zoom-in;
+            transition: transform 0.2s;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .clickable-img:hover { transform: scale(1.01); }
+        .img-caption { color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -96,12 +143,12 @@ layout: null
         <h3>Log Objectives</h3>
         <p>To get this environment ready, we will navigate through these stages:</p>
         <ul>
-            <li><strong>Operating System:</strong> Implementing Ubuntu/WSL2 as the Linux foundation.</li>
+            <li><strong>Operating System:</strong> Installing Ubuntu/WSL2 as the Linux foundation.</li>
             <li><strong>The Toolchain:</strong> Installing and configuring Verilator, GTKWave, and Make.</li>
             <li><strong>Project Structure:</strong> Organizing files into standard RTL and Verification folders.</li>
             <li><strong>Editor:</strong> Installing VS Code and connecting it to our Linux environment.</li>
             <li><strong>GitHub:</strong> Setting up our own Git directly in VS Code.</li>
-            <li><strong>Hardware Verification:</strong> Simulating an 8-bit counter to confirm the tools are working.</li>
+            <li><strong>Environment Verification:</strong> Simulating an 8-bit counter to confirm the tools are working.</li>
         </ul>
     </div>
 
@@ -115,10 +162,44 @@ layout: null
             <a href="https://www.youtube.com/watch?v=eId6K8d0v6o" target="_blank">How to install WSL2 (Credit: TechTime)</a>
         </blockquote>
 
-        <h4>2. The Toolchain: Verilator, GTKWave, and Make</h4>
-        <p>Install the complete toolchain with this command in your Ubuntu terminal:</p>
-        <pre><code>sudo apt update && sudo apt install -y verilator gtkwave build-essential make</code></pre>
+       <section id="toolchain-setup">
+    <h3>2. The Toolchain: Verilator, GTKWave, and Make</h3>
+    <p>Before writing RTL, you must set up the tools for compilation, simulation, and debugging. In open-source hardware development, these three programs form the backbone of your "Inner Loop."</p>
+
+    <div class="tool-definition">
+        <h4><strong>Verilator: The Simulator</strong></h4>
+        <p><strong>Verilator</strong> is a cycle-accurate Verilog/SystemVerilog compiler rather than a traditional interpreted simulator.</p>
+        <ul>
+            <li><strong>What it does:</strong> It converts Verilog code into highly optimized C++ or SystemC models.</li>
+            <li><strong>Why you need it:</strong> It is significantly faster than most commercial simulators for large-scale designs. You will use it to verify logic, catch syntax errors, and "lint" your code for potential hardware bugs before moving to physical silicon or FPGAs.</li>
+        </ul>
     </div>
+
+    <div class="tool-definition">
+        <h4><strong>GTKWave: The Waveform Viewer</strong></h4>
+        <p><strong>GTKWave</strong> is your visual interface for debugging digital logic over time.</p>
+        <ul>
+            <li><strong>What it does:</strong> It reads <code>.vcd</code> (Value Change Dump) files from simulations and displays them as timing diagrams.</li>
+            <li><strong>Why you need it:</strong> When a testbench fails, you need to see signal transitions relative to the clock. It allows you to trace data hierarchy, measure latencies, and debug complex state machines that logs alone cannot capture.</li>
+        </ul>
+    </div>
+
+    <div class="tool-definition">
+        <h4><strong>Make: The Automation Engine</strong></h4>
+        <p><strong>Make</strong> handles the complex commands, flags, and file dependencies inherent in chip design.</p>
+        <ul>
+            <li><strong>What it does:</strong> It executes "Makefiles" to automate your build process, only recompiling files that have changed.</li>
+            <li><strong>Why you need it:</strong> It ensures a repeatable, error-free workflow. With a single <code>make</code> command, you can trigger linting, compilation, simulation, and launch your waveform viewer simultaneously.</li>
+        </ul>
+    </div>
+
+    <div class="installation-block">
+        <h3>Installation</h3>
+        <p>Run the following command in your Ubuntu terminal:</p>
+        <pre><code>sudo apt update && sudo apt install -y verilator gtkwave build-essential make</code></pre>
+        <p><em><strong>Note:</strong> While Verilator, GTKWave, and Make are your primary design tools, we also install <strong>build-essential</strong>. This is a meta-package containing the C++ compiler (GCC) that Verilator requires to transform your hardware descriptions into runnable simulation executables.</em></p>
+    </div>
+</section>
 
     <div class="section">
         <h3>Project Directory Structure</h3>
@@ -204,115 +285,383 @@ sim/waveform.vcd
   
 </section>
 
-    <div class="section">
-      
-    <h2>Module 1: The Parameterizable Synchronous Counter</h2>
-    <p>
-        The first step in any hardware journey is the "Hello World" of RTL: the Counter. While simple in concept, it introduces the fundamental building blocks of digital design: sequential logic, reset strategies, and parameterization.
-    </p>
+  <section id="verification-module">
+    <h2>Verifying our Setup: The Synchronous Counter</h3>
+    <p>In this section we will perform a quick check to ensure everything is communicating correctly. We will implement a simple <strong>Synchronous Counter</strong> to verify our workflow. Our goal here will be to confirm that we can move from RTL code to a working simulation without any environment friction, allowing us to focus entirely on chip design in the later sections.</p>
 
+    <div class="module-objectives">
+        <h4><strong>What we will verify:</strong></h4>
+        <p>This simple module will act as a diagnostic to confirm our setup is ready:</p>
+        <ul>
+            <li><strong>Compilation:</strong> We will check that Verilator can successfully translate our SystemVerilog into a runnable C++ simulation.</li>
+            <li><strong>Automation:</strong> We will use <code>make</code> to handle our build process, ensuring our dependencies are managed correctly.</li>
+            <li><strong>Visualization:</strong> We will generate a waveform file and open it in GTKWave to confirm we can see our signals changing over time.</li>
+        </ul>
+    </div>
+
+    <div class="workflow-preview">
+        <p>By completing this step, we will prove that our workstation is fully configured and ready for the design challenges ahead.</p>
+    </div>
+</section>
+
+   <!-- 1. Functional Specification -->
+<section class="section">
     <h3>1. Functional Specification</h3>
-    <p>A counter is a state machine that tracks an integer value over time.</p>
-    <ul>
-        <li><strong>Core Behavior:</strong> On every rising edge of the clock, the counter evaluates its inputs. If enabled, it increments its internal state by 1.</li>
-        <li><strong>Overflow Handling:</strong> Once the counter reaches its maximum value (determined by its bit-width), it wraps back to zero on the next increment.</li>
-        <li><strong>Reset State:</strong> A dedicated reset signal ensures the hardware starts in a known state (0) upon power-up.</li>
-    </ul>
+    <p>Before writing any RTL, we must define exactly what the hardware should do. Our goal is a flexible, reusable counter module.</p>
+    <div style="background-color: #1a1f2e; padding: 15px; border-radius: 8px; border-left: 4px solid var(--star-blue);">
+        <h4 style="margin-top: 0;">Design Requirements:</h4>
+        <ul class="text-slate-700">
+            <li><strong>Type:</strong> Parameterized Up-Counter.</li>
+            <li><strong>Clocking:</strong> Synchronous operation on the rising edge of the clock.</li>
+            <li><strong>Reset:</strong> Asynchronous, active-low reset (<code>rst_n</code>).</li>
+            <li><strong>Control:</strong> An enable signal (<code>en</code>) to control incrementing.</li>
+            <li><strong>Behavior:</strong> Increments by 1 only when <code>en</code> is high.</li>
+        </ul>
+    </div>
+</section>
 
-    <h3>2. The Interface (Ports & Parameters)</h3>
-    <p>In professional RTL, we use parameters to make modules reusable across different designs.</p>
-    <ul>
-        <li><strong>Parameter WIDTH:</strong> Defines the bit-size of the counter (defaulted to 8 bits).</li>
-        <li><strong>clk (Input):</strong> The system clock.</li>
-        <li><strong>rst_n (Input):</strong> An active-low asynchronous reset. It forces the count to zero regardless of other inputs.</li>
-        <li><strong>en (Input):</strong> The count enable. When 0, the counter holds its current value even as the clock continues to pulse.</li>
-        <li><strong>count (Output):</strong> The current value bus, sized based on the WIDTH parameter.</li>
-    </ul>
+<!-- 2. Interface Definition -->
+<section class="section">
+    <h3>2. Interface Definition</h3>
+    <p>The interface defines how our module connects to the rest of the chip. We define our ports and parameters in a formal table.</p>
+    
+    <div class="interface-table-wrapper shadow-sm">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Signal Name</th>
+                    <th>Direction</th>
+                    <th>Width</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="signal-name">width</td>
+                    <td>Parameter</td>
+                    <td>-</td>
+                    <td>Bit-width of the counter (Default: 8)</td>
+                </tr>
+                <tr>
+                    <td class="signal-name">clk</td>
+                    <td>Input</td>
+                    <td>1</td>
+                    <td>System Clock (Rising Edge Active)</td>
+                </tr>
+                <tr>
+                    <td class="signal-name">rst_n</td>
+                    <td>Input</td>
+                    <td>1</td>
+                    <td>Asynchronous Reset (Active Low)</td>
+                </tr>
+                <tr>
+                    <td class="signal-name">en</td>
+                    <td>Input</td>
+                    <td>1</td>
+                    <td>Count Enable</td>
+                </tr>
+                <tr>
+                    <td class="signal-name">count</td>
+                    <td>Output</td>
+                    <td>[width-1:0]</td>
+                    <td>Current Counter Value</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <h3>3. Internal Logic Strategy</h3>
-    <p>We use an <code>always_ff</code> block to describe the synchronous hardware. The logic follows a strict priority:</p>
-    <ol>
-        <li><strong>Reset:</strong> We check <code>!rst_n</code> first. This is an asynchronous reset because it is included in the sensitivity list.</li>
-        <li><strong>Enable:</strong> If not in reset, the hardware checks the <code>en</code> signal.</li>
-        <li><strong>The Increment:</strong> If enabled, the hardware calculates <code>count + 1</code>.</li>
-    </ol>
-
-    <h3>4. Implementation (SystemVerilog)</h3>
     <details>
-        <summary>View Source: counter.sv</summary>
-        <pre><code class="language-systemverilog">
-module counter #( 
-    parameter WIDTH = 8 
+        <summary>View Module Header</summary>
+<pre><code>module counter #( 
+    parameter width = 8  // Width of the counter
 )(
-    input logic clk,    
-    input logic rst_n,  
-    input logic en,     
-    output logic [WIDTH-1:0] count 
-);
-// Standard synchronous logic with active-low asynchronous reset
-always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) count <= '0;  
-    else if (en) count <= count + 1;
-end
-endmodule
-        </code></pre>
+    input  logic             clk,   // Clock input
+    input  logic             rst_n, // Active low reset
+    input  logic             en,    // Enable signal
+    output logic [width-1:0] count  // Counter output
+);</code></pre>
     </details>
+</section>
+
+<!-- 3. Architectural Planning -->
+<section class="section">
+    <h3>3. Architectural Planning</h3>
+    <p>We visualize the data flow as a sequential logic structure with an asynchronous clear.</p>
+
+    <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: left; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Logic Block Diagram</h4>
+        <img 
+            id="zoomTrigger" 
+            src="images/counter_block_diagram.png" 
+            alt="Synchronous Counter Block Diagram" 
+            class="clickable-img"
+        >
+        <p class="img-caption">Click image to enlarge diagram</p>
+    </div>
+
+    <div class="space-y-4">
+        <p><strong>Theory of Operation:</strong></p>
+        <ol>
+            <li><strong>The Incrementer:</strong> Takes the current <code>count</code> value and prepares the next state (<code>count + 1</code>).</li>
+            <li><strong>The Enable Logic:</strong> The <code>en</code> signal determines if the value passed to the register will be incremented.</li>
+            <li><strong>The Sequential Element:</strong> On every rising edge of <code>clk</code>, the register captures the value unless <code>rst_n</code> overrides it.</li>
+        </ol>
+    </div>
+</section>
+
+<!-- 4. Implementation Logic -->
+<section class="section">
+    <h3>4. Implementation Logic</h3>
+    <p>We implement the logic using an <code>always_ff</code> block to define sequential hardware.</p>
+    
+    <details>
+        <summary>View Register Logic</summary>
+<pre><code>always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        count <= '0;  // Reset counter to 0
+    end else if (en) begin
+        count <= count + 1;  // Increment counter
+    end
+end</code></pre>
+    </details>
+</section>
+
+<!-- 5. Final Code and Summary -->
+<section class="section">
+    <h3>5. Final Implementation</h3>
+    <p>The final module combines the parameterized interface with the sequential logic.</p>
+    
+    <details>
+        <summary>Complete SystemVerilog RTL (counter.sv)</summary>
+<pre><code>// counter.sv - Parameterized Synchronous Counter
+module counter #( 
+    parameter width = 8 
+)(
+    input  logic             clk,
+    input  logic             rst_n,
+    input  logic             en,
+    output logic [width-1:0] count
+);
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            count <= '0;
+        end else if (en) begin
+            count <= count + 1;
+        end
+    end
+
+endmodule</code></pre>
+    </details>
+
+    <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Summary:</p>
+        <p>We have successfully translated our functional requirements into a synthesized hardware module. With the RTL complete, we are ready to move to the next section and verify this design using a <strong>SystemVerilog Testbench</strong>.</p>
+    </div>
+</section>
    
 </section>
 <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
-<section id="verification-strategy">
-    <h2>Verification: The Co-Simulation Strategy</h2>
-    <p>
-        Verification in Verilator is a "co-simulation" process. Since Verilator does not natively have a built-in event scheduler like commercial simulators, we use a C++ wrapper to act as the "physical world" (generating the clock) and a SystemVerilog top-level to handle the hardware test sequence.
-    </p>
 
-    <h3>1. The SystemVerilog Testbench (tb_top.sv)</h3>
-    <p>
-        The testbench serves as the primary environment for verifying the counter's behavior. The process begins with <strong>instantiating the Unit Under Test (UUT)</strong>. Here, we map the top-level signals to the counter's ports and override the <code>WIDTH</code> parameter if necessary.
-    </p>
-    <p>To verify the logic, we define a structured test sequence within an <code>initial</code> block:</p>
-    <ul>
-        <li><strong>Reset Initialization:</strong> We start by asserting <code>rst_n</code> (0) and de-asserting <code>en</code> (0). Using the <code>repeat</code> statement, we hold this state for 10 clock cycles to ensure the registers are cleared.</li>
-        <li><strong>Reset Release:</strong> We set <code>rst_n</code> to 1 and wait for 5 more cycles. At this point, the counter should stay at zero because <code>en</code> is still low.</li>
-        <li><strong>Active Counting:</strong> We assert <code>en</code> (1) and allow the counter to run for 50 cycles. This provides enough time to observe consistent incrementing.</li>
-        <li><strong>Result Reporting:</strong> Finally, we use <code>$display</code> to print the final value of the counter to the console, followed by <code>$finish</code> to stop the simulation.</li>
-    </ul>
+   <section id="verification-testbench">
+    <h2>SystemVerilog Testbench (tb_top.sv)</h2>
+    <p>Now that our RTL is complete, we must prove its correctness. In this section, we build a testbench: a dedicated wrapper that drives stimulus into our counter to stress-test its logic.</p>
 
+    <!-- 1. Functional Specification -->
+    <h3>1. Functional Specification</h3>
+    <p>The testbench's primary job is to exercise all paths of the design. We want to confirm the counter handles initialization, stays idle when disabled, and increments accurately when enabled.</p>
     
+    <div class="stimulus-requirements" style="margin-bottom: 20px;">
+        <ul style="list-style-type: disc; margin-left: 20px;">
+            <li>Initialize signals to a known state.</li>
+            <li>Verify asynchronous reset takes priority.</li>
+            <li>Confirm the counter remains static when <code>en = 0</code>.</li>
+            <li>Confirm the counter increments on every <code>clk</code> edge when <code>en = 1</code>.</li>
+        </ul>
+    </div>
 
-    <details>
-        <summary>View Source: tb_top.sv</summary>
-        <pre><code class="language-systemverilog">
-module tb_top ( 
-    input logic clk,  
-    output logic [7:0] count  
+    <h4>Interface & Parameters</h4>
+    <p>To keep our verification environment flexible, we define a local parameter for the bit-width. This ensures that if we change the counter size later, our testbench adapts automatically.</p>
+
+    <div class="interface-table-wrapper shadow-sm" style="margin-bottom: 20px;">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Signal Name</th>
+                    <th>Direction</th>
+                    <th>Width</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="signal-name">WIDTH</td>
+                    <td>Parameter</td>
+                    <td>-</td>
+                    <td>Local constant for bit-width (Default: 8)</td>
+                </tr>
+                <tr>
+                    <td class="signal-name">clk</td>
+                    <td>Input</td>
+                    <td>1</td>
+                    <td>Clock driven by the C++ wrapper</td>
+                </tr>
+                <tr>
+                    <td class="signal-name">count</td>
+                    <td>Output</td>
+                    <td>[WIDTH-1:0]</td>
+                    <td>The monitored value from the UUT</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <details style="background-color: #0d1117; color: #e6edf3; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+        <summary style="cursor: pointer; font-weight: bold; padding: 5px;">View Module Header Code</summary>
+        <pre style="margin-top: 10px; font-size: 0.9em; overflow-x: auto;"><code>module tb_top #(
+    parameter WIDTH = 8
+)( 
+    input logic clk, 
+    output logic [WIDTH-1:0] count 
 );
-logic rst_n, en;
-
-// Instantiate the Unit Under Test (UUT)
-counter #(.WIDTH(8)) u_counter (
-    .clk(clk), .rst_n(rst_n), .en(en), .count(count)
-);
-
-initial begin
-    rst_n = 0; en = 0;
-    repeat (10) @(posedge clk);
-    rst_n = 1;  // Release reset
-    repeat (5) @(posedge clk);
-    en = 1;     // Start counting
-    repeat (50) @(posedge clk);
-    $display("Simulation complete! Final Count: %d", count);
-    $finish;
-end
-endmodule
-        </code></pre>
+    logic rst_n, en; // Local wires to drive the design</code></pre>
     </details>
 
-    <h3>2. The C++ Simulation Driver (sim_main.cpp)</h3>
+    <!-- 2. Architectural Planning -->
+    <h3>2. Architectural Planning</h3>
+    <p>We must instantiate the counter and map our testbench signals to the module ports. This "plugs" our hardware module into the test environment.</p>
+
+    <details style="background-color: #0d1117; color: #e6edf3; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+        <summary style="cursor: pointer; font-weight: bold; padding: 5px;">View Instantiation Code</summary>
+        <pre style="margin-top: 10px; font-size: 0.9em; overflow-x: auto;"><code>    // Instantiate the counter with the matching parameter
+    counter #(.width(WIDTH)) u_counter (
+        .clk(clk), 
+        .rst_n(rst_n), 
+        .en(en), 
+        .count(count)
+    );</code></pre>
+    </details>
+
+    <!-- 3. Step-by-Step Implementation -->
+    <h3>3. Step-by-Step Implementation</h3>
+    <p>We now define the stimulus sequence. To do this in SystemVerilog, we use an <code>initial</code> block. This is a non-synthesizable piece of code that acts as a script for our hardware to follow during simulation.</p>
+
+    <h4>The Reset Sequence</h4>
+    <p>Hardware is in an "unknown" state at power-up. We force a reset for several cycles to ensure the internal flip-flops reach a stable zero state.</p>
+
+    <details style="background-color: #0d1117; color: #e6edf3; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+        <summary style="cursor: pointer; font-weight: bold; padding: 5px;">View Reset Logic</summary>
+        <pre style="margin-top: 10px; font-size: 0.9em; overflow-x: auto;"><code>    initial begin
+        // Force reset state
+        rst_n = 0; 
+        en = 0;           
+        repeat (10) @(posedge clk); 
+        
+        // Release reset
+        rst_n = 1;</code></pre>
+    </details>
+
+    <h4>Testing Idle vs. Active States</h4>
+    <p>Once reset is released, we check if the counter obeys the <code>en</code> signal. It should remain idle first, then begin incrementing after the enable signal is toggled.</p>
+
+    <details style="background-color: #0d1117; color: #e6edf3; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+        <summary style="cursor: pointer; font-weight: bold; padding: 5px;">View Stimulus Logic</summary>
+        <pre style="margin-top: 10px; font-size: 0.9em; overflow-x: auto;"><code>        // Confirm idle behavior (en=0)
+        repeat (5) @(posedge clk);   
+        
+        // Start counting (en=1)
+        en = 1;                      
+        repeat (50) @(posedge clk);  
+        
+        $display("Final Count: %d", count);
+        $finish; 
+    end
+endmodule</code></pre>
+    </details>
+
+    <!-- 4. Verification & Waveform Strategy -->
+    <h3>4. Verification & Waveform Strategy</h3>
+    <p>When we run this, we expect to see a specific signature in GTKWave:</p>
+    <ul style="list-style-type: disc; margin-left: 20px; margin-bottom: 20px;">
+        <li><strong>Phase 1 (Reset):</strong> <code>count</code> must be 0, regardless of other signals.</li>
+        <li><strong>Phase 2 (Idle):</strong> <code>rst_n</code> is 1, but <code>en</code> is 0. <code>count</code> must remain 0.</li>
+        <li><strong>Phase 3 (Active):</strong> <code>en</code> is 1. On every rising edge of <code>clk</code>, <code>count</code> must increase by 1.</li>
+    </ul>
+
+    <!-- 5. Final Assembly -->
+    <h3>5. Final Assembly</h3>
+    <p>Below is the combined code for <code>dv/tb_top.sv</code>, including the parameterized interface and the full stimulus block.</p>
+
+    <details style="background-color: #0d1117; color: #e6edf3; padding: 10px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #30363d;">
+        <summary style="cursor: pointer; font-weight: bold; padding: 5px; color: #58a6ff;">Full Source Code (tb_top.sv)</summary>
+        <pre style="margin-top: 10px; font-size: 0.9em; overflow-x: auto;"><code>module tb_top #(
+    parameter WIDTH = 8
+)( 
+    input  logic             clk,  
+    output logic [WIDTH-1:0] count  
+);
+    logic rst_n, en;
+
+    // Instantiate the Unit Under Test (UUT)
+    counter #(.width(WIDTH)) u_counter (
+        .clk(clk), 
+        .rst_n(rst_n), 
+        .en(en), 
+        .count(count)
+    );
+
+    initial begin
+        // 1. Initialize and Reset
+        rst_n = 0; en = 0;
+        repeat (10) @(posedge clk);
+        
+        // 2. Release Reset - Test Idle (Should stay at 0)
+        rst_n = 1;
+        repeat (5) @(posedge clk);
+        
+        // 3. Start Counting - Test Active Logic
+        en = 1;
+        repeat (50) @(posedge clk);
+        
+        $display("Simulation complete! Final Count: %d", count);
+        $finish;
+    end
+endmodule</code></pre>
+    </details>
+     <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue); margin-top: 30px;">
+        <p style="font-weight: bold; margin-top: 0;">Summary:</p>
+        <p>We have completed the <strong>SystemVerilog Testbench</strong> and defined the logic necessary to verify our counter. With the verification stimulus written, we are now ready to write the <strong>C++ Wrapper</strong>, which will bridge our simulation with Verilator.</p>
+    </div>
+</section>
+</section>
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+   <section id="cpp-driver-guide" class="section">
+    <h2>The C++ Simulation Driver (sim_main.cpp)</h2>
     <p>
-        In a Verilator workflow, the C++ file acts as the executable wrapper for the translated hardware. While C++ is essential for generating the clock heartbeat and managing waveform dumping (.vcd) for GTKWave, <strong>I will not be delving deep into the C++ implementation details</strong>. The focus of this blog remains centered on RTL design; the C++ code provided below is a standard template used to drive the evaluation loop and record signal states.
+        While our counter and testbench are written in SystemVerilog, Verilator needs a way to actually run that code on your computer's processor. This is where the <strong>C++ Driver</strong> comes in.
     </p>
+    <p>
+        Verilator works by translating hardware logic into a C++ model. However, this model is essentially a dormant function; it requires a C++ wrapper to call that function, provide a time reference, and drive the input signals. Essentially, the C++ code creates the "virtual test bench" that allows the hardware logic to execute.
+    </p>
+
+    <div class="tool-definition">
+        <h4><strong>What this file does for you:</strong></h4>
+        <ul>
+            <li><strong>Generates the Heartbeat:</strong> Hardware needs a clock signal (<code>clk</code>) to move. This file manually toggles that clock on and off in a loop.</li>
+            <li><strong>Starts the Evaluation:</strong> It tells Verilator to look at the hardware signals at every clock tick and calculate the new results.</li>
+            <li><strong>Records the Action:</strong> It creates the <code>.vcd</code> waveform file, acting like a security camera that records every signal change so you can watch it later in GTKWave.</li>
+        </ul>
+    </div>
+
+   
+        <p style="font-weight: bold; margin-top: 0;">Note on C++ Implementation:</p>
+        <p>
+            While the C++ driver is essential for generating the clock and managing waveform data, we will not be delving deep into the C++ implementation details. In this workflow, the C++ file serves as a standard template to drive the evaluation loop; our focus remains centered on the RTL design and hardware verification logic.
+        </p>
+
 
     <details>
         <summary>View Source: sim_main.cpp</summary>
@@ -343,126 +692,120 @@ int main(int argc, char** argv) {
 }
         </code></pre>
     </details>
-
-    <h3>3. Automation with the Makefile</h3>
+ </section>
+ 
+   <section id="automation-simulation" class="section">
+<section id="automation-simulation" class="section">
+    <h2>Automation with the Makefile</h2>
     <p>
-        Building a Verilator project requires several steps: translating the SystemVerilog into C++, compiling the generated files, and linking them into a final binary. Writing these commands into the command prompt manually every time is inefficient and prone to error. The <strong>Makefile</strong> automates this entire flow into simple commands, allowing us to build and run the entire simulation with a single keyword.
+        With the <strong>RTL design</strong>, <strong>SystemVerilog Testbench</strong>, and <strong>C++ Driver</strong> ready, we need a way to link these components. The <strong>Makefile</strong> serves as this bridge, automating complex toolchain commands into a fast, repeatable development cycle.
     </p>
 
-    <details>
-        <summary>View Source: Makefile</summary>
-        <pre><code class="language-makefile">
-# Toolchain variables
-VERILATOR = verilator
-# Updated paths to match your folder structure
+    <div class="tool-definition">
+        <h4><strong>What this file does for you:</strong></h4>
+        <ul>
+            <li><strong>Verilation:</strong> Converts hardware logic (<code>.sv</code>) into optimized C++ models.</li>
+            <li><strong>Compilation:</strong> Invokes GCC to build the final simulation executable from the verilated code.</li>
+            <li><strong>Cleanup:</strong> Easily wipes the <code>obj_dir</code> and old waveforms to ensure every test run is clean and accurate.</li>
+        </ul>
+    </div>
+
+    <details style="background-color: #0d1117; color: #e6edf3; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #30363d;">
+        <summary style="cursor: pointer; font-weight: bold; color: #58a6ff;">View Makefile Source Code</summary>
+        <pre style="margin-top: 15px; font-family: 'Consolas', monospace; font-size: 13px; color: #d1d5db; overflow-x: auto;"><code>VERILATOR = verilator
 RTL_DIR = rtl
 DV_DIR = dv
 TOP_MODULE = tb_top
 V_BINARY = V$(TOP_MODULE)
 
-# Default target: Compile and Run
 all: compile run
 
 compile:
-	@echo "--- Step 1: Verilating and Building C++ Model ---"
-	# --trace: enables waveform dumping
-	# --timing: allows the use of @(posedge clk) in SystemVerilog
-	# -I$(RTL_DIR): tells Verilator where to find counter.sv
 	$(VERILATOR) -Wall --trace --timing --cc -I$(RTL_DIR) \
 		$(DV_DIR)/$(TOP_MODULE).sv --top-module $(TOP_MODULE) \
 		--exe $(DV_DIR)/sim_main.cpp
-	
-	@echo "--- Step 2: Compiling Binary via Make ---"
-	# Build the executable from the translated C++ code
 	make -C obj_dir -f $(V_BINARY).mk $(V_BINARY)
 
 run:
-	@echo "--- Step 3: Executing Simulation ---"
-	# Run the binary generated in Step 2
 	./obj_dir/$(V_BINARY)
-	@echo "--- Simulation Complete. Waveform generated as waveform.vcd ---"
 
 view:
-	@echo "--- Opening GTKWave ---"
-	gtkwave waveform.vcd
+	gtkwave sim/waveform.vcd
 
 clean:
-	@echo "--- Cleaning Workspace ---"
-	rm -rf obj_dir waveform.vcd
-        </code></pre>
+	rm -rf obj_dir sim/waveform.vcd</code></pre>
     </details>
-</section>
-        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 80px 0 40px 0;">
+    
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
-<section id="simulation-verification">
-    <h2>Simulation</h2>
+    <h2>Simulation Execution</h2>
     <p>
-        With the RTL and testbench ready, we can now execute the simulation. This is the moment of truth: if the simulation runs successfully, it validates that your entire toolchain Ubuntu, Verilator, and the C++ wrapper is configured correctly. You are now working with a professional-grade engineering setup.
+        First, ensure your terminal is navigated to the project directory. Then, simply run the <code>make</code> command to compile the design and start the simulation:
+    </p>
+   
+    <p>
+        The terminal will display the build process followed by the simulation logs. Successful execution is confirmed by the simulation reaching the terminal count:
     </p>
 
-    <h3>1. Executing the Simulation</h3>
-    <p>
-        To compile and run the project, use the <strong>Makefile</strong> we created. In your VS Code terminal, run:
-    </p>
-    <pre><code>make</code></pre>
-    <p>
-        This command automates the build and executes the binary. The terminal will display the results of our SystemVerilog <code>$display</code> tasks.
-    </p>
-
-    <div style="background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin: 20px 0; text-align: center;">
-        <img src="../hello_verilator/waveform_image/counter_sim.png" alt="Terminal Simulation Success" style="max-width: 100%; border-radius: 4px; border: 1px solid #30363d;">
-        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px;">
-            The terminal output confirms the environment is working, reaching the target count of 50.
+    <div style="background: #0d1117; padding: 20px; border-radius: 12px; border: 1px solid #30363d; text-align: center; margin: 20px 0;">
+        <img src="../hello_verilator/waveform_image/counter_sim.png" alt="Terminal Simulation Success" class="clickable-img" style="max-width: 100%; border-radius: 4px;">
+        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic;">
+            Log Verification: Simulation completed successfully, validating the 8-bit counter limit.
         </p>
     </div>
 
-    <h3>2. Visualizing Waveforms</h3>
+    <h3>Waveform Analysis</h3>
     <p>
-        To inspect the actual timing and signal behavior, launch the waveform viewer:
+        To inspect signal transitions and timing relationships cycle-by-cycle, launch the waveform viewer by typing the command:
     </p>
-    <pre><code>make view</code></pre>
-    <p>
-        This opens <strong>GTKWave</strong>. By dragging the signals into the window, you can see exactly how the hardware behaves cycle-by-cycle.
-    </p>
-
-    <div style="background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin: 20px 0; text-align: center;">
-        <img src="../hello_verilator/waveform_image/counter_wave.png" alt="GTKWave Counter Waveforms" style="max-width: 100%; border-radius: 4px; border: 1px solid #30363d;">
-        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px;">
-            Waveform Analysis: Verification of the reset sequence and synchronous counting logic.
+     <pre><code>make view</code></pre>
+     <p>    
+        GTKWave should now open on your screen, enabling you to see the waveforms:
+     </p>
+        
+        
+    <div style="background: #0d1117; padding: 20px; border-radius: 12px; border: 1px solid #30363d; text-align: center; margin: 20px 0;">
+        <img src="../hello_verilator/waveform_image/counter_wave.png" alt="GTKWave Results" class="clickable-img" style="max-width: 100%; border-radius: 4px;">
+        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic;">
+            Timing Diagram: Verification of synchronous increment and asynchronous reset priority.
         </p>
     </div>
 
-    <h3>3. Verification Highlights</h3>
-    <p>The waveforms confirm the logic works exactly as intended:</p>
-    <ul>
-        <li><strong>Reset:</strong> The <code>count</code> stays at zero while <code>rst_n</code> is low.</li>
-        <li><strong>Enable:</strong> The <code>count</code> only increments when <code>en</code> is high.</li>
-        <li><strong>Accuracy:</strong> The final value reaches 50, matching our testbench requirements.</li>
+    <p>The waveform analysis confirms three critical behaviors:</p>
+    <ul style="list-style-type: disc; margin-left: 20px; margin-bottom: 20px; ;">
+        <li><strong>Asynchronous Reset:</strong> Correctly forces the count to zero regardless of clock state.</li>
+        <li><strong>Idle Phase:</strong> The counter maintains its value while enable is low, validating the clock-gate logic.</li>
+        <li><strong>Active Phase:</strong> The counter increments exactly once per rising edge, validating synchronous timing.</li>
     </ul>
-
-<br>
-<hr>
-<hr>
-<section id="log-summary">
-    <h2>Log 1: Summary</h2>
-    <p>
-        The foundation is laid. We have successfully transitioned from a blank OS to a fully operational hardware development environment. This log confirms that the toolchain is verified and flight-ready.
-    </p>
-
-    <h3>Major Accomplishments</h3>
-    <ul>
-        <li><strong>OS & Workflow:</strong> Established a Linux foundation via <strong>WSL2</strong> and integrated <strong>VS Code</strong> for a professional remote development interface.</li>
-        <li><strong>Toolchain & Automation:</strong> Configured <strong>Verilator</strong> and <strong>GTKWave</strong> with a custom <strong>Makefile</strong> to automate the build-and-simulate pipeline.</li>
-        <li><strong>Infrastructure:</strong> Organized the workspace into standard <strong>RTL/DV</strong> directories and initialized <strong>Git</strong> version control.</li>
-        <li><strong>Verification:</strong> Validated the setup by simulating an <strong>8-bit counter</strong>, confirming functional resets and synchronous timing.</li>
-    </ul>
-
-    <p style="margin-top: 20px; font-weight: bold;">
-        With the environment stable and the verification flow proven, we are now ready to move from infrastructure setup to high-level digital design.
-    </p>
 </section>
+  <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue); margin-top: 30px;">
+        <p style="font-weight: bold; margin-top: 0;">Summary:</p>
+        <p>With that, we have successfully designed and simulated our first RTL module! confirming our counter is working as intended, and more importantly our enviroment is fully functional.
+        <br>
+        We are now officially ready to start our very own <strong>Chip Designing journey!</strong>
+        </p>
+    </div>
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
 </div>
+
+<!-- IMAGE ZOOM OVERLAY LOGIC -->
+<div id="imageModal" style="display: none; position: fixed; z-index: 1000; padding-top: 50px; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer;" onclick="this.style.display='none'">
+    <span style="position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold;">&times;</span>
+    <img id="img01" style="margin: auto; display: block; width: 80%; max-width: 1000px; border-radius: 8px; border: 2px solid #30363d;">
+</div>
+
+<script>
+    const modal = document.getElementById("imageModal");
+    const img = document.getElementById("zoomTrigger");
+    const modalImg = document.getElementById("img01");
+
+    if (img) {
+        img.onclick = function() {
+            modal.style.display = "block";
+            modalImg.src = this.src;
+        }
+    }
+</script>
 
 </body>
 </html>

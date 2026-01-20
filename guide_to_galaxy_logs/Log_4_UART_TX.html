@@ -109,17 +109,17 @@ layout: null
 
     <div class="section">
         <h2>What is a UART?</h2>
-        <p>UART will be the "translator" of our digital world. Inside our chip, the CPU works with parallel data—sending 8 bits all at once across 8 wires. However, most external devices only have one wire to listen on. Our UART’s job will be to take that parallel byte and "serialize" it, sending it out bit-by-bit over time.</p>
+        <p>UART will be the "translator" of our digital world. Inside our chip, the CPU works with parallel data, sending 8 bits all at once across 8 wires. However, most external devices only have one wire to listen on. Our UART’s job will be to take that parallel byte and "serialize" it, sending it out bit-by-bit over time.</p>
 
         <h3>The Life of a Transmission: A Step-by-Step Example</h3>
         <p>Imagine our CPU wants to send the letter 'A' (ASCII 8'h41, or binary 01000001). Here is exactly how we will handle the flow:</p>
         
         <ul class="step-list">
-            <li>The Trigger: <span>The CPU will place 8'b01000001 on the din bus and pulse tx_start.</span></li>
-            <li>The Wake-up (Start Bit): <span>The UART will immediately pull the tx_out line from High to Low ('0'). This tells the receiver, "Pay attention, data is coming!"</span></li>
+            <li>The Trigger: <span>The CPU will place 8'b01000001 on the din bus and pulse a start transmission signal - 'tx_start'.</span></li>
+            <li>The Wake-up (Start Bit): <span>The UART will immediately pull the output wire - 'tx_out' from High to Low ('0'). This tells the receiver, "Pay attention, data is coming!"</span></li>
             <li>The Data Payload: <span>The UART will then send each bit of the 'A' one by one. It will start with the Least Significant Bit (LSB) and end with the MSB.</span></li>
             <li>The Close (Stop Bit): <span>After all 8 bits are sent, the UART will pull the line back to High ('1'). This resets the line for the next message.</span></li>
-            <li>The Finish Line: <span>The UART will pulse tx_done to let the CPU know it can send the next character.</span></li>
+            <li>The Finish Line: <span>The UART will pulse a feedback signal - 'tx_done' to let the CPU know it can send the next character.</span></li>
         </ul>
 
         <p>Every transmission will follow this '0' -> Data -> '1' frame.</p>
@@ -129,7 +129,7 @@ layout: null
         <h3>Controlling the Timing: The 16x Over-Sampling Concept</h3>
         <p>How will we ensure the receiver doesn't miss a bit? We will use a concept called Over-sampling. We won't just send a bit and hope for the best; we will divide the time for a single bit (the Bit Period) into 16 smaller segments called sample_tick pulses.</p>
 
-        <p>Our UART will hold the value of each bit on tx_out for exactly 16 of these ticks. We do this because the receiver on the other end is designed to wait for the 8th tick—the dead center of the bit—to sample the value. By holding our bit for 16 ticks, we give the receiver the best possible chance to capture the data accurately, even if there is slight clock drift.</p>
+        <p>Our UART will hold the value of each bit on tx_out for exactly 16 of these ticks. We do this because the receiver on the other end is designed to wait for the 8th tick - the dead center of the bit to sample the value. By holding our bit for 16 ticks, we give the receiver the best possible chance to capture the data accurately, even if there is slight clock drift.</p>
 
         
         <div class="image-placeholder">
@@ -211,9 +211,7 @@ endmodule
             <img src="images/image3.png" alt="State Register Block Diagram">
             Image 3: Registered State Machine Block Diagram 
         </div>
-        <p>Our architecture for latching the next state into the state register.</p>
-
-        <p>Building on our architecture, we will now implement the <code>uart_tx</code> module. This is where we will separate the "thinking" from the "doing" to create a professional-grade sequencer.</p>
+        
     </div>
 
     <div class="section">
@@ -232,7 +230,7 @@ endmodule
         <h3>Engineering Specification: <code>uart_tx.sv</code></h3>
 
         <h4>1. Parameters and Ports</h4>
-        <p>We will define the interface of our sequencer. We use <code>TICKS_PER_BIT</code> (typically 16) and <code>DATA_WIDTH</code> (8 bits) as parameters to make the module reusable. Our ports include the system clock, reset, and the control signals from the CPU and the pulse from the Baud Generator.</p>
+        <p>We will define the interface of our sequencer. We use <code>TICKS_PER_BIT</code> (typically 16) and <code>DATA_WIDTH</code> (8 bits) as parameters to make the module reusable. Our ports include the system clock, reset, and the control signals from the CPU, the pulse from the Baud Generator and the Baud enable signal.</p>
 
         <details>
             <summary>View Code: Parameters and Ports</summary>

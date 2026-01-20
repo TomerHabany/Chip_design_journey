@@ -802,18 +802,25 @@ clean:
 </div>
 
 <script>
+    // 1. Get the modal elements
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("img01");
-    // Select all images with the zoom-trigger class
-    const images = document.querySelectorAll(".zoom-trigger");
 
-    // Loop through each image and add the click event
-    images.forEach(img => {
-        img.onclick = function() {
+    // 2. Select ALL images that have the 'zoom-trigger' class
+    const allZoomImages = document.querySelectorAll(".zoom-trigger");
+
+    // 3. Loop through each image and add the click listener
+    allZoomImages.forEach(img => {
+        img.addEventListener('click', function() {
             modal.style.display = "block";
             modalImg.src = this.src;
-        }
+        });
     });
+
+    // 4. Close modal when clicking anywhere on the overlay
+    modal.onclick = function() {
+        modal.style.display = "none";
+    };
 </script>
 
 </body>

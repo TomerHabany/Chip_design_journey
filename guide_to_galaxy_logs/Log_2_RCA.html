@@ -6,7 +6,7 @@ layout: null
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log 2: The Architecture of Addition</title>
+    <title>Log 1: Environment Setup & Toolchain</title>
     <style>
         :root {
             --space-black: #0b0e14;
@@ -37,6 +37,7 @@ layout: null
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        /* SECTION STYLING */
         .section {
             padding-bottom: 20px;
             margin-bottom: 30px;
@@ -74,7 +75,55 @@ layout: null
         ul { padding-left: 20px; }
         li { margin-bottom: 8px; }
         blockquote { border-left: 4px solid var(--nebula-purple); margin: 20px 0; padding-left: 15px; font-style: italic; }
-        .subtitle { color: #8b949e; font-style: italic; margin-top: -10px; margin-bottom: 20px; }
+        a { color: var(--star-blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Interface Table Styling */
+        .interface-table-wrapper {
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 20px 0;
+            background: #ffffff;
+        }
+        .interface-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #1e293b;
+        }
+        .interface-table th {
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .interface-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+        }
+        .interface-table tr:hover { background-color: #f8fafc; }
+        .signal-name {
+            font-family: 'Consolas', monospace;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* Image Zoom Styling */
+        .clickable-img {
+            cursor: zoom-in;
+            transition: transform 0.2s;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .clickable-img:hover { transform: scale(1.01); }
+        .img-caption { color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -83,63 +132,261 @@ layout: null
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
     
     <h1 class="center"> Log 2: The Architecture of Addition</h1>
-    <p class="subtitle">A Journey from Fresh Graduate to Silicon Engineer<br>
-    Moving from behavioral modeling to structural hardware design.</p>
-    
+    <p class="subtitle">The Pivot: From "What" to "How"</p>
+    <p>In RTL design, there is a big difference between describing what a circuit does and defining how it is built.
+        In Log 1, we used Behavioral Modeling—writing high-level code and letting the computer decide the underlying gates. 
+        Now, we are moving to Structural Modeling, where we act as architects. Instead of just writing equations, we are manually connecting smaller building blocks to form a larger, 
+        more complex system.
+    </p>
+
     <div class="section">
         <h3>The Mission: Structural Integration</h3>
-        <p>In Log 2, we move from behavioral modeling (letting the tools decide the logic) to <strong>Structural Modeling</strong>. We are building a <strong>Parameterizable Ripple Carry Adder (RCA)</strong>. This log isn't just about addition; it's about learning how to build a scalable system from small, verified sub-modules.</p>
+        <p>In this log, we move from behavioral modeling to structural design by building a Parameterizable Ripple Carry Adder (RCA).</p>
+        <br>
+        <p>The goal is to learn how to build a scalable system from small, verified sub-modules. 
+            By connecting these modules together like Lego bricks, we move away from coding where the internal logic is hidden and toward intentional design. 
+            This is a deep dive into how complexity is managed when every gate and every wire is a deliberate choice.
+        </p>
     </div>
 
     <div class="section">
-        <h3>Part 1: The Leaf Cell (adder_1bit.sv)</h3>
-        <p><strong>The Goal:</strong> Build a "Full Adder"—the smallest unit of addition. It takes two bits (a, b) and a "Carry-In" (cin), then outputs a <em>sum</em> and a <em>cout</em>.</p>
-
+        <h2>Module: 1-Bit Full Adder</h2>
+        <h3>1. The Functional Specification</h3>
+        <p>The Full Adder is the basic building block of arithmetic circuits. It includes a carry-in bit, which allows multiple units to be chained together for multi-bit addition.</p>
+        <li><strong>Purpose:</strong> To perform a single-bit addition of three inputs.</li>
+        <li><strong>Behavior:</strong> 
+            <ul>
+                <li>Calculates the binary sum of <code>a</code>, <code>b</code>, and <code>cin</code>. 
+                <li>Generates a <code>cout</code> if at least two inputs are high.</li>
+            </ul>
+        </li>
         
+        <h3>Interface Definition</h3>
+        <p>First, we will make a table showing our module's inputs and outputs.</p>
 
-        <blockquote>
-            <strong>Important Note:</strong> Adding <code>#1</code> delays makes this code <strong>non-synthesizable</strong>. In real production RTL, you wouldn't include these because timing is determined by physical silicon. For simulation, they are vital for visualizing the "ripple" effect.
-        </blockquote>
-
+        <div class="interface-table-wrapper">
+    <table class="interface-table">
+        <thead>
+            <tr>
+                <th>Signal Name</th>
+                <th>Direction</th>
+                <th>Width</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="signal-name">a</td>
+                <td>Input</td>
+                <td>1</td>
+                <td>First input bit</td>
+            </tr>
+            <tr>
+                <td class="signal-name">b</td>
+                <td>Input</td>
+                <td>1</td>
+                <td>Second input bit</td>
+            </tr>
+            <tr>
+                <td class="signal-name">cin</td>
+                <td>Input</td>
+                <td>1</td>
+                <td>Carry-in from previous stage</td>
+            </tr>
+            <tr>
+                <td class="signal-name">sum</td>
+                <td>Output</td>
+                <td>1</td>
+                <td>Sum output</td>
+            </tr>
+            <tr>
+                <td class="signal-name">cout</td>
+                <td>Output</td>
+                <td>1</td>
+                <td>Carry-out output</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p>According to our table, we can now write the header for our module in SystemVerilog.</p>
+       
         <details>
-            <summary>Source: rtl/adder_1bit.sv</summary>
+            <summary>adder_1bit.sv module header</summary>
             <pre><code>
 `timescale 1ns/1ps
 module adder_1bit (
-    input logic  a, b, cin,
-    output logic sum, cout
+    input  logic a,
+    input  logic b,
+    input  logic cin,
+    output logic sum,
+    output logic cout
 );
-    // These #1 delays are for simulation only!
+            </code></pre>
+        </details>
+    </div>
+
+    <h3>2. Architectural Planning</h3>
+        <li><strong>Theory of Operation:</strong> The module implements standard boolean equations for addition:</li>
+        <ul>
+            <li><code>sum = a XOR b XOR cin</code></li>
+            <li><code>cout = (a AND b) OR (cin AND (a XOR b))</code></li>
+        </ul>
+        <li> <strong>Timing:</strong> The design uses a 1ns delay (#1) to simulate the propagation delay of the gates.<p>
+        Without this delay, the simulation would treat the logic as instantaneous, updating outputs in the same timestamp as inputs. Adding the delay forces the simulator to wait 1ns, allowing us to visualize the "ripple" effect in waveform viewers as the carry signal propagates through the logic over time.</p>
+        <p>Note that these delays are for simulation only. Hard-coded time delays are non-synthesizable; synthesis tools for FPGAs or ASICs ignore them completely. In real hardware, delays are determined by the physical properties of transistors and wiring, not the code.</p>
+
+        </li>
+
+    <h3>3. Implementation</h3>
+    <p>We use assign statements to define the logic as a continuous connection. This ensures the output is automatically re-calculated whenever an input changes, effectively modeling the physical wiring of the gates.
+
+    </p>
+        <details>
+            <summary>Source: adder_1bit.sv</summary>
+            <pre><code>
+`timescale 1ns/1ps
+module adder_1bit (
+    input  logic a,
+    input  logic b,
+    input  logic cin,
+    output logic sum,
+    output logic cout
+);
+    // Logic for Sum and Carry-out with simulated gate delay
     assign #1 sum  = a ^ b ^ cin;
     assign #1 cout = (a & b) | (cin & (a ^ b));
 endmodule
             </code></pre>
         </details>
+    
+ <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Summary:</p>
+<p>This 1-bit module provides the fundamental logic for binary addition. With the 1-bit Adder defined, we can now scale this into a multi-bit Ripple Carry Adder (RCA) by chaining these blocks together using structural hierarchy.</p>
+</div>
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+<div class="section">
+    <h2>Module: Ripple Carry Adder (RCA)</h2>
+    
+    <h3>1. The Functional Specification</h3>
+    <p>The Ripple Carry Adder (RCA) scales 1-bit full adder logic to handle <code>WIDTH</code>-bit wide data buses. This is our first example of a parameterizable structural design.</p>
+
+    <ul>
+        <li><strong>Purpose:</strong> To perform <code>WIDTH</code>-bit binary addition by chaining 1-bit adders.</li>
+        
+         <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">RCA Block Diagaram</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/counter_block_diagram.png" 
+            alt="RCA Block Diagaram" 
+            class="clickable-img"
+        >
+        
+    </div>
+        
+        <li><strong>Behavior:</strong>
+            <ul>
+                <li>Uses the <code>WIDTH</code> parameter to instantiate the required number of full adders.</li>
+                <li>Connects the carry-out of each bit to the carry-in of the next (rippling).</li>
+                <li>Outputs a final carry-out bit to indicate overflow.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4>Interface Definition</h4>
+    
+    <strong>Parameters:</strong>
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Parameter Name</th>
+                    <th>Type</th>
+                    <th>Default Value</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="signal-name">WIDTH</td>
+                    <td>int</td>
+                    <td>8</td>
+                    <td>The bit-width of the addition operands</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="section">
-        <h3>Part 2: The Scalable Top-Level (rca.sv)</h3>
-        <p><strong>The Goal:</strong> Chain 1-bit adders to handle larger numbers using a design that scales automatically based on a <code>WIDTH</code> variable.</p>
+    <strong>Ports:</strong>
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Signal Name</th>
+                    <th>Direction</th>
+                    <th>Width</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="signal-name">a</td><td>Input</td><td>WIDTH</td><td>Augend input bus</td></tr>
+                <tr><td class="signal-name">b</td><td>Input</td><td>WIDTH</td><td>Addend input bus</td></tr>
+                <tr><td class="signal-name">cin</td><td>Input</td><td>1</td><td>Initial carry-in</td></tr>
+                <tr><td class="signal-name">sum</td><td>Output</td><td>WIDTH</td><td>Sum output bus</td></tr>
+                <tr><td class="signal-name">cout</td><td>Output</td><td>1</td><td>Final carry-out bit</td></tr>
+            </tbody>
+        </table>
+    </div>
 
-        
-
-        <details>
-            <summary>Source: rtl/rca.sv</summary>
-            <pre><code>
-module rca #( parameter WIDTH = 8 ) (
+    <p>According to our tables, we can define the parameterizable module header as follows:</p>
+    <details>
+        <summary>View Module Declaration</summary>
+        <pre><code>module rca #(
+    parameter WIDTH = 8
+) (
     input  logic [WIDTH-1:0] a, b,
     input  logic             cin,
     output logic [WIDTH-1:0] sum,
     output logic             cout
-);
-    // The Carry Chain: Connecting the overflow between bits
-    logic [WIDTH:0] carry_chain;
-    assign carry_chain[0] = cin;
+);</code></pre>
+    </details>
 
-    genvar i;
+    <h3>2. Architectural Planning</h3>
+    
+    <ul>
+        <li><strong>Theory of Operation:</strong> We perform <code>WIDTH</code>-bit addition by chaining <code>WIDTH</code> instances of <code>adder_1bit</code>. We create an internal <code>carry_chain</code> wire of size <code>WIDTH + 1</code> to bridge the carry signals.</li>
+        <li><strong>Structural Hierarchy:</strong> Instead of using the <code>+</code> operator, we "wire" the blocks together. <code>carry_chain[0]</code> is driven by the global <code>cin</code>, and the final <code>carry_chain[WIDTH]</code> drives the global <code>cout</code>.</li>
+    </ul>
+
+    <h3>3. Step-by-Step Implementation</h3>
+    
+    <h4>3.1 Internal Nets</h4>
+    <p>First, we declare the internal carry chain and connect the starting carry-in.</p>
+    <details>
+        <summary>View Internal Nets</summary>
+        <pre><code>    // Carry chain connects bit i to bit i+1
+    logic [WIDTH:0] carry_chain;
+    assign carry_chain[0] = cin;</code></pre>
+    </details>
+
+    <h4>3.2 The Generate Loop</h4>
+    <p>To avoid manually instantiating every bit, we use a generate block to stamp out the required number of 1-bit adders based on the <code>WIDTH</code> parameter.</p>
+    
+    <blockquote>
+        <strong>The Generate Block:</strong> Think of this as a "copy-paste" engine for hardware. While it looks like a standard software loop, it does not execute at runtime. Instead, the compiler evaluates the loop during the elaboration phase to physically replicate the hardware logic inside it multiple times, creating a distinct set of gates and wires for every iteration.
+    </blockquote>
+
+    <blockquote>
+        <strong>The Genvar:</strong> This is a temporary iteration variable used exclusively by the compiler to manage the generate loop. It exists only during design elaboration and does not represent a physical signal or register in the final circuit.
+    </blockquote>
+
+    <details>
+        <summary>View Implementation</summary>
+        <pre><code>    genvar i;
     generate
         for (i = 0; i < WIDTH; i = i + 1) begin : adder_loop
-            adder_1bit u_adder_1bit (
+            adder_1bit u_adder (
                 .a   (a[i]),
                 .b   (b[i]),
                 .cin (carry_chain[i]),
@@ -150,51 +397,391 @@ module rca #( parameter WIDTH = 8 ) (
     endgenerate
 
     assign cout = carry_chain[WIDTH];
-endmodule
-            </code></pre>
-        </details>
+endmodule</code></pre>
+    </details>
+
+      <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Summary:</p>
+    <p>The RCA module demonstrates how to scale simple logic into a complex system. With the hardware architecture finalized, we now move to the verification phase to build a testbench and prove our design works as intended.</p>
+</div>
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;"
+
+   <div class="section">
+    <h2>Verification Strategy and Automation</h2>
+    <p>In order to simulate our RCA we will focus on two critical files: the SystemVerilog Testbench (TB), which provides the stimulus and checking logic, and the Makefile, which automates the compilation and execution process.</p>
+    
+    <blockquote>
+        Because we are simulating a combinational Ripple Carry Adder (and no sequential logic that requires a clock), we do not need to manually write a C++ wrapper. Verilator is capable of automatically generating the execution kernel from our SystemVerilog initial blocks and timing delays.
+    </blockquote>
+
+    <h3>The Functional Specification (tb_rca.sv)</h3>
+    <p>We will build a testbench that validates the function of our RCA by generating random values for it to add, and comparing the results to a "golden model" - the built in adder function.</p>
+
+    <ul>
+        <li><strong>Purpose:</strong> To verify the logical correctness and timing behavior of the <code>rca</code> module.</li>
+    </ul>
+
+    <h4>Interface Definition (Testbench Internal Signals)</h4>
+    <p>The following signals are used within the testbench to drive the inputs of our adder and monitor its response.</p>
+
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Signal Name</th>
+                    <th>Type</th>
+                    <th>Width</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="signal-name">a, b</td><td>logic</td><td>WIDTH</td><td>Randomly generated stimulus inputs</td></tr>
+                <tr><td class="signal-name">cin</td><td>logic</td><td>1</td><td>Stimulus carry-in</td></tr>
+                <tr><td class="signal-name">sum</td><td>logic</td><td>WIDTH</td><td>Observed output from the RCA</td></tr>
+                <tr><td class="signal-name">cout</td><td>logic</td><td>1</td><td>Observed carry-out from the RCA</td></tr>
+                <tr><td class="signal-name">expected_value</td><td>logic</td><td>WIDTH+1</td><td>The ideal mathematical result used for comparison</td></tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="section">
-        <h3>Part 3: The Automated Testbench (tb_rca.sv)</h3>
-        <p><strong>The Goal:</strong> Verify 16-bit math by comparing our structural <strong>RCA module</strong> against <strong>SystemVerilog’s built-in + operator</strong> reference.</p>
-        
-        <details>
-            <summary>Source: dv/tb_rca.sv</summary>
-            <pre><code>
-initial begin
-    repeat (20) begin
-        a = 16'($urandom_range(0, 2**WIDTH-1));
-        b = 16'($urandom_range(0, 2**WIDTH-1));
-        cin = 1'($urandom_range(0, 1));
+    <p>Based on these requirements, we define the testbench module and its internal logic signals:</p>
+    <details>
+        <summary>View TB Module Declaration</summary>
+        <pre><code>`timescale 1ns/1ps
+module tb_rca;
+    // Parameters
+    parameter WIDTH = 16;
 
-        // Calculate a reference answer using the built-in operator
-        expected_value = 17'(a) + 17'(b) + 17'(cin);
-        
-        #20; // The "Settling Time"
+    // Signals to drive the Unit Under Test (UUT)
+    logic [WIDTH-1:0] a;
+    logic [WIDTH-1:0] b;
+    logic             cin;
+    
+    // Signals to observe from the UUT
+    logic [WIDTH-1:0] sum;
+    logic             cout;
 
-        // Compare our structural hardware vs the reference result
-        if (sum !== expected_value[WIDTH-1:0] || cout !== expected_value[WIDTH])
-            $error("Mismatch detected! Check the carry chain timing.");
-        else
-            $display("PASS: %0d + %0d = %0d", a, b, {cout, sum});
+    // Golden model reference signal
+    logic [WIDTH:0]   expected_value;</code></pre>
+    </details>
+
+    <h3>Instantiation and Setup</h3>
+    <p>We connect the internal testbench signals to the RCA ports and set up the waveform dumping to view the ripple effect in GTKWave.</p>
+    <details>
+        <summary>View Instantiation Logic</summary>
+        <pre><code>    // Instantiate the Unit Under Test
+    rca #(.WIDTH(WIDTH)) uut (
+        .a   (a),
+        .b   (b),
+        .cin (cin),
+        .sum (sum),
+        .cout(cout)
+    );
+
+    initial begin
+        $display("Starting RCA Test...");
+        $dumpfile("waveform.vcd");
+        $dumpvars(0, tb_rca);</code></pre>
+    </details>
+
+    <h3>Testbench Strategy</h3>
+    <p>The verification flow is built around four key functional phases:</p>
+
+    <h4>1. Environment Setup</h4>
+    <p>Initialize the simulation and initiate waveform generation for visual analysis.</p>
+    <details>
+        <summary>View Setup Code</summary>
+        <pre><code>    initial begin
+        $display("Starting RCA Test...");
+        $dumpfile("waveform.vcd");
+        $dumpvars(0, tb_rca);</code></pre>
+    </details>
+
+    <h4>2. Waveform and Console Logging</h4>
+    <p>We use <code>$display</code> to print status updates to the terminal, while <code>$dumpfile</code> and <code>$dumpvars</code> create a Value Change Dump (VCD) file. This file records every signal transition, allowing us to debug the "ripple" effect visually in a waveform viewer.</p>
+    <details>
+        <summary>View Logging Logic</summary>
+        <pre><code>    $display("Starting RCA Test..."); 
+    $dumpfile("waveform.vcd"); // VCD file for waveform viewing
+    $dumpvars(0, tb_rca); // dump all variables in this module</code></pre>
+    </details>
+
+    <h4>3. Randomized Stimulus</h4>
+    <p>Apply a series of randomized inputs to the Unit Under Test (UUT) to ensure it handles various data patterns.</p>
+    <details>
+        <summary>View Stimulus Generation</summary>
+        <pre><code>        repeat (20) begin
+            // generate random inputs
+            a   = 16'($urandom_range(0, 2**WIDTH-1));
+            b   = 16'($urandom_range(0, 2**WIDTH-1));
+            cin = 1'($urandom_range(0, 1));</code></pre>
+    </details>
+
+    <h4>4. Automated Checking</h4>
+    <p>Implement a "Golden Reference" model (the built-in SystemVerilog adder) and compare our RCA adder results to the reference results.</p>
+    
+    <p><strong>Timing Margin:</strong> Since each 1-bit adder in our design has a 1ns delay, a 16-bit addition requires 16ns to stabilize. We use a <code>#20</code> delay to ensure the "ripple" has completely settled before we check the result.</p>
+    
+    <details>
+        <summary>View Automated Checking Code</summary>
+        <pre><code>  // compute expected outputs
+ expected_value = 17'(a) + 17'(b) + 17'(cin);
+
+ // wait for a short time to allow outputs to stabilize
+    #20;
+
+  // check results
+        if (sum !== expected_value[WIDTH-1:0] || cout !== expected_value[WIDTH]) begin
+            $error("Test failed for a=%0d, b=%0d, cin=%0d: expected value=%0d, cout=%0d but got sum=%0d, cout=%0d",
+                   a, b, cin, expected_value[WIDTH-1:0], expected_value[WIDTH], sum, cout);
+        end else begin
+            $display("Test passed for a=%0d, b=%0d, cin=%0d: sum=%0d, cout=%0d",
+                     a, b, cin, sum, cout);
+        end
     end
-end
-            </code></pre>
-        </details>
+    $display("RCA Test completed.");
+    $finish;
+    end
+endmodule</code></pre>
+    </details>
+
+    <h3>Full Testbench Code</h3>
+    <p>The consolidated production-ready code is provided below.</p>
+    <details>
+        <summary>View Full tb_rca.sv</summary>
+        <pre><code>`timescale 1ns/1ps
+
+module tb_rca;
+    parameter WIDTH = 16;
+
+    // Stimulus and observation signals
+    logic [WIDTH-1:0] a, b;
+    logic             cin;
+    logic [WIDTH-1:0] sum;
+    logic             cout;
+    logic [WIDTH:0]   expected_value;
+
+    // Instantiate UUT
+    rca #(.WIDTH(WIDTH)) uut (
+        .a(a), .b(b), .cin(cin), .sum(sum), .cout(cout)
+    );
+
+    initial begin
+        $display("Starting RCA Test...");
+        $dumpfile("waveform.vcd");
+        $dumpvars(0, tb_rca);
+
+        repeat (20) begin
+            // Stimulus generation
+            a   = 16'($urandom_range(0, 2**WIDTH-1));
+            b   = 16'($urandom_range(0, 2**WIDTH-1));
+            cin = 1'($urandom_range(0, 1));
+
+            // Wait for propagation delay (RCA "ripple" settle time)
+            #20;
+
+            // Golden model reference
+            expected_value = 17'(a) + 17'(b) + 17'(cin);
+
+            // Self-checking logic
+            if (sum !== expected_value[WIDTH-1:0] || cout !== expected_value[WIDTH]) begin
+                $error("FAILED: a=%0d, b=%0d, cin=%b | Expected Sum=%0d, Cout=%b | Got Sum=%0d, Cout=%b",
+                        a, b, cin, expected_value[WIDTH-1:0], expected_value[WIDTH], sum, cout);
+            end else begin
+                $display("PASSED: a=%0d, b=%0d, cin=%b | Sum=%0d, Cout=%b", 
+                          a, b, cin, sum, cout);
+            end
+        end
+
+        $display("RCA Test completed successfully.");
+        $finish;
+    end
+endmodule</code></pre>
+    </details>
+
+    <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Summary:</p>
+    <p>This testbench will validates the RCA by applying randomized stimuli and verifying the results against a built-in golden model. For our final step, we will implement a Makefile to automate the compilation and execution of the simulation.</p>
     </div>
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+<div class="section">
+    <h2>The Makefile</h2>
+    <p>As we saw in our first log, a Makefile is an essential tool for streamlining development. Instead of manually re-entering Verilator commands, we use a single <code>make</code> command to automate the build and simulation flow.</p>
+
+    <h3>1. Variables and File Paths</h3>
+    <p>We begin by defining variables for our tools and source files.</p>
+    <details>
+        <summary>View Variables</summary>
+        <pre><code># --- Variables ---
+VERILATOR = verilator
+RTL_DIR = rtl
+DV_DIR = dv
+TOP_MODULE = tb_rca
+
+# List all source files
+SRCS = $(RTL_DIR)/adder_1bit.sv $(RTL_DIR)/rca.sv $(DV_DIR)/$(TOP_MODULE).sv</code></pre>
+    </details>
+
+    <h3>2. Rule Management (.PHONY &amp; all)</h3>
+    <p>To ensure the Makefile works reliably, we use <code>.PHONY</code> to tell the system that commands like <code>clean</code> or <code>compile</code> are not actual files on the disk. We also define the <code>all</code> rule as the default "entry point" to run the entire flow in one go.</p>
+    <details>
+        <summary>View Build Rules</summary>
+        <pre><code># --- Build Rules ---
+.PHONY: all compile run waves clean
+
+# Default target runs everything
+all: clean compile run</code></pre>
+    </details>
+
+    <h3>3. Compilation and Execution</h3>
+    <p>These rules define how Verilator transforms our SystemVerilog code into a runnable binary.</p>
+    <ul>
+        <li><strong>Compile:</strong> Converts the SV code into C++ and builds a simulation executable.</li>
+        <li><strong>Run:</strong> Executes the generated binary to perform the actual simulation.</li>
+    </ul>
+    <details>
+        <summary>View Compile and Run Rules</summary>
+        <pre><code>compile:
+    @echo "--- STEP 1 & 2: Verilating and Building Binary ---"
+    $(VERILATOR) -Wall --trace --timing --binary \
+        -I$(RTL_DIR) \
+        $(SRCS) \
+        --top-module $(TOP_MODULE) \
+        -o V$(TOP_MODULE)
+
+run:
+    @echo "--- STEP 3: Running Simulation ---"
+    ./obj_dir/V$(TOP_MODULE)</code></pre>
+    </details>
+
+    <h3>4. Debugging and Cleanup</h3>
+    <p>The final stages handle post-simulation tasks like viewing waveforms and cleaning the workspace.</p>
+    <details>
+        <summary>View Debug and Clean Rules</summary>
+        <pre><code>waves:
+    @echo "--- STEP 4: Opening Waveforms ---"
+    gtkwave waveform.vcd
+
+clean:
+    @echo "Cleaning up project files..."
+    rm -rf obj_dir waveform.vcd</code></pre>
+    </details>
+
+    <h3>Full Makefile</h3>
+    <p>Below is the complete, production-ready Makefile. To run the full flow, simply use the command <code>make</code>.</p>
+    <details>
+        <summary>View Full Makefile</summary>
+        <pre><code># --- Variables ---
+VERILATOR = verilator
+RTL_DIR = rtl
+DV_DIR = dv
+TOP_MODULE = tb_rca
+
+# List all source files
+SRCS = $(RTL_DIR)/adder_1bit.sv $(RTL_DIR)/rca.sv $(DV_DIR)/$(TOP_MODULE).sv
+
+# --- Build Rules ---
+.PHONY: all compile run waves clean
+
+all: clean compile run
+
+compile:
+    @echo "--- STEP 1 & 2: Verilating and Building Binary ---"
+    $(VERILATOR) -Wall --trace --timing --binary \
+        -I$(RTL_DIR) \
+        $(SRCS) \
+        --top-module $(TOP_MODULE) \
+        -o V$(TOP_MODULE)
+
+run:
+    @echo "--- STEP 3: Running Simulation ---"
+    ./obj_dir/V$(TOP_MODULE)
+
+waves:
+    @echo "--- STEP 4: Opening Waveforms ---"
+    gtkwave waveform.vcd
+
+clean:
+    @echo "Cleaning up project files..."
+    rm -rf obj_dir waveform.vcd</code></pre>
+    </details>
+
+  <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Summary:</p>
+    <p>The Makefile completes our design environment by providing a "one-button" solution for running the simulation. With the RTL, Testbench, and Makefile in place, we have successfully implemented a professional design flow for our Parameterizable Ripple Carry Adder.</p>
+</div>
+
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
     <div class="section">
-        <h3>Log 2 Final Summary</h3>
-        <ul>
-            <li><strong>Structural Hierarchy:</strong> Successfully implemented a hierarchical design by nesting leaf cells within a top-module.</li>
-            <li><strong>Scalability with Generics:</strong> Used <code>generate</code> loops to create a Parameterizable Design.</li>
-            <li><strong>Simulation Timing Realism:</strong> Integrated inertial delays to model propagation delay.</li>
-            <li><strong>Automated Self-Checking:</strong> Developed a "Golden Reference" testbench strategy for 100% accuracy.</li>
-        </ul>
-        
-    </div>
-    <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
+    <h2>Simulation Execution</h2>
+    <p>First, ensure your terminal is navigated to the project directory. Then, simply run the <code>make</code> command to compile the design and start the simulation:</p>
+    
+    <details>
+        <summary>View Command</summary>
+        <pre><code>make</code></pre>
+    </details>
+
+    <p>The terminal will display the build process followed by the simulation logs. Successful execution is confirmed by the testbench reporting "PASSED" for the randomized test cases:</p>
+    
+       <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Successful Build &amp; Simulation</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/rca_sim.png" 
+            alt="RCA simulation" 
+            class="clickable-img"
+        >
+        </div>
+    
+    
+
+    <h3>Waveform Analysis</h3>
+    <p>To inspect signal transitions and observe the propagation delays cycle-by-cycle, launch the waveform viewer:</p>
+
+    <details>
+        <summary>View Command</summary>
+        <pre><code>make waves</code></pre>
+    </details>
+
+    <p>GTKWave should now open on your screen, enabling you to see the signals:</p>
+    
+     <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">Waveform Viewer Output</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/rca_waves.png" 
+            alt="RCA simulation waveforms" 
+            class="clickable-img"
+        >
+        </div>
+    
+    
+
+    <p>The waveform analysis confirms three critical behaviors of our structural design:</p>
+
+    <ul>
+        <li><strong>Combinational Logic:</strong> The <code>sum</code> and <code>cout</code> update automatically following changes in <code>a</code> or <code>b</code>, independent of a clock.</li>
+        <li><strong>The Ripple Effect:</strong> By zooming into the transitions, you can see the 1ns gate delays in action as the carry signal propagates from bit 0 up to bit 15.</li>
+        <li><strong>Parameter Accuracy:</strong> The buses correctly reflect the 16-bit width defined in our testbench, validating the <code>generate</code> loop and parameter scaling.</li>
+    </ul>
+
+<div class="section">
+    
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+      <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+    <h2>Summary</h2>
+    <p>With the simulation complete, we were able to successfully validate our RCA is working properly. In this log, we achieved several key milestones:</p>
+
+    <ul>
+        <li><strong>Structural Modeling:</strong> We transitioned from behavioral descriptions to manually connecting 1-bit full adders to form a complex system.</li>
+        <li><strong>Scalability:</strong> We used parameters and <code>generate</code> loops to create a design that can scale to any bit-width without changing the underlying code.</li>
+        <li><strong>Timing Awareness:</strong> By implementing simulated gate delays, we visualized how signals physically "ripple" through a circuit.</li>
+        <li><strong>Automated Verification:</strong> We built a self-checking testbench and a Makefile that would catch any errors in our design.</li>
+    </ul>
+
 </div>
 
 </body>

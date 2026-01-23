@@ -1,4 +1,6 @@
 `timescale 1ns/1ps
+// Parameterized Synchronous FIFO Module
+// Supports configurable data width and depth
 module fifo
 #(
     parameter DATA_WIDTH = 8,
@@ -25,8 +27,8 @@ module fifo
     logic [PTR_WIDTH-1:0] wr_ptr, rd_ptr;
     logic [PTR_WIDTH:0] count; 
 
-    wire wr_valid = wr_en && !full;
-    wire rd_valid = rd_en && !empty;
+    logic wr_valid = wr_en && !full;
+    logic rd_valid = rd_en && !empty;
 
     // CONTROL LOGIC
     always_ff @(posedge clk or negedge rst_n) begin
@@ -79,7 +81,7 @@ module fifo
             dout <= mem[rd_ptr];
         end
         end
-        // If rd_valid is low, dout holds its previous value
+    
     
 endmodule
 

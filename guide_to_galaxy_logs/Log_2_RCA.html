@@ -371,7 +371,10 @@ endmodule
     </details>
 
     <h4>3.2 The Generate Loop</h4>
-    <p>To avoid manually instantiating every bit, we use a generate block to stamp out the required number of 1-bit adders based on the <code>WIDTH</code> parameter.</p>
+    <p>To avoid manually instantiating every bit, we use a generate block to stamp out the required number of 1-bit adders based on the <code>WIDTH</code> parameter.
+    <br>
+    inside this loop we assign the inputs and outputs of each <code>adder_1bit</code> instance to the appropriate bits of <code>a</code>, <code>b</code>, <code>sum</code>, and <code>carry_chain</code>.
+    </p>
     
     <blockquote>
         <strong>The Generate Block:</strong> Think of this as a "copy-paste" engine for hardware. While it looks like a standard software loop, it does not execute at runtime. Instead, the compiler evaluates the loop during the elaboration phase to physically replicate the hardware logic inside it multiple times, creating a distinct set of gates and wires for every iteration.
@@ -399,6 +402,48 @@ endmodule
     assign cout = carry_chain[WIDTH];
 endmodule</code></pre>
     </details>
+
+<h3>Full RCA Module Code</h3>
+    <p>The full code is provided below.</p>
+    <details>
+        <summary>View Full rca.sv</summary>
+        <pre><code>
+            //parameterized ripple carry adder module
+            `timescale 1ns/1ps
+
+            module rca #(
+            parameter WIDTH = 8
+            ) (
+            input  logic [WIDTH-1:0] a,
+            input  logic [WIDTH-1:0] b,
+            input  logic             cin,
+            output logic [WIDTH-1:0] sum,
+             output logic             cout
+            );
+            logic [WIDTH:0] carry_chain;
+            assign carry_chain[0] = cin;
+
+            // declare genvar loop variable
+            genvar i;
+
+            // generate block to instantiate multiple 1-bit adders
+            generate
+            for (i = 0; i < WIDTH; i = i + 1) begin : adder_loop
+             adder_1bit u_adder_1bit (
+            .a   (a[i]),
+            .b   (b[i]),
+            .cin (carry_chain[i]),
+            .sum (sum[i]),
+            .cout(carry_chain[i+1])
+            );
+             end
+            endgenerate
+            assign cout = carry_chain[WIDTH];
+
+        endmodule  
+</code></pre>
+    </details>
+
 
       <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
         <p style="font-weight: bold; margin-top: 0;">Summary:</p>

@@ -6,7 +6,7 @@ layout: null
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log 3: The Synchronous FIFO</title>
+    <title>Log Log 3: The Synchronous FIFO</title>
     <style>
         :root {
             --space-black: #0b0e14;
@@ -37,6 +37,7 @@ layout: null
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        /* SECTION STYLING */
         .section {
             padding-bottom: 20px;
             margin-bottom: 30px;
@@ -73,12 +74,59 @@ layout: null
         code { background: #21262d; padding: 2px 5px; border-radius: 4px; color: var(--star-blue); font-family: 'Consolas', monospace; }
         ul { padding-left: 20px; }
         li { margin-bottom: 8px; }
-        .subtitle { color: #8b949e; font-style: italic; margin-top: -10px; margin-bottom: 20px; text-align: center; }
-        .center { text-align: center; }
+        blockquote { border-left: 4px solid var(--nebula-purple); margin: 20px 0; padding-left: 15px; font-style: italic; }
+        a { color: var(--star-blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Interface Table Styling */
+        .interface-table-wrapper {
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 20px 0;
+            background: #ffffff;
+        }
+        .interface-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #1e293b;
+        }
+        .interface-table th {
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .interface-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+        }
+        .interface-table tr:hover { background-color: #f8fafc; }
+        .signal-name {
+            font-family: 'Consolas', monospace;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* Image Zoom Styling */
+        .clickable-img {
+            cursor: zoom-in;
+            transition: transform 0.2s;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .clickable-img:hover { transform: scale(1.01); }
+        .img-caption { color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic; }
     </style>
 </head>
 <body>
-
 <div class="log-container">
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
     
@@ -88,111 +136,332 @@ layout: null
     <div class="section">
         <h3>The Mission: Sequential Logic & Buffering</h3>
         <p>In Log 2, we built an adder where signals "rippled" through gates. Now, we move into <strong>Sequential Logic</strong>. We are building a <strong>Synchronous FIFO (First-In, First-Out)</strong>. Think of this as the "waiting room" of digital design - a buffer used to manage data flow between different modules.</p>
+        
     </div>
 
     <div class="section">
-        <h2> The Module (<code>fifo.sv</code>)</h2>
-        <h3>️ 1. The Interface and Memory Array</h3>
-        <p>We need a storage buffer that handles data in order. Our first step is defining the interface and the physical storage shelves (memory array) using parameters for scalability.</p>
+    <h2>Module: Synchronous FIFO Buffer</h2>
+    
+    <h3>What is a FIFO Buffer?</h3>
+    <p>Before we look at the code, let's understand the concept. FIFO stands for First-In, First-Out.</p>
+    <p>Imagine a queue at a coffee shop: the first person to enter the line is the first person to be served and leave. In digital design, a FIFO works exactly like that. It is a memory structure used to store data temporarily when two parts of a chip are talking to each other but might not be ready at the exact same time.</p>
+    
+    <p>Common uses for a FIFO include:</p>
+    <ul>
+        <li><strong>Rate Matching:</strong> Connecting a fast data source to a slow data consumer.</li>
+        <li><strong>Data Buffering:</strong> Holding onto a burst of data so it doesn't get lost while the rest of the system is busy.</li>
+    </ul>
 
-        
+    <h3>1. The Functional Specification</h3>
+    <ul>
+        <li><strong>Purpose:</strong> To provide a temporary storage buffer that maintains data order.</li>
+        <li><strong>Behavior:</strong> 
+            <ul>
+                <li>Writes data to memory on the rising edge of the clock when <code>wr_en</code> is high.</li>
+                <li>Reads data from memory on the rising edge of the clock when <code>rd_en</code> is high.</li>
+                <li>Provides status flags (full, empty) to prevent data overflow or underflow.</li>
+            </ul>
+        </li>
+    </ul>
 
-        <details>
-            <summary>Source: rtl/fifo.sv (Interface)</summary>
-            <pre><code>
-module fifo #(
+    <h4>Interface Definition</h4>
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Signal Name</th>
+                    <th>Direction</th>
+                    <th>Width</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="signal-name">clk</td><td>Input</td><td>1</td><td>System clock</td></tr>
+                <tr><td class="signal-name">rst_n</td><td>Input</td><td>1</td><td>Active-low asynchronous reset</td></tr>
+                <tr><td class="signal-name">wr_en</td><td>Input</td><td>1</td><td>Write enable</td></tr>
+                <tr><td class="signal-name">rd_en</td><td>Input</td><td>1</td><td>Read enable</td></tr>
+                <tr><td class="signal-name">din</td><td>Input</td><td>DATA_WIDTH</td><td>Data input bus</td></tr>
+                <tr><td class="signal-name">dout</td><td>Output</td><td>DATA_WIDTH</td><td>Data output bus</td></tr>
+                <tr><td class="signal-name">full</td><td>Output</td><td>1</td><td>High when buffer is at capacity</td></tr>
+                <tr><td class="signal-name">empty</td><td>Output</td><td>1</td><td>High when buffer has no data</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h4>Module Header</h4>
+    <p>Based on the parameters and ports defined above, our module header is structured as follows:</p>
+    <details>
+        <summary>View Module Header</summary>
+        <pre><code>module fifo #(
     parameter DATA_WIDTH = 8,
     parameter DEPTH = 16
-)(
-    input  logic clk,
-    input  logic rst_n,
-    input  logic wr_en,
-    input  logic rd_en,
-    input  logic [DATA_WIDTH-1:0] din,
+) (
+    input logic clk,
+    input logic rst_n,
+    input logic wr_en,
+    input logic rd_en,
+    input logic [DATA_WIDTH-1:0] din,
     output logic [DATA_WIDTH-1:0] dout,
     output logic full,
-    output logic empty,
-    output logic almost_full,
-    output logic almost_empty
-);
+    output logic empty
+);</code></pre>
+    </details>
+
+    <h3>2. FIFO Architecture</h3>
+    <p>To understand the FIFO, we must look at how the data path and control logic interact. The diagram below illustrates the four main internal components:</p>
+    
+    <div style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: uppercase;">FIFO Buffer Block Diagaram</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/fifo_block.jpg" 
+            alt="FIFO Block Diagaram" 
+            class="clickable-img"
+        >
+        
+    </div>
+    
+
+    <p><strong>Component Breakdown:</strong></p>
+    <ul>
+        <li><strong>The Memory Array (Dual-Port RAM):</strong> The heart of the FIFO. It has one write port controlled by the <code>wr_ptr</code> and one read port controlled by the <code>rd_ptr</code>. This array stores the input data in chronological order.</li>
+        <li><strong>Write Control Logic:</strong> This block manages the <code>wr_ptr</code>. Every time a valid write occurs, it increments the pointer on the clock edge. If the pointer reaches the maximum depth, it wraps back to zero (circular buffer).</li>
+        <li><strong>Read Control Logic:</strong> Similar to the write control, this manages the <code>rd_ptr</code>. It ensures that the <code>dout</code> reflects the data stored at the current read address.</li>
+        <li><strong>Compare Logic:</strong> This unit manages the control of the FIFO. It compares the number of times data was written to the array and the number of times data was read to generate the <code>full</code> and <code>empty</code> signals.</li>
+    </ul>
+
+    <h3>3. Internal Signals</h3>
+    <p>To manage the FIFO's state and internal movement, we need to define several internal registers and signals:</p>
+    <ul>
+        <li><strong>Memory Array:</strong> A 2D array of registers to store the data.</li>
+        <li><strong>Pointers (wr_ptr, rd_ptr):</strong> Sequential registers used to index the memory array for writes and reads - these point to the next Byte (row) written to or read from the memory array.</li>
+        <li><strong>Pointer Width Parameter:</strong> We define a local parameter <code>localparam PTR_WIDTH</code>, (where <code>PTR_WIDTH</code> is log_2(DEPTH)) this parameter will be used to define the number of bits of our pointers, and the <code>count</code> signal.</li>
+        <li><strong>Counter (<code>count</code>):</strong> This register will control the <code>full</code> and <code>empty</code> outputs by tracking the number of items currently stored in the FIFO. Each valid writing increments the count, while each valid reading decrements it.
+            <ul>
+                <li><strong>Empty State:</strong> When <code>count</code> is 0, it indicates that no data is stored or all data was already read and therefore the FIFO is considered empty.</li>
+                <li><strong>Full State:</strong> When <code>count</code> equals the defined <code>DEPTH</code>, it indicates that every memory slot is occupied and the FIFO is full.</li>
+            </ul>
+        </li>
+        <li><strong>Bit-Width Calculation:</strong> We define the width of the counter as <code>PTR_WIDTH + 1</code>. Why the extra bit? While the pointers only need to address the array's slots (0 to <code>DEPTH-1</code>), the counter must be able to represent <code>DEPTH + 1</code> distinct states (from 0 up to and including the value of <code>DEPTH</code>). For example, in a 16-slot FIFO, a 4-bit pointer can count from 0 to 15 (0000 to 1111). However, we need a 5th bit to represent the number "16" to indicate the FIFO is full. Without this extra bit, the counter would wrap around to 0 when full, making it indistinguishable from the empty state.</li>
+        <li><strong>Validation Signals (wr_valid, rd_valid):</strong> These combinational signals act as the final decision-makers for any operation.
+            <ul>
+                <li><strong>wr_valid (Write Authorization):</strong> This signal is high only when the external system requests a write (<code>wr_en</code>) and the FIFO has available space (<code>!full</code>). It prevents "Overflow," where new data would overwrite unread data.</li>
+                <li><strong>rd_valid (Read Authorization):</strong> This signal is high only when a read is requested (<code>rd_en</code>) and the FIFO actually contains data (<code>!empty</code>). It prevents "Underflow," where the system would attempt to read "garbage" data from an empty buffer.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <details>
+        <summary>View Internal Signals</summary>
+        <pre><code>    // Memory and Pointers
     logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
     localparam PTR_WIDTH = $clog2(DEPTH);
     logic [PTR_WIDTH-1:0] wr_ptr, rd_ptr;
     logic [PTR_WIDTH:0] count; 
-endmodule
-            </code></pre>
-        </details>
-    </div>
 
-    <div class="section">
-        <h3> 2. Status Flags (The Early Warning System)</h3>
-        <p>We implement <strong>Almost Full/Empty</strong> flags. In high-speed designs, these act as an <strong>Early Warning</strong>, telling the sender to "Slow down" before an actual overflow occurs.</p>
+    // Validation Logic (Combinational)
+    logic wr_valid = wr_en && !full;
+    logic rd_valid = rd_en && !empty;</code></pre>
+    </details>
 
-        <details>
-            <summary>Source: rtl/fifo.sv (Flags)</summary>
-            <pre><code>
-    assign full         = (count == (PTR_WIDTH+1)'(DEPTH));
-    assign empty        = (count == 0);
-    assign almost_full  = (count >= (PTR_WIDTH+1)'(DEPTH - 2)); 
-    assign almost_empty = (count <= 2);
-            </code></pre>
-        </details>
-    </div>
+    <h3>4. Deep Dive: How the FIFO Works (Step-by-Step)</h3>
+    <p>To understand the logic, let's trace a FIFO with a <code>WIDTH</code> of 8 and <code>DEPTH</code> of 4.</p>
+    <p><strong>Case A: The Empty State (all the data was read or upon reset)</strong></p>
+    <ul>
+        <li>both <code>wr_ptr</code> and <code>rd_ptr</code> are 0, and <code>count</code> is 0.</li>
+        <li>Status: <code>empty</code> is 1, <code>full</code> is 0.</li>
+        <li>Input: If you try to read (<code>rd_en=1</code>), the internal <code>rd_valid</code> logic prevents the pointer from moving and <code>dout</code> from changing because the FIFO is empty.</li>
+    </ul>
+    <p><strong>Case B: Writing Data (Filling Up)</strong></p>
+    <ul>
+        <li>Write Data (8'hA): <code>wr_en=1</code>. Data 8'hA is stored at <code>mem[0]</code>. <code>wr_ptr</code> becomes 1, <code>count</code> becomes 1.</li>
+        <li>Write Data (8'hB, 8'hC, 8'hD): After three more writes, <code>wr_ptr</code> has wrapped around or reached the end. <code>count</code> is now 4 (4 = <strong>3</strong>'b100 - shows why the extra bit is needed for <code>count</code>).</li>
+        <li>Status: <code>empty</code> is 0, <code>full</code> is 1.</li>
+        <li>Logic Check: At this point, <code>wr_valid</code> becomes 0. Even if the external system keeps <code>wr_en</code> high, the FIFO will ignore new data.</li>
+    </ul>
+    <p><strong>Case C: Reading Data (Emptying Out)</strong></p>
+    <ul>
+        <li>Read Data: <code>rd_en=1</code>. The FIFO outputs <code>mem[0]</code> (8'hA). <code>rd_ptr</code> becomes 1, <code>count</code> drops to 3.</li>
+        <li>Status: <code>full</code> immediately drops to 0, allowing new writes again.</li>
+    </ul>
+    <p><strong>Case D: Simultaneous Read &amp; Write</strong></p>
+    <p>If <code>wr_en</code> and <code>rd_en</code> are both high at the same time:</p>
+    <ul>
+        <li>Data is written to the current <code>wr_ptr</code>.</li>
+        <li>Data is read from the current <code>rd_ptr</code>.</li>
+        <li>Count stays the same: The number of items doesn't change, keeping the status flags stable.</li>
+    </ul>
 
-    <div class="section">
-        <h3> 3. Control Logic (Pointers & Counter)</h3>
-        <p>We manage pointers using a <strong>Circular Buffer</strong> strategy—wrapping back to zero when the last shelf is reached.</p>
-
-        <details>
-            <summary>Source: rtl/fifo.sv (Control Logic)</summary>
-            <pre><code>
-    always_ff @(posedge clk or negedge rst_n) begin
+    <h3>5. Implementation</h3>
+    <h4>5.1 Control Logic</h4>
+    <p>The control logic handles the sequential update of pointers and the counter. It ensures pointers wrap around correctly and that the count increments on writes and decrements on reads.</p>
+    <p>To manage the <code>count</code> register, we use a case statement that evaluates the current authorized operations (<code>wr_valid</code> and <code>rd_valid</code>) concatenated into a 2-bit signal. This allows us to handle four scenarios: a write only (increment), a read only (decrement), simultaneous read and write (no change), or no operation (no change). This approach cleanly separates the logic for different FIFO states within a single procedural block.</p>
+    <details>
+        <summary>View Control Logic</summary>
+        <pre><code>    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            wr_ptr <= 0; rd_ptr <= 0; count <= 0;
+            wr_ptr <= 0;
+            rd_ptr <= 0;
+            count  <= 0;
         end else begin
-            if (wr_valid) wr_ptr <= (wr_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : wr_ptr + 1'b1;
-            if (rd_valid) rd_ptr <= (rd_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : rd_ptr + 1'b1;
+            if (wr_valid) 
+                wr_ptr <= (wr_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : wr_ptr + 1'b1;
+            if (rd_valid) 
+                rd_ptr <= (rd_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : rd_ptr + 1'b1;
+            
             case ({wr_valid, rd_valid})
                 2'b10: count <= count + 1'b1;
                 2'b01: count <= count - 1'b1;
+                default: count <= count; 
+            endcase
+        end
+    end</code></pre>
+    </details>
+    <p><strong>Note on Casting Syntax:</strong> In the code above, we use the syntax <code>(PTR_WIDTH)'(DEPTH-1)</code>. This is a static cast in SystemVerilog. This specific syntax forces the value inside the parentheses on the right (<code>DEPTH-1</code>) to match the bit-width specified on the left (<code>PTR_WIDTH</code>).</p>
+    <p>Because parameters like <code>DEPTH</code> are typically 32-bit integers, comparing them directly to a smaller signal like <code>wr_ptr</code> can cause compiler warnings. Using this cast ensures the constant is correctly sized (truncated or padded) to the exact bit-length of the signal it is being compared against, leading to cleaner and more predictable hardware synthesis.</p>
+    
+    <h4>5.2 Status Flags</h4>
+    <p>These signals are combinational. They look at the current count register and instantly change the FIFO outputs <code>full</code> and <code>empty</code>:</p>
+    <details>
+        <summary>View Status Flags</summary>
+        <pre><code>    assign full  = (count == (PTR_WIDTH+1)'(DEPTH));
+    assign empty = (count == 0);</code></pre>
+    </details>
+
+    <h4>5.3 Data Path</h4>
+    <p>The data path handles the actual movement of data into and out of the memory array.
+    <ul>
+        <li>If wr_valid is high, the data on the din bus is sampled and stored into the memory array at the address currently specified by wr_ptr.</li>
+
+        <li>If rd_valid is high, the data currently stored at the rd_ptr address in the memory array is sampled and clocked into the dout output register, making it available to the external system.</li>
+    </ul>
+    </p>
+    <details>
+        <summary>View Data Path</summary>
+        <pre><code>    // Write to memory
+    always_ff @(posedge clk) begin
+        if (wr_valid) mem[wr_ptr] <= din;
+    end
+
+    // Read from memory to output register
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) dout <= 0;
+        else if (rd_valid) dout <= mem[rd_ptr];
+    end</code></pre>
+    </details>
+
+    <h3>6. Full Source Code</h3>
+    <details>
+        <summary>View Full Code</summary>
+        <pre><code>`timescale 1ns/1ps
+
+module fifo #(
+    parameter DATA_WIDTH = 8,
+    parameter DEPTH = 16
+) (
+    input logic clk,
+    input logic rst_n,
+    input logic wr_en,
+    input logic rd_en,
+    input logic [DATA_WIDTH-1:0] din,
+    output logic [DATA_WIDTH-1:0] dout,
+    output logic full,
+    output logic empty
+);
+
+    // Memory and Pointers
+    logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
+    localparam PTR_WIDTH = $clog2(DEPTH);
+    logic [PTR_WIDTH-1:0] wr_ptr, rd_ptr;
+    logic [PTR_WIDTH:0] count; 
+
+    // Internal Validation Signals
+    wire wr_valid = wr_en && !full;
+    wire rd_valid = rd_en && !empty;
+
+    // CONTROL LOGIC
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            wr_ptr <= 0;
+            rd_ptr <= 0;
+            count  <= 0;
+        end else begin
+            if (wr_valid) 
+                wr_ptr <= (wr_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : wr_ptr + 1'b1;
+            if (rd_valid) 
+                rd_ptr <= (rd_ptr == (PTR_WIDTH)'(DEPTH-1)) ? 0 : rd_ptr + 1'b1;
+            
+            case ({wr_valid, rd_valid})
+                2'b10: count <= count + 1'b1;
+                2'b01: count <= count - 1'b1;
+                default: count <= count; 
             endcase
         end
     end
-            </code></pre>
-        </details>
-    </div>
 
-    <div class="section">
-        <h3> The Automated Testbench</h3>
-        <p>We verify the hardware using a <strong>Golden Reference Queue</strong> in SystemVerilog. By mirroring every hardware move in software, we can automatically detect data mismatches.</p>
+    // STATUS FLAGS
+    assign full  = (count == (PTR_WIDTH+1)'(DEPTH));
+    assign empty = (count == 0);
 
-        <details>
-            <summary>Source: dv/tb_fifo.sv (Tasks)</summary>
-            <pre><code>
-    task read_data();
-        expected_data = queue.pop_front(); 
-        @(negedge clk);
-        rd_en = 1;
-        @(negedge clk);
-        rd_en = 0;
-        if (dout !== expected_data) 
-            $error("Data mismatch! Expected: %h, Got: %h", expected_data, dout);
-    endtask
-            </code></pre>
-        </details>
-    </div>
+    // DATA PATH
+    always_ff @(posedge clk) begin
+        if (wr_valid) mem[wr_ptr] <= din;
+    end
 
-    <div class="section">
-        <h3>📝 Log 3 Final Summary</h3>
-        <ul>
-            <li><strong>RTL Design:</strong> Implemented a Parameterized Synchronous FIFO with Early Warning flags.</li>
-            <li><strong>Automated Verification:</strong> Used SystemVerilog Tasks and a Golden Reference Queue for 100% data checking.</li>
-            <li><strong>Stress Testing:</strong> Verified throughput, overflow (Full), and underflow (Empty) scenarios.</li>
-        </ul>
-        <p class="center"><i>Log 3 Complete.</i></p>
-    </div>
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            dout <= 0;
+        end else if (rd_valid) begin
+            dout <= mem[rd_ptr];
+        end
+    end
+    
+endmodule</code></pre>
+    </details>
+
+    <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Design Summary:</p>
+    <p>In this section, we have successfully developed a fully functional RTL description of a Synchronous FIFO. We applied sequential logic to track internal state, utilized validation signals to prevent buffer overflows, and implemented a dual-port memory architecture. By separating the control logic (pointers and counter) from the data path (memory array), we have created a robust, parameterizable module.</p>
+    <p>With the hardware design finalized, we are now ready to move into the Design Verification phase to prove our implementation works correctly under real-world simulation conditions.</p>
+    
+
+</div>
+     <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+   
+
+<div>
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
 </div>
+
+<!-- IMAGE ZOOM OVERLAY LOGIC -->
+<div id="imageModal" style="display: none; position: fixed; z-index: 1000; padding-top: 50px; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer;" onclick="this.style.display='none'">
+    <span style="position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold;">&times;</span>
+    <img id="img01" style="margin: auto; display: block; width: 80%; max-width: 1000px; border-radius: 8px; border: 2px solid #30363d;">
+</div>
+
+<script>
+    // 1. Get the modal elements
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("img01");
+
+    // 2. Select ALL images that have the 'zoom-trigger' class
+    const allZoomImages = document.querySelectorAll(".zoom-trigger");
+
+    // 3. Loop through each image and add the click listener
+    allZoomImages.forEach(img => {
+        img.addEventListener('click', function() {
+            modal.style.display = "block";
+            modalImg.src = this.src;
+        });
+    });
+
+    // 4. Close modal when clicking anywhere on the overlay
+    modal.onclick = function() {
+        modal.style.display = "none";
+    };
+</script>
 
 </body>
 </html>

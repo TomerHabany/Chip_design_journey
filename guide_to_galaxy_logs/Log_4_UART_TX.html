@@ -8,7 +8,7 @@ layout: null
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log 4: The UART Transmitter</title>
-    <style>
+   <style>
         :root {
             --space-black: #0b0e14;
             --deep-slate: #161b22;
@@ -38,6 +38,7 @@ layout: null
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        /* SECTION STYLING */
         .section {
             padding-bottom: 20px;
             margin-bottom: 30px;
@@ -45,24 +46,16 @@ layout: null
         }
         .section:last-of-type { border-bottom: none; }
 
-        .image-placeholder {
-            background-color: var(--code-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-            font-style: italic;
-            border-radius: 8px;
+        .back-link { 
+            margin-bottom: 20px; 
+            display: inline-block; 
+            text-decoration: none; 
+            color: var(--nebula-purple); 
+            font-weight: bold; 
+            transition: color 0.2s;
         }
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-        }
-
+        .back-link:hover { color: var(--star-blue); }
+        
         details {
             background-color: var(--code-bg);
             padding: 15px;
@@ -80,22 +73,82 @@ layout: null
             margin: 0;
         }
         code { background: #21262d; padding: 2px 5px; border-radius: 4px; color: var(--star-blue); font-family: 'Consolas', monospace; }
-        
-        .step-list {
-            list-style-type: decimal;
-            margin-left: 20px;
-            padding-left: 10px;
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        blockquote { border-left: 4px solid var(--nebula-purple); margin: 20px 0; padding-left: 15px; font-style: italic; }
+        a { color: var(--star-blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Interface Table Styling */
+        .interface-table-wrapper {
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 20px 0;
+            background: #ffffff;
         }
-        .step-list li {
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: var(--star-blue);
+        .interface-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #1e293b;
         }
-        .step-list span {
-            font-weight: normal;
-            color: var(--stardust);
+        .interface-table th {
+            background-color: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
         }
-        hr { border: 0; border-top: 1px solid var(--border-color); margin: 30px 0; }
+        .interface-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+        }
+        .interface-table tr:hover { background-color: #f8fafc; }
+        .signal-name {
+            font-family: 'Consolas', monospace;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* Image Zoom Styling */
+        .clickable-img {
+            cursor: zoom-in;
+            transition: transform 0.2s;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .clickable-img:hover { transform: scale(1.01); }
+        .img-caption { color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic; }
+
+        /* --- ADDITIONS FOR ENLARGING & ZOOMING --- */
+        .img-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none; /* Controlled by Script */
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            cursor: zoom-out;
+            overflow: hidden; /* Prevents scrollbars during zoom */
+        }
+
+        .img-overlay img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            transition: transform 0.1s ease-out; /* Smooth scrolling zoom */
+            transform-origin: center; /* Ensures zoom happens from middle */
+        }
     </style>
 </head>
 <body>
@@ -576,6 +629,59 @@ endmodule
     </div>
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
 </div>
+    // <!-- IMAGE ZOOM OVERLAY LOGIC -->
+<div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer; align-items: center; justify-content: center;" onclick="closeModal(event)">
+    <span style="position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer;">&times;</span>
+    <img id="img01" style="margin: auto; display: block; width: 80%; max-width: 1000px; border-radius: 8px; border: 2px solid #30363d; transition: transform 0.1s ease-out; transform-origin: center;">
+</div>
+
+<script>
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("img01");
+    let currentScale = 1;
+
+    // 1. Select ALL images with 'zoom-trigger'
+    const allZoomImages = document.querySelectorAll(".zoom-trigger");
+
+    allZoomImages.forEach(img => {
+        img.addEventListener('click', function() {
+            // Force the display to flex so it centers and shows up
+            modal.style.setProperty("display", "flex", "important");
+            modalImg.src = this.src;
+            currentScale = 1; 
+            modalImg.style.transform = `scale(${currentScale})`;
+        });
+    });
+
+    // 2. Close modal function
+    function closeModal(event) {
+        // Only close if clicking the background or the 'X' (span), not the image
+        if (event.target !== modalImg) {
+            modal.style.display = "none";
+        }
+    }
+
+    // 3. Scroll to Zoom Logic
+    modal.addEventListener('wheel', function(e) {
+        // Only zoom if modal is actually visible
+        if (modal.style.display === "flex") {
+            e.preventDefault(); 
+
+            const zoomStep = 0.15; // Slightly faster zoom
+            if (e.deltaY < 0) {
+                currentScale += zoomStep;
+            } else {
+                currentScale -= zoomStep;
+            }
+
+            // Restrict zoom levels
+            currentScale = Math.min(Math.max(0.5, currentScale), 5);
+
+            modalImg.style.transform = `scale(${currentScale})`;
+        }
+    }, { passive: false });
+</script>
+
 
 </body>
 </html>

@@ -124,6 +124,30 @@ layout: null
         }
         .clickable-img:hover { transform: scale(1.01); }
         .img-caption { color: #8b949e; font-size: 0.85rem; margin-top: 10px; font-style: italic; }
+
+         /* --- ADDITIONS FOR ENLARGING & ZOOMING --- */
+        .img-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none; /* Controlled by Script */
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            cursor: zoom-out;
+            overflow: hidden; /* Prevents scrollbars during zoom */
+        }
+
+        .img-overlay img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            transition: transform 0.1s ease-out; /* Smooth scrolling zoom */
+            transform-origin: center; /* Ensures zoom happens from middle */
+        }
     </style>
 </head>
 <body>
@@ -796,32 +820,58 @@ clean:
 </div>
 
 <!-- IMAGE ZOOM OVERLAY LOGIC -->
-<div id="imageModal" style="display: none; position: fixed; z-index: 1000; padding-top: 50px; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer;" onclick="this.style.display='none'">
-    <span style="position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold;">&times;</span>
-    <img id="img01" style="margin: auto; display: block; width: 80%; max-width: 1000px; border-radius: 8px; border: 2px solid #30363d;">
+<div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer; align-items: center; justify-content: center;" onclick="closeModal(event)">
+    <span style="position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer;">&times;</span>
+    <img id="img01" style="margin: auto; display: block; width: 80%; max-width: 1000px; border-radius: 8px; border: 2px solid #30363d; transition: transform 0.1s ease-out; transform-origin: center;">
 </div>
 
 <script>
-    // 1. Get the modal elements
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("img01");
+    let currentScale = 1;
 
-    // 2. Select ALL images that have the 'zoom-trigger' class
+    // 1. Select ALL images with 'zoom-trigger'
     const allZoomImages = document.querySelectorAll(".zoom-trigger");
 
-    // 3. Loop through each image and add the click listener
     allZoomImages.forEach(img => {
         img.addEventListener('click', function() {
-            modal.style.display = "block";
+            // Force the display to flex so it centers and shows up
+            modal.style.setProperty("display", "flex", "important");
             modalImg.src = this.src;
+            currentScale = 1; 
+            modalImg.style.transform = `scale(${currentScale})`;
         });
     });
 
-    // 4. Close modal when clicking anywhere on the overlay
-    modal.onclick = function() {
-        modal.style.display = "none";
-    };
+    // 2. Close modal function
+    function closeModal(event) {
+        // Only close if clicking the background or the 'X' (span), not the image
+        if (event.target !== modalImg) {
+            modal.style.display = "none";
+        }
+    }
+
+    // 3. Scroll to Zoom Logic
+    modal.addEventListener('wheel', function(e) {
+        // Only zoom if modal is actually visible
+        if (modal.style.display === "flex") {
+            e.preventDefault(); 
+
+            const zoomStep = 0.15; // Slightly faster zoom
+            if (e.deltaY < 0) {
+                currentScale += zoomStep;
+            } else {
+                currentScale -= zoomStep;
+            }
+
+            // Restrict zoom levels
+            currentScale = Math.min(Math.max(0.5, currentScale), 5);
+
+            modalImg.style.transform = `scale(${currentScale})`;
+        }
+    }, { passive: false });
 </script>
+
 
 </body>
 </html>

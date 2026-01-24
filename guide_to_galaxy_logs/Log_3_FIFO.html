@@ -466,50 +466,46 @@ endmodule</code></pre>
 </div>
 
 <script>
-    // 1. Get the modal elements
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("img01");
-    
-    // Track the current zoom level
     let currentScale = 1;
 
-    // 2. Select ALL images that have the 'zoom-trigger' class
+    // 1. Select ALL images with 'zoom-trigger'
     const allZoomImages = document.querySelectorAll(".zoom-trigger");
 
-    // 3. Loop through each image and add the click listener
     allZoomImages.forEach(img => {
         img.addEventListener('click', function() {
-            // We set display to 'flex' only when clicked to center the image
-            modal.style.display = "flex"; 
+            // Force the display to flex so it centers and shows up
+            modal.style.setProperty("display", "flex", "important");
             modalImg.src = this.src;
-            currentScale = 1; // Reset zoom when opening new image
+            currentScale = 1; 
             modalImg.style.transform = `scale(${currentScale})`;
         });
     });
 
-    // 4. Close modal function
+    // 2. Close modal function
     function closeModal(event) {
-        // Only close if the background (modal) or the close button is clicked, not the image
+        // Only close if clicking the background or the 'X' (span), not the image
         if (event.target !== modalImg) {
             modal.style.display = "none";
         }
     }
 
-    // 5. Scroll to Zoom Logic
+    // 3. Scroll to Zoom Logic
     modal.addEventListener('wheel', function(e) {
-        // Only trigger zoom if the modal is currently visible
+        // Only zoom if modal is actually visible
         if (modal.style.display === "flex") {
-            e.preventDefault(); // Prevent the background page from scrolling
+            e.preventDefault(); 
 
-            const zoomStep = 0.1;
+            const zoomStep = 0.15; // Slightly faster zoom
             if (e.deltaY < 0) {
                 currentScale += zoomStep;
             } else {
                 currentScale -= zoomStep;
             }
 
-            // Constraints: Min zoom 0.5x, Max zoom 4x
-            currentScale = Math.min(Math.max(0.5, currentScale), 4);
+            // Restrict zoom levels
+            currentScale = Math.min(Math.max(0.5, currentScale), 5);
 
             modalImg.style.transform = `scale(${currentScale})`;
         }

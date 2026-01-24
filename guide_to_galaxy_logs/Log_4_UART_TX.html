@@ -184,11 +184,17 @@ layout: null
 
         <p>Our UART will hold the value of each bit on tx_out for exactly 16 of these ticks. We do this because the receiver on the other end is designed to wait for the 8th tick - the dead center of the bit to sample the value. By holding our bit for 16 ticks, we give the receiver the best possible chance to capture the data accurately, even if there is slight clock drift.</p>
 
-        
-        <div class="image-placeholder">
-            <img src="images/image1.png" alt="UART Block Diagram">
-            Image 1: UART Block Diagram 
+        <div 
+        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">UART Block Diagram</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/image1.png" 
+            alt="UART Block Diagram"
+            class="clickable-img"
+        >
         </div>
+       
         <p>This diagram shows the high-level flow from the CPU, through our UART and Baud Generator blocks, out to the Receiver.</p>
     </div>
 
@@ -201,10 +207,17 @@ layout: null
 
         <p>If the generator is free-running, it is constantly counting in the background. If the tx_start signal arrives just as the generator was about to finish a count, our first bit (the Start Bit) might be cut extremely short. In a worst-case scenario, the '0' bit that signals the start of communication would only be a few clock cycles wide instead of the full 16-tick period. This would cause the receiver to miss the message entirely. By using a baud_en signal from the UART, we will "reset" the timer so it starts fresh at the exact moment we begin sending data.</p>
 
-        <div class="image-placeholder">
-            <img src="images/image2.png" alt="Baud Generator Timing Diagram">
-            Image 2: Timing Diagram showing worst case scenario for free running baud generator
+        <div 
+        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">Baud Generator Timing Diagram</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/image2.png" 
+            alt="Baud Generator Timing Diagram"
+            class="clickable-img"
+        >
         </div>
+        
         <p>This illustrates the timing collision that happens if we don't synchronize the generator.</p>
 
         <h3>Implementation: Step-by-Step</h3>
@@ -259,11 +272,18 @@ endmodule
 
         <h3>Designing for Stability: The Registered Moore Machine</h3>
         <p>We will implement a Moore State Machine, where the output is determined solely by the current state. To ensure our output is perfectly stable and free of combinational logic "glitches," we will make it a Registered State Machine. This means we will use a register to hold the state, ensuring that the tx_out signal only changes exactly on the clock edge.</p>
-
-        <div class="image-placeholder">
-            <img src="images/image3.png" alt="State Register Block Diagram">
-            Image 3: Registered State Machine Block Diagram 
+    
+        <div 
+        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">State Register Block Diagram</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/image3.png" 
+            alt="State Register Block Diagram"
+            class="clickable-img"
+        >
         </div>
+        
         
     </div>
 
@@ -417,12 +437,17 @@ always_comb begin
         <h4>7. State Machine Case Logic</h4>
         <p>We will implement the sequencer using a <code>case</code> statement. Our controller will follow the pre-determined path: <code>IDLE</code> -> <code>START</code> -> <code>DATA</code> -> <code>STOP</code>. In each state, we will count 16 <code>sample_tick</code> pulses before moving to the next. In the <code>DATA</code> state, we will use the right-shift operator (<code>>></code>) to move the next bit into position every time a bit period finishes.</p>
 
-        
-        <div class="image-placeholder">
-            <img src="images/image4.png" alt="FSM State Diagram">
-            Image 4: UART FSM/Sequencer state diagram 
+        <div 
+        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">FSM State Diagram</h4>
+        <img 
+            class="clickable-img zoom-trigger"
+            src="images/image4.png" 
+            alt="FSM State Diagram"
+            class="clickable-img"
+        >
         </div>
-        <p>The visual sequence of our UART states.</p>
+        
 
         <details>
             <summary>View Code: State Machine Logic</summary>

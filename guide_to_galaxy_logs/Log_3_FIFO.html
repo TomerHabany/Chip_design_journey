@@ -89,7 +89,7 @@ layout: null
             margin: 30px auto;
             width: 100%;
         }
-        
+
         .interface-table-wrapper {
             margin: 25px 0;
             border-radius: 8px;
@@ -1400,7 +1400,7 @@ clean:
         <img src="images/fifo_overflow_prot.png" class="clickable-img zoom-trigger" alt="Overflow Inhibit Waveform">
         <div class="img-caption">Figure 5: Hardware gating of wr_valid during a full condition.</div>
     </div>
-    <p><strong>Insight:</strong> This confirms the hardware enforcement of boundary rules. Even when the Testbench drives <code>wr_en</code> high while <code>full</code> is active, observe that <code>wr_valid</code> (the internal write strobe) stays low.</p>
+    <p><strong>Insight:</strong> This confirms the hardware enforcement of boundary rules. We can see, right after the marker, the Testbench keeps driving <code>wr_en</code> high while <code>full</code> changes from 0 to 1 - that causes <code>wr_valid</code> to go low, stops the advancement of the <code>wr_ptr</code> and prevents <code>mem[0]</code> from changing.</p>
     <p><strong>Proof:</strong> The <code>wr_ptr</code> remains frozen despite the input activity, proving the hardware blocked the overflow at the gate level.</p>
 
     <h4>Waveform Analysis: Underflow Protection</h4>
@@ -1408,7 +1408,7 @@ clean:
         <img src="images/fifo_underflow_prot.png" class="clickable-img zoom-trigger" alt="Underflow Protection Waveform">
         <div class="img-caption">Figure 6: Protection logic preventing read pointer increments on an empty buffer.</div>
     </div>
-    <p><strong>Insight:</strong> Observe that even when <code>rd_en</code> is pulsed high by the testbench, the <code>rd_ptr</code> does not increment and the <code>dout</code> remains unchanged.</p>
+    <p><strong>Insight:</strong> Observe right after the marker, that even when <code>rd_en</code> is kept high by the testbench, because <code>empty</code> is asserted, the internal <code>rd_valid</code> signal goes low, preventing the <code>rd_ptr</code> from incrementing and the <code>dout</code> from changing.</p>
     <p><strong>Proof:</strong> This visually confirms that the internal read strobe is inhibited when the empty flag is active, ensuring that no stale or "garbage" data is read from the memory array.</p>
 
     <h4>Waveform Analysis: Concurrent Throughput Timing</h4>
@@ -1425,7 +1425,7 @@ clean:
         <div class="img-caption">Figure 8: Immediate signal clearing upon rst_n assertion.</div>
     </div>
     <p><strong>Insight:</strong> Unlike other signals that wait for a <code>clk</code> edge, observe how the status flags and pointers react immediately to the falling edge of <code>rst_n</code>.</p>
-    <p><strong>Hardware Recovery:</strong> This proves the asynchronous nature of the design—the pointers return to zero mid-cycle, instantly clearing the data path before the next rising clock edge.</p>
+    <p><strong>Hardware Recovery:</strong> This proves the asynchronous nature of the design - the pointers return to zero mid-cycle, instantly clearing the data path before the next rising clock edge.</p>
 
     
 

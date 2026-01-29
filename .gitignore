@@ -13,3 +13,7 @@ node_modules/
 .profile/
 .motd_shown/
 .sudo_as_admin_successful/
+# Ignore Windows Zone.Identifier files
+*:Zone.Identifier
+# If you want to be extra safe for all hidden NTFS streams
+*:$DATA

@@ -289,7 +289,7 @@ endmodule
 
     <div class="section">
         <h3>The Philosophy of Registered State Machines</h3>
-        <p>As we move into professional-grade RTL, we will adopt the industry-standard practice of separating our logic into two distinct domains. For every signal that controls our output—the state, the data buffer, and internal counters—we will create a <code>_next</code> (combinational) and a <code>_reg</code> (sequential) pair.</p>
+        <p>As we move into professional-grade RTL, we will adopt the industry-standard practice of separating our logic into two distinct domains. For every signal that controls our output, the state, the data buffer, and internal counters we will create a <code>_next</code> (combinational) and a <code>_reg</code> (sequential) pair.</p>
 
         <ul>
             <li><strong>Combinational Logic (<code>_next</code>):</strong> This acts as the "brain," calculating the next value based on current inputs and the current state.</li>
@@ -327,7 +327,7 @@ module uart_tx
         </details>
 
         <h4>2. Internal Signals</h4>
-        <p>We will declare the registers and their corresponding combinational "next" signals. Every internal signal that controls our output generation—including the <code>tick_count_reg</code> (to track the 16 ticks) and <code>bit_count_reg</code> (to track which of the 8 bits we are sending)—will have a matching <code>_next</code> signal. We use <code>$clog2</code> to determine the exact number of bits needed for our counters to save hardware area.</p>
+        <p>We will declare the registers and their corresponding combinational "next" signals. Every internal signal that controls our output generation, including the <code>tick_count_reg</code> (to track the 16 ticks) and <code>bit_count_reg</code> (to track which of the 8 bits we are sending) - will have a matching <code>_next</code> signal. We use <code>$clog2</code> to determine the exact number of bits needed for our counters to save hardware area.</p>
 
         <details>
             <summary>View Code: Internal Signals</summary>
@@ -388,7 +388,7 @@ assign baude_en = baude_en_reg;
         </details>
 
         <h4>5. Sequential Logic</h4>
-        <p>This is the only section where we use the <code>posedge clk</code>. On a reset (<code>rst_n</code> low), we will initialize our registers to safe values—specifically, <code>tx_reg</code> will be set to '1' (the idle state). On every clock edge, we will simply move the "next" values into the "registers."</p>
+        <p>This is the only section where we use the <code>posedge clk</code>. On a reset (<code>rst_n</code> low), we will initialize our registers to safe values, specifically, <code>tx_reg</code> will be set to '1' (the idle state). On every clock edge, we will simply move the "next" values into the "registers."</p>
 
         <details>
             <summary>View Code: Sequential Logic</summary>

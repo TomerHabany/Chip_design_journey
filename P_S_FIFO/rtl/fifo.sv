@@ -14,9 +14,7 @@ module fifo
     input logic [DATA_WIDTH-1:0] din,
     output logic [DATA_WIDTH-1:0] dout,
     output logic full,
-    output logic empty,
-    output logic almost_full,
-    output logic almost_empty
+    output logic empty    
 );
 
     // Memory array
@@ -27,8 +25,11 @@ module fifo
     logic [PTR_WIDTH-1:0] wr_ptr, rd_ptr;
     logic [PTR_WIDTH:0] count; 
 
-    logic wr_valid = wr_en && !full;
-    logic rd_valid = rd_en && !empty;
+    logic wr_valid;
+    logic rd_valid;
+
+    assign wr_valid = wr_en && !full;
+    assign rd_valid = rd_en && !empty;
 
     // CONTROL LOGIC
     always_ff @(posedge clk or negedge rst_n) begin
@@ -65,8 +66,7 @@ module fifo
     // Status flags
     assign full         = (count == (PTR_WIDTH+1)'(DEPTH));
     assign empty        = (count == 0);
-    assign almost_full  = (count >= (PTR_WIDTH+1)'(DEPTH - 2)); 
-    assign almost_empty = (count <= 2);
+   
 
     // DATA PATH
     always_ff @(posedge clk) begin

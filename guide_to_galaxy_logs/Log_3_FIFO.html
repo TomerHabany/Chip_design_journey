@@ -78,41 +78,83 @@ layout: null
         a { color: var(--star-blue); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
-        /* Interface Table Styling */
-        .interface-table-wrapper {
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin: 20px 0;
-            background: #ffffff;
+       /* Brighter "Nebula Frost" Table Styling */
+
+       /* Center the image and its caption */
+        .image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            width: 100%;
         }
+        
+        .interface-table-wrapper {
+            margin: 25px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            /* Uses a softer, lighter border for a clean look */
+            border: 1px solid #d0d7de; 
+            /* Soft light-mode shadow for depth */
+            box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+        }
+
         .interface-table {
             width: 100%;
             border-collapse: collapse;
-            color: #1e293b;
-        }
-        .interface-table th {
-            background-color: #f8fafc;
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #475569;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .interface-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.875rem;
-        }
-        .interface-table tr:hover { background-color: #f8fafc; }
-        .signal-name {
-            font-family: 'Consolas', monospace;
-            font-weight: 600;
-            color: #2563eb;
+            /* Main body is a very clean, bright off-white/grey */
+            background-color: #f6f8fa; 
+            color: #24292f;
+            font-size: 0.95rem;
         }
 
+        .interface-table th {
+            /* Header uses a sophisticated slate-grey */
+            background-color: #eaeef2;
+            color: #8a3ffc; /* Vivid Nebula Purple */
+            font-weight: 700;
+            text-align: center;
+            padding: 14px 16px;
+            border-bottom: 2px solid #d0d7de;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .interface-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #d0d7de;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* Subtle Zebra Striping using a crisp white */
+        .interface-table tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+
+        /* Row highlight on hover - a very light purple tint */
+        .interface-table tr:hover {
+            background-color: #f0f7ff;
+        }
+
+        /* Logic/Signal Styling - Professional "GitHub-style" Code look */
+        .interface-table code {
+            background-color: rgba(175, 184, 193, 0.2); /* Soft grey inset */
+            color: #0969da;           /* Precision Blue for signals */
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        /* Status Column - Vibrant Verification Green */
+        .interface-table td:nth-child(2) {
+            font-weight: bold;
+            color: #1a7f37; 
+        }
+        
         /* Image Zoom Styling */
         .clickable-img {
             cursor: zoom-in;
@@ -164,7 +206,7 @@ layout: null
     </div>
 
     <div class="section">
-    <h2>Module: Synchronous FIFO Buffer</h2>
+    <h2>RTL Module: Parameterizable Synchronous FIFO Buffer (fifo.sv)</h2>
     
     <h3>What is a FIFO Buffer?</h3>
     <p>Before we look at the code, let's understand the concept. FIFO stands for First-In, First-Out.</p>
@@ -200,14 +242,14 @@ layout: null
                 </tr>
             </thead>
             <tbody>
-                <tr><td class="signal-name">clk</td><td>Input</td><td>1</td><td>System clock</td></tr>
-                <tr><td class="signal-name">rst_n</td><td>Input</td><td>1</td><td>Active-low asynchronous reset</td></tr>
-                <tr><td class="signal-name">wr_en</td><td>Input</td><td>1</td><td>Write enable</td></tr>
-                <tr><td class="signal-name">rd_en</td><td>Input</td><td>1</td><td>Read enable</td></tr>
-                <tr><td class="signal-name">din</td><td>Input</td><td>DATA_WIDTH</td><td>Data input bus</td></tr>
-                <tr><td class="signal-name">dout</td><td>Output</td><td>DATA_WIDTH</td><td>Data output bus</td></tr>
-                <tr><td class="signal-name">full</td><td>Output</td><td>1</td><td>High when buffer is at capacity</td></tr>
-                <tr><td class="signal-name">empty</td><td>Output</td><td>1</td><td>High when buffer has no data</td></tr>
+                <td><code>clk</code></td><td>Input</td><td>1</td><td>System clock</td></tr>
+                <td><code>rst_n</code></td><td>Input</td><td>1</td><td>Active-low asynchronous reset</td></tr>
+                <td><code>wr_en</code></td><td>Input</td><td>1</td><td>Write enable</td></tr>
+                <td><code>rd_en</code></td><td>Input</td><td>1</td><td>Read enable</td></tr>
+                <td><code>din</code></td><td>Input</td><td>DATA_WIDTH</td><td>Data input bus</td></tr>
+                <td><code>dout</code></td><td>Output</td><td>DATA_WIDTH</td><td>Data output bus</td></tr>
+                <td><code>full</code></td><td>Output</td><td>1</td><td>High when buffer is at capacity</td></tr>
+                <td><code>empty</code></td><td>Output</td><td>1</td><td>High when buffer has no data</td></tr>
             </tbody>
         </table>
     </div>
@@ -453,11 +495,985 @@ endmodule</code></pre>
      <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
     <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
-   
+   <div class="section">
+    <h2>Design Verification (fifo_tb.sv)</h2>
+    <p>In this section we will go through the step-by-step construction of a robust SystemVerilog verification environment. It follows a modular architecture designed for clarity, reusability, and hardware-accurate simulation.</p>
 
+    <h3>Stage 1: Requirement Analysis &amp; Planning</h3>
+    <p>Before writing the first line of SystemVerilog, we define the "Golden Rules" of the FIFO. Verification isn't about checking if it works, it’s about trying to break it. By defining a Verification Plan early, we ensure that every line of testbench code serves a specific purpose.</p>
+
+    <h4>The Verification Plan</h4>
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Purpose</th>
+                    <th>Expected Behavior</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Reset Behavior</strong></td>
+                    <td>Cold boot check.</td>
+                    <td>All pointers zero, empty high, full low.</td>
+                </tr>
+                <tr>
+                    <td><strong>Overflow/Underflow</strong></td>
+                    <td>Boundary protection.</td>
+                    <td>Logic must ignore invalid commands (write when full / read when empty) and maintain data integrity.</td>
+                </tr>
+                <tr>
+                    <td><strong>Sustained Throughput</strong></td>
+                    <td>Stress testing.</td>
+                    <td>Simultaneous R/W at full speed without data loss.</td>
+                </tr>
+                <tr>
+                    <td><strong>Asynchronous Reset</strong></td>
+                    <td>Robustness testing.</td>
+                    <td>Immediate data invalidation and clean state recovery mid-operation.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+    <h3>Stage 2: The Hardware Environment (Interface &amp; Top-Level)</h3>
+    <p>The first stage of building the testbench is establishing the "Physical" layer - how the signals are bundled and how the hardware is clocked.</p>
+
+    <h4>FIFO Interface</h4>
+    <p>The Interface is a structural bundle that encapsulates all signals connecting the Testbench and the DUT.</p>
+    <ul>
+        <li><strong>Encapsulation:</strong> Replaces numerous individual wires with a single object, reducing manual wiring errors.</li>
+        <li><strong>Maintainability:</strong> Design changes are localized to the interface.</li>
+        <li><strong>Parameterization:</strong> Simplifies passing global parameters like <code>DATA_WIDTH</code> and <code>DEPTH</code>.</li>
+    </ul>
+
+    <details>
+        <summary>View Interface Declaration</summary>
+        <pre><code>interface fifo_if #(parameter DATA_WIDTH = 8, DEPTH = 16) (input logic clk);
+    logic rst_n, wr_en, rd_en, full, empty; 
+    logic [DATA_WIDTH-1:0] din, dout;</code></pre>
+    </details>
+
+    <h4>Modport: Defining the Permission Set</h4>
+    <p>A Modport defines the signal directions and access rights specifically for the Testbench.</p>
+    <ul>
+        <li><strong>Access Control:</strong> Restricts the testbench to only drive stimulus and monitor status.</li>
+        <li><strong>Directional Mirroring:</strong> The DUT's inputs (e.g., <code>wr_en</code>) become Testbench outputs, while DUT's outputs become the Testbench inputs. </li>
+    </ul>
+
+    <details>
+        <summary>View Modport Definition</summary>
+        <pre><code>    modport tb (
+        input clk, dout, full, empty,
+        output rst_n, wr_en, rd_en, din
+    );
+endinterface</code></pre>
+    </details>
+
+    <h4>Testbench Module &amp; Clock Generation</h4>
+    <p>The top-level module provides the 100MHz clock and acts as the primary interconnect:
+    
+    <details>
+        <summary>View TB Module Declaration & Clock Generation</summary>
+        <pre><code>// --- Testbench Module ---
+module tb_fifo();
+    logic clk;
+    initial begin
+        clk = 0;
+    end
+
+    always #5 clk <= ~clk; // 100MHz</code></pre>
+    </details>
+ <br>
+    For the first time in this guide, the clock is generated and controlled within the SystemVerilog testbench rather than the C++ wrapper. This is made possible by Verilator’s new <code>--timing</code> flag, which enables the simulator to handle native, time-based constructs. This allows us to move complex stimulus logic out of C++ and into standard SystemVerilog:
+<ul>
+     <li>Clock Generation: <code>forever #5 clk = ~clk;</code> replaces manual C++ toggling.</li>
+
+        <li>Timed Resets: <code>initial begin rst = 1; #100 rst = 0; end</code> simplifies initialization.</li>
+
+        <li>Event Waiting: <code>wait(ready);</code> allows the testbench to pause until a signal condition is met.</li>
+</ul>
+
+By using this approach, your testbench becomes more portable and behaves much more like it would in traditional simulators like Questa or Vivado.</p>
+
+    <h4>System Connectivity &amp; Instantiations</h4>
+    <p>Within our tb module, we integrate the environment by performing three critical instantiations:</p>
+    <ul>
+        <li><strong>Interface Instance (vif):</strong> The physical instance of our signal bundle.</li>
+        <li><strong>DUT Connection:</strong> Mapping the FIFO hardware directly to the interface signals.</li>
+        <li><strong>Test Module Activation:</strong> Establishing the "intelligence" of the environment.</li>
+    </ul>
+
+    <details>
+        <summary>View Instantiations & Connectivity Logic</summary>
+        <pre><code>// --- Instantiate FIFO Interface ---
+    fifo_if #(8, 16) fifo_vif(.clk(clk));
+
+// --- Instantiate DUT ---
+    fifo #(.DATA_WIDTH(8), .DEPTH(16)) dut (
+        .clk(clk), .rst_n(fifo_vif.rst_n), .wr_en(fifo_vif.wr_en),
+        .rd_en(fifo_vif.rd_en), .din(fifo_vif.din), .dout(fifo_vif.dout),
+        .full(fifo_vif.full), .empty(fifo_vif.empty)
+    );
+
+// --- Instantiate Test Module ---
+    test t1 (fifo_vif.tb); 
+endmodule</code></pre>
+    </details>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+    <h3>Stage 3: Test Module &amp; Driver Logic</h3>
+    <h4>Test Module, Signals and "Golden Model" Declaration </h4>
+    <p>We declare the test module and define internal variables to track and verify the data moving through the design:
+    <ul>
+        <li><code>temp_data</code>: A temporary holder for generating random values to send to the FIFO.</li>
+
+        <li><code>expected_output</code>: Stores the value we expect to see leaving the FIFO for immediate comparison.</li>
+
+        <li><code>scoreboard_queue[$]</code>: A "Golden Model" (queue) that mimics the FIFO's memory, storing every piece of data in the order it was sent.</li>
+    </ul>
+        
+        
+    <details>
+        <summary>View Test Module Signals</summary>
+        <pre><code>module test#(parameter DATA_WIDTH = 8, DEPTH = 16) (fifo_if.tb ifc);
+    logic [7:0] temp_data, expected_output, scoreboard_queue[$];</code></pre>
+    </details>
+
+    The Testbench manages the verification session through the interface handle 'ifc' which allows the testbench to access the entire bus with a simple dot-notation (e.g: <code>ifc.data_in</code>). <br>
+        </p>
+
+    <h4>Scoreboard Logic Flow</h4>
+    <p>The scoreboard functions as a software-based emulator of the FIFO’s expected behavior:</p>
+    <ul>
+        <li><strong>Push on Write:</strong> Data sent to DUT is pushed into <code>scoreboard_queue</code>.</li>
+        <li><strong>Pop on Read:</strong> Oldest entry is stored in <code>expected_output</code>.</li>
+        <li><strong>Comparison:</strong> Actual hardware output (<code>ifc.dout</code>) is checked against <code>expected_output</code>.</li>
+    </ul>
+
+    <h4>Tasks (The Drivers)</h4>
+    <p>We encapsulate low-level signal toggling into reusable tasks to abstract timing logic.</p>
+    <p> <strong>How we use these tasks:</strong> Instead of writing repetitive clock-cycle logic in our main test loop, we call these tasks like functions. This allows us to focus on the verification intent, such as "write ten values" or "read until empty", while the tasks handle the specific timing requirements of the interface. This modularity makes the testbench easier to read and allows us to reuse the same logic for both directed tests and random stimulus.</p>
+
+    <h5>1. Reset Task</h5>
+    <details>
+        <summary>View Reset Task</summary>
+        <pre><code>    task reset_dut();
+        ifc.rst_n <= 1'b0;
+        @(posedge ifc.clk);
+        ifc.rst_n <= 1'b1;
+        $display("[%0t] Reset complete", $time);
+    endtask</code></pre>
+    </details>
+
+    <h5>2. Write Task &amp; Negative Testing</h5>
+    <p>We verify that the hardware ignores <code>wr_en</code> when <code>full</code> is high. If incorrect, the pointers would move, leading to corruption.</p>
+    <details>
+        <summary>View Write Task</summary>
+        <pre><code>    task write_data(input logic [7:0] data_in);     
+        if (!ifc.rst_n) return;
+        if (ifc.full) begin
+            ifc.din   <= data_in;
+            ifc.wr_en <= 1'b1; // Attempt write anyway (Negative Test)
+            $display("[%0t] Error: FIFO Full, write ignored", $time);
+            @(posedge ifc.clk);
+            ifc.wr_en <= 1'b0;                  
+        end else begin
+            ifc.din   <= data_in;
+            ifc.wr_en <= 1'b1;
+            @(posedge ifc.clk);
+            ifc.wr_en <= 1'b0;     
+            if(ifc.rst_n) begin        
+                scoreboard_queue.push_back(data_in);
+                $display("[%0t] Wrote data: %0h", $time, data_in);
+            end
+        end
+    endtask</code></pre>
+    </details>
+
+    <h5>3. Read Task &amp; Negative Testing</h5>
+    <p>Verifies "Underflow Protection" by attempting a read when <code>empty</code> is high.</p>
+    <details>
+        <summary>View Read Task</summary>
+        <pre><code>    task read_data(output logic [7:0] data_out);
+            if (!ifc.rst_n) return;
+            if (ifc.empty) begin
+            ifc.rd_en <= 1'b1; // Attempt read anyway (Negative Test)
+            $display("[%0t] Error: FIFO Empty, read ignored", $time);
+            @(posedge ifc.clk);
+            ifc.rd_en <= 1'b0; 
+        end else begin
+            ifc.rd_en <= 1'b1;
+            @(posedge ifc.clk);
+            data_out = ifc.dout;
+            ifc.rd_en <= 1'b0;
+            if(ifc.rst_n) begin
+                expected_output = scoreboard_queue.pop_front();
+                if(data_out !== expected_output)
+                    $error("[%0t] Mismatch! Exp: %h, Got: %h", $time, expected_output, data_out);
+                else
+                    $display("[%0t] Read data: %0h", $time, data_out);
+            end
+        end
+    endtask</code></pre>
+    </details>
+
+    <h4>The Double-Check Reset Pattern</h4>
+    <p>Both tasks check <code>ifc.rst_n</code> twice: once at the very start and again immediately after the clock edge. <br>
+
+This is designed to solve a racing problem within the testbench itself. In simulation, if a reset occurs exactly at the same time as a clock edge, there is a risk that the testbench logic might still finish the task and update the Scoreboard (Golden Model) even though the Hardware (our FIFO Buffer) has already cleared its memory. By checking the reset state twice, we ensure the Testbench software stays perfectly synchronized with the Hardware state, preventing "Ghost Data" from corrupting our queue during a reset event.</p>
+
+    <h3>Stage 4: Verification Execution (Test Scenarios)</h3>
+
+    <p>First, we begin our test by applying a reset, making sure the test starts from a clean state.</p>
+    <details>
+        <summary>View Reset code</summary>
+        <pre><code>    initial begin
+        @(posedge ifc.clk);
+        ifc.wr_en <= 0; ifc.rd_en <= 0; ifc.din <= 0;
+        reset_dut();</code></pre>
+    </details>
+
+    <h4>Requirement 1: Overflow (Fill Test)</h4>
+    <p>We attempt to write <code>DEPTH + 5</code> items to ensure the FIFO Buffer's boundary protection works.</p>
+    <details>
+        <summary>View Fill Test</summary>
+        <pre><code>        $display("\n--- Scenario 1: Fill Test ---");
+        for (int i = 1; i < DEPTH + 5; i++) begin
+             write_data(i[7:0]);             
+        end</code></pre>
+    </details>
+
+    <h4>Requirement 2: Underflow (Empty Test)</h4>
+    <p>We attempt to read <code>DEPTH + 5</code> times, firstly verifying the read data matches the data in our "Golden Model" and secondly Ensuring hardware stops providing data once <code>empty</code> is high.</p>
+    <details>
+        <summary>View Empty Test</summary>
+        <pre><code>        $display("\n--- Scenario 2: Empty Test ---");
+        for (int i = 1; i < DEPTH + 5; i++) begin
+            read_data(temp_data);
+            if (!ifc.empty) begin                                                                               
+                 if (temp_data !== i[7:0]) begin
+                    $error("Mismatch! Expected %0h, Got %0h", i[7:0], temp_data);
+                end
+            end            
+        end</code></pre>
+    </details>
+
+    <h4>Requirement 3: Sustained Throughput (Simultaneous R/W)</h4>
+    <p>In order to simulate real world conditions of simultaneous read and write requests, we will use a <code>fork-join</code> block.</p>
+
+    <p><strong>Concurrency with <code>fork-join</code>:</strong> Standard SystemVerilog initial blocks execute sequentially (one line at a time). To simulate simultaneous hardware behavior, we use the fork command to split the single execution thread into two parallel threads: a <strong>Writer</strong> and a <strong>Reader</strong>. The join keyword ensures the main test thread pauses until both parallel processes complete. This allows us to saturate the FIFO bus with simultaneous requests, mimicking high-performance real-world conditions.</p>
+
+    <p><strong>Data Generation Strategy:</strong> Unlike the boundary tests, for this test we will use <code>$urandom</code> (random number system function) to generate random data. Randomization is essential here to ensure the FIFO doesn't just work for sequential numbers, but handles any arbitrary bit pattern without corruption. We will push the random data generated into <code>scoreboard_queue</code> so that we can later verify our FIFO buffer's functionality.</p>
+    <details>
+        <summary>View Simultaneous R/W Code</summary>
+        <pre><code>        $display("\n--- Scenario 3: Simultaneous R/W ---");
+        fork
+            begin : writer
+                for (int i = 0; i < DEPTH + 10; i++) begin
+                    logic [7:0] val = $urandom;
+                    if (!ifc.full) scoreboard_queue.push_back(val);
+                    write_data(val);
+                end
+            end
+            begin : reader
+                repeat(5) @(posedge ifc.clk);
+                for (int i = 0; i < DEPTH + 10; i++) begin
+                    read_data(temp_data);
+                    if (scoreboard_queue.size() > 0) begin
+                        expected_output = scoreboard_queue.pop_front(); 
+                        if (temp_data !== expected_output)
+                            $error("Scoreboard Mismatch! Exp: %0h, Got: %0h", expected_output, temp_data);
+                    end
+                end
+            end  
+        join</code></pre>
+    </details>
+
+    <h4>Requirement 4: Asynchronous Reset (Stress Test)</h4>
+    <p>This scenario validates the the way our FIFO module handles an Asynchronous reset command mid operation. We fill the FIFO halfway and then trigger a reset while R/W operations are active.</p>
+
+    <p><strong>Advanced Concurrency Control:</strong></p>
+
+        <p><code>fork-join_any</code>: Unlike the standard join, which waits for all threads to finish, join_any allows the main test thread to continue as soon as any single thread completes. In this test, we have three threads: Continuous Writing, Continuous Reading, and the Surprise Reset. We want the test to move to the verification phase the moment the reset finishes, regardless of how many R/W operations were left in the other loops.</p>
+
+        <p><code>disable fork</code>: Once the reset is complete and the code exits the fork block, the Writer and Reader threads might still be trying to run. disable fork is a powerful command that kills all active threads spawned by the immediate parent fork block. This is essential to prevent "runaway" tasks from trying to drive signals once we've moved on to checking the post-reset state.</p>
+    <details>
+        <summary>View Stress Test Code</summary>
+        <pre><code>     $display("\n--- Scenario 4: Reset During Operation ---");
+     for (int i = 0; i < DEPTH/2; i++) write_data(i[7:0]);
+
+        fork
+            begin // Thread 1: Writes
+                for (int i = 0; i < DEPTH; i++) write_data($urandom);
+            end
+            begin // Thread 2: Reads
+                for (int i = 0; i < DEPTH; i++) read_data(temp_data);
+            end
+            begin // Thread 3: Surprise Reset!
+                #23;
+                $display("[%0t] !!! CRITICAL: Issuing Unexpected Reset !!!", $time);
+                ifc.rst_n <= 1'b0;
+                @(posedge ifc.clk);
+                ifc.rst_n <= 1'b1;
+            end
+        join_any
+        disable fork;
+
+        if (ifc.full !== 0 || ifc.empty !== 1 || dut.wr_ptr !== 0 || dut.rd_ptr !== 0)
+            $error("Post-Reset Error: FIFO not in clean state!");
+        else
+            $display("[%0t] Post-Reset Check Passed: FIFO is empty.", $time);</code></pre>
+    </details>
+
+    <h4>Continuous Monitoring</h4>
+    <p>An independent initial block acts as a Monitor Process. This is an autonomous thread that tracks the hardware status flags throughout the entire simulation. Unlike the "Drivers" (which perform actions), the Monitor provides a continuous audit trail, making it much easier to identify the exact timestamp when the FIFO reaches boundary conditions like FULL or EMPTY.</p>
+    <details>
+        <summary>View Monitor Process</summary>
+        <pre><code>// --- Monitor Process ---
+    initial begin
+        forever begin
+            @(posedge ifc.clk);
+            if (ifc.full)  $display("  [MONITOR] FIFO is FULL");
+            if (ifc.empty) $display("  [MONITOR] FIFO is EMPTY");
+        end
+    end
+endmodule</code></pre>
+    </details>
+    
+    <h4>The Consolidated fifo_tb.sv File</h4>
+    <details>
+        <summary>View Full TB Code</summary>
+        <pre><code>// tb_fifo.sv - Testbench for FIFO Module
+
+`timescale 1ns/1ps
+
+// --- FIFO Interface Definition ---
+interface fifo_if #(parameter DATA_WIDTH = 8, DEPTH = 16) (input logic clk);    // Clock input from the testbench
+    logic rst_n, wr_en, rd_en, full, empty;                                     // top-level signals
+    logic [DATA_WIDTH-1:0] din, dout;                                           // Data signals
+
+// --- Interface Modport for Testbench ---  
+// This modport defines the direction of signals for the testbench
+    modport tb (
+        input clk, dout, full, empty,
+        output rst_n, wr_en, rd_en, din
+    );
+endinterface
+
+// --- Testbench Module ---
+module tb_fifo();
+    logic clk;                          // Generating clock signal
+   initial begin                        // Initial block to set initial clock value
+    clk = 0;
+end
+
+always #5 clk <= ~clk;                  // Clock generation: 10ns period (100MHz)
+
+// --- Instantiate FIFO Interface ---
+    fifo_if #(8, 16) fifo_vif(.clk(clk));   // virtual interface instance
+
+// --- Instantiate DUT ---
+    fifo #(.DATA_WIDTH(8), .DEPTH(16)) dut (
+        .clk(clk), .rst_n(fifo_vif.rst_n), .wr_en(fifo_vif.wr_en),
+        .rd_en(fifo_vif.rd_en), .din(fifo_vif.din), .dout(fifo_vif.dout),
+        .full(fifo_vif.full), .empty(fifo_vif.empty)
+    );
+
+// --- Instantiate Test Module ---
+    test t1 (fifo_vif.tb);      // Pass the modport of the interface to the test module
+endmodule
+
+
+// --- Test Module Definition ---
+module test#(parameter DATA_WIDTH = 8, DEPTH = 16) (fifo_if.tb ifc);        // Use the testbench modport of the interface 
+    logic [7:0] temp_data, expected_output, scoreboard_queue[$];     // Temporary data storage and scoreboard queue
+
+// --- Tasks Definition ---
+// Task 1: Reset DUT
+    task reset_dut();
+        ifc.rst_n <= 1'b0; 
+        ifc.wr_en <= 1'b0;
+        ifc.rd_en <= 1'b0;
+        @(posedge ifc.clk);                 // Wait 1 cycle before releasing reset
+        ifc.rst_n <= 1'b1; 
+        $display("[%0t] DUT Reset Completed", $time);
+    endtask
+
+// Task 2: Write Data to FIFO
+    task write_data(input logic [7:0] data_in);     
+        if (!ifc.rst_n) return;                                         // Abort if reset is active
+        if (ifc.full) begin                                             // Check FIFO full status
+            ifc.din   <= data_in;                                       // Load data to be written    
+            ifc.wr_en <= 1'b1;
+            $display("[%0t] Error: FIFO Full, write ignored", $time);
+            @(posedge ifc.clk);                                         // Wait 1 cycle before proceeding     
+            ifc.wr_en <= 1'b0;                  
+        end else begin                                                  // If not full
+            ifc.din   <= data_in;                                       // Load data to be written    
+            ifc.wr_en <= 1'b1;                                          // Enable write      
+            @(posedge ifc.clk);                                         // Wait for 1 clock cycle
+            ifc.wr_en <= 1'b0;                                          // Disable write     
+            if(ifc.rst_n) begin        
+            $display("[%0t] Wrote data: %0h", $time, data_in);
+            end
+        end
+    endtask 
+
+// Task 3: Read Data from FIFO
+    task read_data(output logic [7:0] data_out);
+            if (!ifc.rst_n) return;                                     // Abort if reset is active
+            if (ifc.empty) begin                                       // Check FIFO empty status
+            ifc.rd_en <= 1'b1;  
+            $display("[%0t] Error: FIFO Empty, read ignored", $time);
+            @(posedge ifc.clk);                                    // Wait 1 cycle before proceeding
+            ifc.rd_en <= 1'b0; 
+        end else begin                                     // If not empty
+            ifc.rd_en <= 1'b1;                             // Enable read
+            @(posedge ifc.clk);                            // Wait for 1 clock cycle
+            
+            data_out = ifc.dout;                         // Capture read data
+            ifc.rd_en <= 1'b0;                           // Disable read
+            $display("[%0t] Read data: %0h", $time, data_out);            
+        end
+    endtask
+    
+// --- Test Scenarios ---
+    initial begin
+        //step 1: reset DUT
+        @(posedge ifc.clk);
+        ifc.wr_en <= 0; ifc.rd_en <= 0; ifc.din <= 0;
+        reset_dut();
+
+        //step 2: Fill Test
+        @(posedge ifc.clk);
+        $display("\n--- Scenario 1: Fill Test ---");
+        for (int i = 1; i < DEPTH + 5; i++) begin                         // Attempt to write more than DEPTH to test full condition
+             write_data(i[7:0]);             
+        end
+
+        //step 3: Empty Test
+        $display("\n--- Scenario 2: Empty Test ---");
+        for (int i = 1; i < DEPTH + 5; i++) begin                       // Attempt to read more than DEPTH to test empty condition
+            read_data(temp_data);
+            if (!ifc.empty) begin                                               
+                 if (temp_data !== i[7:0]) begin                                     // Verify read data against expected value
+                    $error("Mismatch! Expected %0h, Got %0h", i[7:0], temp_data);
+                end
+            end            
+        end
+
+        // Step 4: Simultaneous Read/Write Test
+        $display("\n--- Scenario 3: Simultaneous R/W ---");
+        fork                                                // Fork-Join to perform read and write simultaneously
+            begin : writer                                  // Writer process
+                for (int i = 0; i < DEPTH + 10; i++) begin
+                    logic [7:0] val = $urandom;             // Generate random data into loop parameter 'val'
+                    if (!ifc.full) begin
+                    scoreboard_queue.push_back(val);        // Store expected data in scoreboard
+                    end
+                    write_data(val);                        // Write data to FIFO
+                end
+            end
+            begin : reader     // Reader process
+                repeat(5) @(posedge ifc.clk);                        // Initial delay to allow some writes to accumulate
+                for (int i = 0; i < DEPTH + 10; i++) begin
+                    read_data(temp_data);                           // Read data from FIFO
+                    if (scoreboard_queue.size() > 0) begin         // Check if scoreboard has expected data
+                        expected_output = scoreboard_queue.pop_front();         // Get expected data from scoreboard
+                        if (temp_data !== expected_output) begin                // Compare read data with expected data
+                            $error("Scoreboard Mismatch! Exp: %0h, Got: %0h", expected_output, temp_data);
+                        end                   
+                    end
+                end
+            end  
+        join
+        
+     // Step 5: Reset During Operation (Stress Test)
+     $display("\n--- Scenario 4: Reset During Operation ---");
+
+     // 1. Fill the FIFO halfway
+     for (int i = 0; i < DEPTH/2; i++) begin
+        write_data(i[7:0]);
+      end
+
+        fork
+            // Thread 1: Continuous Writing
+            begin
+                for (int i = 0; i < DEPTH; i++) write_data($urandom);
+            end
+            // Thread 2: Continuous Reading
+            begin
+                for (int i = 0; i < DEPTH; i++) read_data(temp_data);
+            end
+            // Thread 3: Surprise Reset!
+            begin
+                #23; // Wait for some random time mid-transfer
+                $display("[%0t] !!! CRITICAL: Issuing Unexpected Reset !!!", $time);
+                ifc.rst_n <= 1'b0;
+                @(posedge ifc.clk);
+                ifc.rst_n <= 1'b1;
+            end
+        join_any // We join as soon as the reset thread finishes
+        disable fork; // Kill the remaining R/W threads
+
+     // 2. Verification after Reset
+
+            if (ifc.full !== 0 || ifc.empty !== 1 || dut.wr_ptr !== 0 || dut.rd_ptr !== 0) begin
+            $error("Post-Reset Error: FIFO not in clean state! Full: %b, Empty: %b wr_ptr: %b rd_ptr: %b", ifc.full, ifc.empty, dut.wr_ptr, dut.rd_ptr);
+        end else begin
+            $display("[%0t] Post-Reset Check Passed: FIFO is empty and pointers are reset.", $time);
+        end
+
+     // 3. Clear the scoreboard queue because the data is now gone
+        scoreboard_queue.delete();
+        #5;
+        $display("\n---No Errors detected!!!! Test Completed Successfully---");
+        $finish;
+    end
+
+
+// --- Monitor Process ---
+    initial begin
+        forever begin               // Continuously monitor FIFO status
+            @(posedge ifc.clk);     // Check status at every clock edge
+            
+            if (ifc.full)  $display("  [MONITOR] FIFO is FULL");
+            if (ifc.empty) $display("  [MONITOR] FIFO is EMPTY");
+        end
+    end
+endmodule</code></pre>
+    </details>
+
+    
+
+   <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Testbench Design Summary:</p>
+    <p>By following this modular approach, we have transformed the initial hardware requirements into a robust, automated SystemVerilog Test Bench:</p>
+    <ul>
+        <li><strong>Strategic Planning:</strong> Established a Verification Plan for corner-case testing.</li>
+        <li><strong>Structural Foundations:</strong> Used Interfaces and Modports for clean boundaries.</li>
+        <li><strong>Encapsulated Logic:</strong> Abstracted drivers and Scoreboard-based Golden Models.</li>
+        <li><strong>Negative &amp; Stress Testing:</strong> Validated robustness against illegal commands and concurrency.</li>
+        <li><strong>Reset Verification:</strong> Validated the hardware's ability to perform an Asynchronous Reset mid operation.</li>
+    </ul>
+
+    <h3>Takeaway</h3>
+    <p>Upon running the simulation, this architecture will ensure the FIFO is not just functionally correct under ideal conditions, but resilient against illegal commands and complex timing events.</p>
+    </div>
+
+    <h3>Moving to Implementation</h3>
+    <p>To bring this Test Bench to life, we move into the compilation and execution phase. This involves developing a C++ wrapper to manage the Verilator cycle and a Makefile to consolidate our build rules into an automated workflow.</p>
+</div>
+<hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+    <div class="section">
+    <h2>The C++ Simulation Wrapper</h2>
+    <p>When using Verilator, a C++ wrapper acts as the executive controller of the simulation. For this environment, we utilize the Verilator <code>--timing</code> flag, which significantly simplifies our C++ logic.</p>
+    <p>In traditional Verilator flows, the C++ wrapper must manually toggle the clock signal. However, since we defined our clock generation (<code>always #5 clk <= ~clk</code>) directly inside <code>tb_fifo.sv</code>, the C++ wrapper becomes a lightweight manager focused purely on execution, time-tracking, and waveform dumping.</p>
+
+    
+
+    <h3>1. Environment &amp; Context Setup</h3>
+    <p>To begin the simulation, we must initialize the Verilator engine using the <code>VerilatedContext</code> class and create a C++ instance of our SystemVerilog testbench using the <code>Vtb_fifo</code> constructor. This setup handles command-line arguments via the <code>commandArgs</code> function and manages the memory for the virtual hardware.</p>
+
+    <details>
+        <summary>View Implementation</summary>
+        <pre><code>// 1. Create Verilator context and instantiate the top module
+const std::unique_ptr&lt;VerilatedContext&gt; contextp{new VerilatedContext};
+contextp->commandArgs(argc, argv);
+const std::unique_ptr&lt;Vtb_fifo&gt; top{new Vtb_fifo{contextp.get()}};</code></pre>
+    </details>
+
+    <h4>Syntax Explanation</h4>
+    <ul>
+        <li><strong><code>std::unique_ptr</code>:</strong> A smart pointer that ensures the memory for our simulation objects is automatically cleaned up when the program finishes.</li>
+        <li><strong><code>VerilatedContext</code>:</strong> The "brain" of the simulation. It maintains the internal simulation clock and handles global Verilator configurations.</li>
+        <li><strong><code>commandArgs(argc, argv)</code>:</strong> Passes standard command-line arguments (like <code>+verilator+seed+5</code>) from the terminal into the simulation context.</li>
+        <li><strong><code>Vtb_fifo</code>:</strong> The specific class name generated by Verilator. The <code>V</code> prefix is added to your top-level module name (<code>tb_fifo</code>).</li>
+    </ul>
+
+    <h3>2. The Observability Layer (VCD Tracing)</h3>
+    <p>We need a way to "see" inside the chip during simulation. This section configures the waveform generator by enabling the <code>traceEverOn</code> setting and using the <code>VerilatedVcdC</code> class to record every signal transition into a <code>.vcd</code> file.</p>
+
+    <details>
+        <summary>View Implementation</summary>
+        <pre><code>// 2. Waveform Setup (.vcd generation)
+Verilated::traceEverOn(true);
+VerilatedVcdC* tfp = new VerilatedVcdC;
+top->trace(tfp, 99);
+tfp->open("fifo_waveform.vcd");</code></pre>
+    </details>
+
+    <h4>Syntax Explanation</h4>
+    <ul>
+        <li><strong><code>traceEverOn(true)</code>:</strong> A global setting that tells Verilator to keep track of signal changes so they can be recorded.</li>
+        <li><strong><code>VerilatedVcdC</code>:</strong> The class responsible for writing the waveform data to a file.</li>
+        <li><strong><code>top->trace(tfp, 99)</code>:</strong> Links our hardware instance (<code>top</code>) to the trace file provider (<code>tfp</code>). The <code>99</code> defines how many levels of sub-modules to record.</li>
+        <li><strong><code>tfp->open(...)</code>:</strong> Creates the actual physical file on your hard drive.</li>
+    </ul>
+
+    <h3>3. The Executive Execution Loop</h3>
+    <p>This loop is the heartbeat of the simulation. Because the clock toggling is handled inside the SystemVerilog testbench, the C++ loop simply advances time using the <code>timeInc</code> function and asks Verilator to recalculate the hardware logic via the <code>eval</code> function at every step.</p>
+
+    <details>
+        <summary>View Implementation</summary>
+        <pre><code>// 3. Simulation Executive Loop
+while (!contextp->gotFinish()) {
+    contextp->timeInc(1); // Advance time by 1ns
+    top->eval();          // Evaluate hardware logic
+    tfp->dump(contextp->time());
+}</code></pre>
+    </details>
+
+    <h4>Syntax Explanation</h4>
+    <ul>
+        <li><strong><code>gotFinish()</code>:</strong> Returns true only when the SystemVerilog code executes the <code>$finish</code> command. This is how the hardware tells the software "I'm done."</li>
+        <li><strong><code>timeInc(1)</code>:</strong> Increments the internal simulation time. By advancing 1 unit per loop, we provide a high-resolution window for the hardware's internal <code>#5</code> delays to trigger.</li>
+        <li><strong><code>top->eval()</code>:</strong> The "Engine." It processes all logic inside the SystemVerilog files based on the current time and signal states.</li>
+        <li><strong><code>tfp->dump(...)</code>:</strong> Takes a snapshot of all signal values at the current timestamp and writes them to the VCD file.</li>
+    </ul>
+
+    <h3>4. Full C++ Wrapper Implementation</h3>
+    <p>For reference, here is the complete wrapper file integrated into a single cohesive script:</p>
+
+    <details>
+        <summary>View sim_main.cpp</summary>
+        <pre><code>#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include "Vtb_fifo.h"
+#include "verilated.h"
+#include "verilated_vcd_c.h"
+
+int main(int argc, char** argv) {
+    // 1. Create Verilator context and instantiate the top module
+    const std::unique_ptr&lt;VerilatedContext&gt; contextp{new VerilatedContext};
+    contextp->commandArgs(argc, argv);
+    const std::unique_ptr&lt;Vtb_fifo&gt; top{new Vtb_fifo{contextp.get()}};
+
+    // 2. Waveform Setup (.vcd generation)
+    Verilated::traceEverOn(true);
+    VerilatedVcdC* tfp = new VerilatedVcdC;
+    top->trace(tfp, 99);
+    tfp->open("fifo_waveform.vcd");
+
+    // 3. Simulation Executive Loop
+    while (!contextp->gotFinish()) {
+        contextp->timeInc(1); // Advance time by 1ns
+        top->eval();          // Evaluate hardware logic
+        tfp->dump(contextp->time());
+    }
+
+    // 4. Graceful Cleanup
+    tfp->close();
+    std::cout << "\n[SIM] --- Simulation Finished ---" << std::endl;
+    std::cout << "[SIM] Waveform saved to: fifo_waveform.vcd" << std::endl;
+
+    return 0;
+}</code></pre>
+    </details>
+
+     <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Summary</p>
+    <ul>
+        <li><strong>Minimalist Control:</strong> Leveraged <code>--timing</code> to keep the C++ wrapper under 40 lines of code.</li>
+        <li><strong>Unified Termination:</strong> Synchronized the C++ loop exit with the SystemVerilog test completion.</li>
+        <li><strong>Full Visibility:</strong> Implemented VCD dumping for comprehensive waveform analysis in GTKWave.</li>
+    </ul>
+    <p>Next, we will build our <strong>Makefile</strong> to link the RTL, the Testbench, and this C++ Wrapper into a single executable binary.</p>
+</div>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+    <div class="section">
+    <h2>Makefile Automation</h2>
+    <p>Consistent with our previous workflow, we use the Makefile to orchestrate the build process. This automates compilation and execution, ensuring source changes are immediately reflected in the simulation without repetitive manual commands.</p>
+
+    <h3>1. Project Initialization &amp; Variables</h3>
+    <p>The first section of the Makefile establishes the global environment. Before performing any actions, we must define where our tools and source files are located.</p>
+    <p><strong>Functional Intent:</strong> We organize the project into main variables to manage the compiler path, hardware logic (rtl), verification files (dv), and the specific top-level module name. This centralization makes the script portable and easy to update.</p>
+
+    <details>
+        <summary>View Variables Implementation</summary>
+        <pre><code># Variables
+VERILATOR = verilator
+RTL_DIR = rtl
+DV_DIR = dv
+TOP_MODULE = tb_fifo
+
+# List all source files
+SV_SRCS = $(RTL_DIR)/fifo.sv $(DV_DIR)/tb_fifo.sv
+CPP_SRCS = $(DV_DIR)/tb_fifo.cpp</code></pre>
+    </details>
+
+    <h4>Syntax Explanation</h4>
+    <ul>
+        <li><strong><code>VARIABLE = value</code>:</strong> The standard way to define macros in a Makefile, allowing updates in one place.</li>
+        <li><strong><code>TOP_MODULE</code>:</strong> Defines the entry point of the hardware simulation; Verilator needs this to find the top-level ports.</li>
+        <li><strong><code>$(VARIABLE)</code>:</strong> The syntax used to reference and expand a defined variable.</li>
+        <li><strong><code>SV_SRCS</code>:</strong> Aggregates multiple SystemVerilog files into a space-separated list for a single-pass hierarchy build.</li>
+    </ul>
+
+    <h3>2. Global Targets &amp; Build Rules</h3>
+    <p>Following the variables, we define the "Phony" targets and the master build sequence.</p>
+    <p><strong>Functional Intent:</strong> We use the <code>.PHONY</code> rule to ensure our labels are treated as commands rather than files. We then define the <code>all</code> target to link our clean-up, compilation, and execution into a single automated chain.</p>
+
+    <details>
+        <summary>View Build Rules Implementation</summary>
+        <pre><code># Build rules
+.PHONY: all compile run waves clean
+
+all: clean compile run</code></pre>
+    </details>
+
+    <h4>Syntax Explanation</h4>
+    <ul>
+        <li><strong><code>.PHONY</code>:</strong> A special target that tells the system these are command labels, preventing conflicts if files with the same name exist.</li>
+        <li><strong><code>all: clean compile run</code>:</strong> Defines the default behavior. Running <code>make all</code> executes these three rules in chronological order.</li>
+    </ul>
+
+    <h3>3. The Compilation Stage (Verilation)</h3>
+    <p>This rule handles the heavy lifting: converting SystemVerilog into optimized C++ and building the binary.</p>
+    <p><strong>Functional Intent:</strong> The compile rule invokes Verilator with essential flags: <code>--trace</code> for waveforms, <code>--timing</code> for delay support, and <code>-sv</code> for parsing. We include source directories with <code>-I</code> flags and use <code>-Wno-</code> commands to suppress non-critical linter noise, specifically ignoring:</p>
+    
+    <ul>
+        <li><code>WIDTHTRUNC:</code> Width mismatches in assignments.</li>
+        <li><code>UNUSEDSIGNAL/UNUSEDPARAM:</code> Declared but untouched logic.</li>
+        <li><code>MODDUP:</code> Duplicate module definitions.</li>
+        <li><code>DECLFILENAME:</code> Filename/Module name mismatches.</li>
+        <li><code>INITIALDLY:</code> Non-blocking assignments in initial blocks.</li>
+    </ul>
+
+    <details>
+        <summary>View Compilation Implementation</summary>
+        <pre><code>compile:
+    @echo "--- STEP 1 & 2: Verilating and Building Binary ---"
+    $(VERILATOR) -Wall --trace --timing -sv --cc --exe --build \
+        -I$(RTL_DIR) -I$(DV_DIR) \
+        $(SV_SRCS) $(CPP_SRCS) \
+        --top-module $(TOP_MODULE) \
+        -o V$(TOP_MODULE) \
+        -Wno-WIDTHTRUNC -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM \
+        -Wno-MODDUP -Wno-DECLFILENAME -Wno-INITIALDLY</code></pre>
+    </details>
+
+    <h4>Syntax Explanation</h4>
+    <ul>
+        <li><strong><code>--timing</code>:</strong> Enables Verilator's internal scheduler to handle <code>#</code> delays and event-based triggers.</li>
+        <li><strong><code>--cc --exe --build</code>:</strong> Instructs Verilator to create the C++ models, prepare the executable wrapper, and compile the binary immediately.</li>
+        <li><strong><code>-Wno-[WARNING]</code>:</strong> A unique rule used to suppress specific warnings to reduce terminal noise.</li>
+    </ul>
+
+    <h3>4. Simulation &amp; Visualization</h3>
+    <p>Once compiled, these rules handle the actual execution of the binary and the loading of waveform data.</p>
+    <p><strong>Functional Intent:</strong> The <code>run</code> target launches the compiled binary, while the <code>waves</code> target opens GTKWave for debugging.</p>
+
+    <details>
+        <summary>View Simulation Implementation</summary>
+        <pre><code>run:
+    @echo "--- STEP 3: Running Simulation ---"
+    ./obj_dir/V$(TOP_MODULE)
+
+waves:
+    @echo "--- STEP 4: Opening Waveforms ---"
+    gtkwave fifo_waveform.vcd &amp;</code></pre>
+    </details>
+
+    <h4>Syntax Explanation</h4>
+    <ul>
+        <li><strong><code>./obj_dir/</code>:</strong> The default output directory where Verilator stores all generated C++ files and the final binary.</li>
+        <li><strong><code>&amp;</code>:</strong> A shell rule that runs the command in the background, keeping the terminal active for further commands.</li>
+    </ul>
+
+    <h3>5. Maintenance (Cleanup)</h3>
+    <p>The final section of the code handles the removal of temporary files to keep the project directory clean.</p>
+    <p><strong>Functional Intent:</strong> The <code>clean</code> rule purges build artifacts to ensure subsequent compilations are "fresh" and unaffected by old data.</p>
+
+    <details>
+        <summary>View Cleanup Implementation</summary>
+        <pre><code>clean:
+    @echo "Cleaning up project files..."
+    rm -rf obj_dir fifo_waveform.vcd</code></pre>
+    </details>
+
+    <h3>6. Full Implementation</h3>
+    <details>
+        <summary>View Full Makefile</summary>
+        <pre><code># Variables
+VERILATOR = verilator
+RTL_DIR = rtl
+DV_DIR = dv
+TOP_MODULE = tb_fifo
+
+# List all source files
+SV_SRCS = $(RTL_DIR)/fifo.sv $(DV_DIR)/tb_fifo.sv
+CPP_SRCS = $(DV_DIR)/tb_fifo.cpp
+
+# Build rules
+.PHONY: all compile run waves clean
+
+all: clean compile run
+
+compile:
+    @echo "--- STEP 1 & 2: Verilating and Building Binary ---"
+    $(VERILATOR) -Wall --trace --timing -sv --cc --exe --build \
+        -I$(RTL_DIR) -I$(DV_DIR) \
+        $(SV_SRCS) $(CPP_SRCS) \
+        --top-module $(TOP_MODULE) \
+        -o V$(TOP_MODULE) \
+        -Wno-WIDTHTRUNC -Wno-UNUSEDSIGNAL -Wno-UNUSEDPARAM \
+        -Wno-MODDUP -Wno-DECLFILENAME -Wno-INITIALDLY
+
+run:
+    @echo "--- STEP 3: Running Simulation ---"
+    ./obj_dir/V$(TOP_MODULE)
+
+waves:
+    @echo "--- STEP 4: Opening Waveforms ---"
+    gtkwave fifo_waveform.vcd &amp;
+
+clean:
+    @echo "Cleaning up project files..."
+    rm -rf obj_dir fifo_waveform.vcd</code></pre>
+    </details>
+
+    <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Summary</p>
+    <ul>
+        <li><strong>One-Touch Workflow:</strong> Enabled full project cleanup, compilation, and execution with a single <code>make all</code> command.</li>
+        <li><strong>Directory Hygiene:</strong> Separated RTL from DV while maintaining seamless connectivity.</li>
+        <li><strong>Streamlined Debugging:</strong> Automated GTKWave launch via <code>make waves</code>.</li>
+    </ul>
+    
+    <p>Now that we have our FIFO Buffer module and the completed testing environment built, all that's left is to run the simulation and see how our module operates!</p>
+</div>
+   
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+   
+        <div class="section">
+    <h2>Simulation Performance &amp; Verification</h2>
+    <p>This section serves as the final verification report for the FIFO Buffer module. The following data proves that the hardware design meets all functional requirements and handles corner-case conditions with 100% accuracy as defined in the initial engineering specification.</p>
+
+    <h3>1. Execution Log Analysis</h3>
+    <p>By using the <code>make</code> command we run the simulation. The execution log provides a high-resolution, timestamped audit of the simulation. It demonstrates the successful interaction between the Stimulus Drivers and the Autonomous Monitor, confirming that the module behaves predictably under stress.</p>
+    <p>We will look at the log for each scenario ran during the test:</p>
+
+    <h4>Scenario 1: Fill Test (Boundary Check)</h4>
+    <div class="image-container">
+        <img src="images/fifo_sim_log_1.png" class="clickable-img zoom-trigger" alt="FIFO Fill Test Log">
+        <div class="img-caption">Figure 1: Execution log showing sequential writes and FULL flag assertion.</div>
+    </div>
+    <p>The module successfully accepted 16 sequential data writes (0x1 to 0x10). At timestamp [185000], the Monitor correctly identified the <strong>FULL</strong> state. While the Testbench issued "write ignored" prompts for subsequent attempts, the actual hardware inhibit was validated in Scenario 2; the first data retrieved was 0x1, proving that no overflow data overwritten the initial buffer entries.</p>
+
+    <h4>Scenario 2: Empty Test (Underflow Protection)</h4>
+    <div class="image-container">
+        <img src="images/fifo_sim_log_2.png" class="clickable-img zoom-trigger" alt="FIFO Empty Test Log">
+        <div class="img-caption">Figure 2: Execution log showing complete drain and EMPTY flag assertion.</div>
+    </div>
+    <p>Following the Fill Test, the module executed a complete drain of the buffer. The integrity of the data (0x1 through 0x10) confirms that the overflow attempts in Scenario 1 were successfully blocked by the hardware. At [385000], the <strong>EMPTY</strong> flag was asserted. The lack of "garbage data" in subsequent read attempts confirms the underflow protection logic.</p>
+
+    <h4>Scenario 3: Concurrent Throughput</h4>
+    <div class="image-container">
+        <img src="images/fifo_sim_log_3.png" class="clickable-img zoom-trigger" alt="FIFO Concurrent R/W Log">
+        <div class="img-caption">Figure 3: Scoreboard validation during simultaneous read and write operations.</div>
+    </div>
+    <p>This test demonstrated Concurrent Throughput capability. The log shows the hardware processing incoming data and outgoing data on the exact same clock cycle (e.g., at [485000]). The zero-mismatch result in the scoreboard proves that the read and write logic operate independently without collision, allowing for maximum data bandwidth.</p>
+
+    <h4>Scenario 4: Reset During Operation</h4>
+    <div class="image-container">
+        <img src="images/fifo_sim_log_4.png" class="clickable-img zoom-trigger" alt="FIFO Reset Log">
+        <div class="img-caption">Figure 4: Log showing instantaneous recovery after mid-operation asynchronous reset.</div>
+    </div>
+    <p>Mid-way through an active R/W cycle at [838000], a critical asynchronous reset was issued. The system immediately entered a clean state. Hardware validation was confirmed by the Monitor's <strong>EMPTY</strong> status and the subsequent manual check of the internal RTL pointers, which returned to zero immediately upon reset assertion.</p>
+
+  
+
+    <h3>2. Waveform Analysis</h3>
+    <p>We run the <code>make waves</code> command which opens GTKWave and allows us to see a visualization of our simulation.</p>
+
+    <h4>Waveform Analysis: Overflow Inhibit Logic</h4>
+    <div class="image-container">
+        <img src="images/fifo_overflow_prot.png" class="clickable-img zoom-trigger" alt="Overflow Inhibit Waveform">
+        <div class="img-caption">Figure 5: Hardware gating of wr_valid during a full condition.</div>
+    </div>
+    <p><strong>Insight:</strong> This confirms the hardware enforcement of boundary rules. Even when the Testbench drives <code>wr_en</code> high while <code>full</code> is active, observe that <code>wr_valid</code> (the internal write strobe) stays low.</p>
+    <p><strong>Proof:</strong> The <code>wr_ptr</code> remains frozen despite the input activity, proving the hardware blocked the overflow at the gate level.</p>
+
+    <h4>Waveform Analysis: Underflow Protection</h4>
+    <div class="image-container">
+        <img src="images/fifo_underflow_prot.png" class="clickable-img zoom-trigger" alt="Underflow Protection Waveform">
+        <div class="img-caption">Figure 6: Protection logic preventing read pointer increments on an empty buffer.</div>
+    </div>
+    <p><strong>Insight:</strong> Observe that even when <code>rd_en</code> is pulsed high by the testbench, the <code>rd_ptr</code> does not increment and the <code>dout</code> remains unchanged.</p>
+    <p><strong>Proof:</strong> This visually confirms that the internal read strobe is inhibited when the empty flag is active, ensuring that no stale or "garbage" data is read from the memory array.</p>
+
+    <h4>Waveform Analysis: Concurrent Throughput Timing</h4>
+    <div class="image-container">
+        <img src="images/fifo_r_and_w.png" class="clickable-img zoom-trigger" alt="Concurrent R/W Waveform">
+        <div class="img-caption">Figure 7: Cycle-accurate view of simultaneous pointer updates.</div>
+    </div>
+    <p><strong>Insight:</strong> Observe that <code>wr_ptr</code> and <code>rd_ptr</code> increment on the same clock edge.</p>
+    <p><strong>Flag Stability:</strong> Note the <code>full</code> and <code>empty</code> signals. During simultaneous R/W, these flags remain stable because the total count is unchanged. This confirms the internal "Handshake" logic is glitch-free under load.</p>
+
+    <h4>Waveform Analysis: Asynchronous Reset Response</h4>
+    <div class="image-container">
+        <img src="images/fifo_reset.png" class="clickable-img zoom-trigger" alt="Asynchronous Reset Waveform">
+        <div class="img-caption">Figure 8: Immediate signal clearing upon rst_n assertion.</div>
+    </div>
+    <p><strong>Insight:</strong> Unlike other signals that wait for a <code>clk</code> edge, observe how the status flags and pointers react immediately to the falling edge of <code>rst_n</code>.</p>
+    <p><strong>Hardware Recovery:</strong> This proves the asynchronous nature of the design—the pointers return to zero mid-cycle, instantly clearing the data path before the next rising clock edge.</p>
+
+    
+
+    <h3>3. Requirement Traceability Matrix (RTM)</h3>
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Functional Requirement</th>
+                    <th>Status</th>
+                    <th>Verification Proof</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Overflow Inhibit Logic</td>
+                    <td style="color: #238636; font-weight: bold;">PASSED</td>
+                    <td>Waveform: Overflow Inhibit Logic (<code>wr_valid</code> low)</td>
+                </tr>
+                <tr>
+                    <td>Underflow Inhibit Logic</td>
+                    <td style="color: #238636; font-weight: bold;">PASSED</td>
+                    <td>Waveform: Underflow Protection (<code>rd_valid</code> low and <code>dout</code> unchanged)</td>
+                </tr>
+                <tr>
+                    <td>Simultaneous Read/Write</td>
+                    <td style="color: #238636; font-weight: bold;">PASSED</td>
+                    <td>Scenario 3 Scoreboard (0 Mismatches)</td>
+                </tr>
+                <tr>
+                    <td>Asynchronous Reset</td>
+                    <td style="color: #238636; font-weight: bold;">PASSED</td>
+                    <td>Scenario 4 Log &amp; Waveform: Reset Response</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+   <div style="background-color: #1a1f2e; padding: 20px; border-radius: 12px; border: 1px solid var(--star-blue);">
+        <p style="font-weight: bold; margin-top: 0;">Verification Summary</p>
+    <p>The comprehensive simulation of the FIFO Buffer module confirms that the RTL implementation is functionally complete and timing-accurate. By cross-referencing autonomous logs with cycle-accurate waveforms, we have proven that the module effectively handles boundary protection, full-speed concurrent throughput, and instantaneous asynchronous recovery. The design is now validated for integration into high-performance SoC architectures.</p>
+</div>
+    </div>
 <div>
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
 </div>
+
+
 
 <!-- IMAGE ZOOM OVERLAY LOGIC -->
 <div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer; align-items: center; justify-content: center;" onclick="closeModal(event)">

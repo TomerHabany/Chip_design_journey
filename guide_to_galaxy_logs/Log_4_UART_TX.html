@@ -406,8 +406,8 @@ layout: null
     <p>Before diving into the RTL, it is important to understand how the transmitter sits within a larger system. It acts as the bridge between the high-speed internal logic (CPU/FPGA) and the external serial world.</p>
         
     <div class="image-container">
-        <img src="images/system_block_diagram.png" alt="System Block Diagram">
-        <p class="figure-caption">Figure 1: UART System Block Diagram</p>
+        <img src="images/image1.png" class="clickable-img zoom-trigger" alt="System Block Diagram">
+        <div class="img-caption">Figure 1: UART System Block Diagram</div>
     </div>
 
     <p>In Figure 1 we can see the relationship between CPU, Baud Generator, and Transmitter </p>
@@ -548,8 +548,8 @@ module uart_tx #(
     <p>The transmitter is implemented as a Registered State Machine. This architecture uses a "Next State / Register" logic pattern to ensure timing stability. In this design, a combinational logic block calculates the next value of every signal based on the current state and inputs, while the sequential logic (flip-flops) only updates the <code>reg</code> values on the rising edge of the clock.</p>
 
     <div class="image-container">
-        <img src="images/image3.png" alt="Registered State Machine Diagram">
-        <p class="figure-caption">Figure 2: Registered State Machine conceptual architecture diagram</p>
+        <img src="images/image3.png" class="clickable-img zoom-trigger" alt="Registered State Machine Diagram">
+        <div class="img-caption">Figure 2: Registered State Machine conceptual architecture diagram</div>
     </div>
 
     <p>By registering the state and outputs, we effectively isolate the combinational delays from the rest of the system, preventing "glitches" from propagating to the output pins and ensuring the design meets timing requirements at higher clock frequencies.</p>
@@ -557,8 +557,8 @@ module uart_tx #(
     <p>In order to get a better understanding of the transmitter we will look at the following block diagram illustrating its internal design:</p>
     
     <div class="image-container">
-        <img src="images/uart_int_sig.png" alt="UART Internal Signals Diagram">
-        <p class="figure-caption">Figure 3: Internal logic blocks including FSM Control, Counter, and Shift Register</p>
+        <img src="images/uart_int_sig.png" class="clickable-img zoom-trigger" alt="UART Internal Signals Diagram">
+        <div class="img-caption">Figure 3: Internal logic blocks including FSM Control, Counter, and Shift Register</div>
     </div>
     
 
@@ -616,8 +616,8 @@ module uart_tx #(
     <p>The following diagram illustrates our FSM:</p>
     
     <div class="image-container">
-        <img src="images/image4.png" alt="FSM State Diagram">
-        <p class="figure-caption">Figure 4: FSM Transition Diagram</p>
+        <img src="images/image4.png" class="clickable-img zoom-trigger" alt="FSM State Diagram">
+        <div class="img-caption">Figure 4: FSM Transition Diagram</div>
     </div>
     
 

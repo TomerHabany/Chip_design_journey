@@ -13,7 +13,7 @@ module uart_tx
     input  logic        sample_tick, // sample rate tick from baud generator
     output logic       tx_out,   // serial transmit output
     output logic       tx_done,      // transmission done tick
-    output logic       baude_en     // baud enable signal
+    output logic       baud_en     // baud enable signal
 );
 
 // Internal signals
@@ -37,11 +37,11 @@ logic [DATA_WIDTH-1:0] tx_data_reg;
 logic tx_done_next;
 logic tx_done_reg;
 
-// 6. baude enable signal
-logic baude_en_next;
-logic baude_en_reg;
+// 6. baud enable signal
+logic baud_en_next;
+logic baud_en_reg;
 
-// State machine sequential logic
+// State machine states definition
 typedef enum logic [1:0] {
     IDLE,
     START,
@@ -54,7 +54,7 @@ state_t state_reg;
 // combinational assignments
 assign tx_out = tx_reg;
 assign tx_done = tx_done_reg;
-assign baude_en = baude_en_reg;
+assign baud_en = baud_en_reg;
 
 // sequential logic
 always_ff @(posedge clk or negedge rst_n) begin
@@ -66,7 +66,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         bit_count_reg <= '0;
         tx_data_reg <= '0;
         tx_done_reg <= 1'b0;
-        baude_en_reg <= 1'b0;
+        baud_en_reg <= 1'b0;
     end else begin
         // update all registers
         state_reg <= state_next;
@@ -75,7 +75,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         bit_count_reg <= bit_count_next;
         tx_data_reg <= tx_data_next;
         tx_done_reg <= tx_done_next;
-        baude_en_reg <= baude_en_next;
+        baud_en_reg <= baud_en_next;
     end
 end
 
@@ -88,7 +88,7 @@ always_comb begin
      bit_count_next = bit_count_reg;
      tx_data_next = tx_data_reg;
      tx_done_next = 1'b0; // default no done tick
-     baude_en_next = (state_reg != IDLE); // enable baud generator when not in IDLE
+     baud_en_next = (state_reg != IDLE); // enable baud generator when not in IDLE
 
         case(state_reg)
 

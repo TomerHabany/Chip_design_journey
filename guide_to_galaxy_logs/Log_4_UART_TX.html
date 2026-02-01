@@ -1,14 +1,13 @@
 ---
 layout: null
 ---
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log 4: The UART Transmitter</title>
-   <style>
+    <title>Log Log 3: The Synchronous FIFO</title>
+    <style>
         :root {
             --space-black: #0b0e14;
             --deep-slate: #161b22;
@@ -79,41 +78,83 @@ layout: null
         a { color: var(--star-blue); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
-        /* Interface Table Styling */
-        .interface-table-wrapper {
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin: 20px 0;
-            background: #ffffff;
+       /* Brighter "Nebula Frost" Table Styling */
+
+       /* Center the image and its caption */
+        .image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            width: 100%;
         }
+
+        .interface-table-wrapper {
+            margin: 25px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            /* Uses a softer, lighter border for a clean look */
+            border: 1px solid #d0d7de; 
+            /* Soft light-mode shadow for depth */
+            box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+        }
+
         .interface-table {
             width: 100%;
             border-collapse: collapse;
-            color: #1e293b;
-        }
-        .interface-table th {
-            background-color: #f8fafc;
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #475569;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .interface-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.875rem;
-        }
-        .interface-table tr:hover { background-color: #f8fafc; }
-        .signal-name {
-            font-family: 'Consolas', monospace;
-            font-weight: 600;
-            color: #2563eb;
+            /* Main body is a very clean, bright off-white/grey */
+            background-color: #f6f8fa; 
+            color: #24292f;
+            font-size: 0.95rem;
         }
 
+        .interface-table th {
+            /* Header uses a sophisticated slate-grey */
+            background-color: #eaeef2;
+            color: #8a3ffc; /* Vivid Nebula Purple */
+            font-weight: 700;
+            text-align: center;
+            padding: 14px 16px;
+            border-bottom: 2px solid #d0d7de;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .interface-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #d0d7de;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* Subtle Zebra Striping using a crisp white */
+        .interface-table tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+
+        /* Row highlight on hover - a very light purple tint */
+        .interface-table tr:hover {
+            background-color: #f0f7ff;
+        }
+
+        /* Logic/Signal Styling - Professional "GitHub-style" Code look */
+        .interface-table code {
+            background-color: rgba(175, 184, 193, 0.2); /* Soft grey inset */
+            color: #0969da;           /* Precision Blue for signals */
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        /* Status Column - Vibrant Verification Green */
+        .interface-table td:nth-child(2) {
+            font-weight: bold;
+            color: #1a7f37; 
+        }
+        
         /* Image Zoom Styling */
         .clickable-img {
             cursor: zoom-in;
@@ -149,11 +190,25 @@ layout: null
             transition: transform 0.1s ease-out; /* Smooth scrolling zoom */
             transform-origin: center; /* Ensures zoom happens from middle */
         }
-    </style>
-</head>
-<body>
-
-<div class="log-container">
+        
+        /* Math/LaTeX Styling */
+        .mjx-chtml {
+            color: #adbac7; /* Matches your document text color */
+            font-size: 1.1em;
+            margin: 20px 0;
+        }
+        
+        /* Ensure display equations are centered and spaced */
+        .MathJax_Display {
+            margin: 25px 0 !important;
+            display: block;
+            text-align: center;
+        }
+            </style>
+        </head>
+        <body>
+    
+        <div class="log-container">
     <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
     <div class="section">
         <h1 class="center">Log 4: The UART Transmitter – Precision Timing & State Machines</h1>
@@ -161,177 +216,372 @@ layout: null
     </div>
 
     <div class="section">
-        <h2>What is a UART?</h2>
-        <p>UART will be the "translator" of our digital world. Inside our chip, the CPU works with parallel data, sending 8 bits all at once across 8 wires. However, most external devices only have one wire to listen on. Our UART’s job will be to take that parallel byte and "serialize" it, sending it out bit-by-bit over time.</p>
+    <h2>RTL Module: UART Transmitter &amp; Baud Rate Generator</h2>
 
-        <h3>The Life of a Transmission: A Step-by-Step Example</h3>
-        <p>Imagine our CPU wants to send the letter 'A' (ASCII 8'h41, or binary 01000001). Here is exactly how we will handle the flow:</p>
-        
-        <ul class="step-list">
-            <li>The Trigger: <span>The CPU will place 8'b01000001 on the din bus and pulse a start transmission signal - 'tx_start'.</span></li>
-            <li>The Wake-up (Start Bit): <span>The UART will immediately pull the output wire - 'tx_out' from High to Low ('0'). This tells the receiver, "Pay attention, data is coming!"</span></li>
-            <li>The Data Payload: <span>The UART will then send each bit of the 'A' one by one. It will start with the Least Significant Bit (LSB) and end with the MSB.</span></li>
-            <li>The Close (Stop Bit): <span>After all 8 bits are sent, the UART will pull the line back to High ('1'). This resets the line for the next message.</span></li>
-            <li>The Finish Line: <span>The UART will pulse a feedback signal - 'tx_done' to let the CPU know it can send the next character.</span></li>
-        </ul>
+    <h3>What is a UART?</h3>
+    <p>UART (Universal Asynchronous Receiver-Transmitter) is one of the most fundamental communication protocols in digital design. UART is asynchronous, meaning it does not share a clock signal between the sender and the receiver.</p>
+    
+    <p>In most systems, the CPU or the internal FPGA logic operates at a very high frequency (often 50MHz, 100MHz, or higher). However, when communicating with outside components such as a GPS module, a sensor, or a PC terminal, those devices typically operate at a much slower frequency to ensure data integrity over wires.</p>
 
-        <p>Every transmission will follow this '0' -> Data -> '1' frame.</p>
+    
+
+    <p>To bridge this gap, the UART acts as a translator:</p>
+    <ul>
+        <li><strong>Parallel-to-Serial Conversion:</strong> It takes a full Byte (8 bits) of data from the CPU all at once (parallel) and sends it out one bit at a time (serial) over a single wire.</li>
+        <li><strong>Timing Alignment:</strong> Because there is no shared clock, both sides must agree on a specific speed beforehand, known as the Baud Rate.</li>
+    </ul>
+
+    <p>To achieve this, the transmitter must:</p>
+    <ul>
+        <li>Generate its own timing signal to know exactly when to shift each bit out onto the wire.</li>
+        <li>Package data into a "frame" (Start bit, Data bits, and a Stop bit) so the receiver knows when a transmission begins and ends.</li>
+    </ul>
+
+    <p>This guide is split into two parts: First, we will build the "heartbeat" of the system - the Baud Rate Generator, and then we will implement the UART Transmitter state machine that uses it.</p>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+
+    <h2>Part 1: The Baud Rate Generator (baud_gen.sv)</h2>
+
+    <h4>1. The Functional Specification</h4>
+    <p><strong>Purpose:</strong> To create a timing pulse (tick) that tells the UART module when to sample or shift data bits based on a pre-defined frequency.</p>
+
+    <p><strong>Behavior:</strong></p>
+    <ul>
+        <li>Divides the high-frequency system clock down to a much slower "sample rate."</li>
+        <li>In this design, we generate a tick that is 16 times faster than the actual Baud Rate. This is a common industry standard because it allows the Receiver (RX) to oversample the incoming data for better accuracy.</li>
+        <li>Provides a <code>sample_tick</code> that is high for exactly one clock cycle when the timing limit is reached.</li>
+        <li>Includes an <code>en</code> (enable) signal to start or stop the generator.</li>
+    </ul>
+
+    <h4>Interface Definition</h4>
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Signal Name</th>
+                    <th>Direction</th>
+                    <th>Width</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>clk</code></td><td>Input</td><td>1</td><td>System clock (e.g., 100MHz).</td></tr>
+                <tr><td><code>rst_n</code></td><td>Input</td><td>1</td><td>Active-low asynchronous reset.</td></tr>
+                <tr><td><code>en</code></td><td>Input</td><td>1</td><td>Enable signal to start the counter.</td></tr>
+                <tr><td><code>sample_tick</code></td><td>Output</td><td>1</td><td>High for one cycle at the oversampling rate.</td></tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="section">
-        <h3>Controlling the Timing: The 16x Over-Sampling Concept</h3>
-        <p>How will we ensure the receiver doesn't miss a bit? We will use a concept called Over-sampling. We won't just send a bit and hope for the best; we will divide the time for a single bit (the Bit Period) into 16 smaller segments called sample_tick pulses.</p>
+    <p>The <code>en</code> signal is crucial for maintaining synchronization. Since UART is asynchronous, the transmitter and receiver need to start their "stopwatches" at the exact same moment a transmission begins. By keeping the generator disabled until the UART state machine is ready to send a Start Bit, we ensure that the very first tick occurs at a predictable interval, preventing timing drift from the very first bit.</p>
 
-        <p>Our UART will hold the value of each bit on tx_out for exactly 16 of these ticks. We do this because the receiver on the other end is designed to wait for the 8th tick - the dead center of the bit to sample the value. By holding our bit for 16 ticks, we give the receiver the best possible chance to capture the data accurately, even if there is slight clock drift.</p>
+            <h4>Module Header</h4>
+            <details>
+                <summary>View Module Header Code</summary>
+                <pre><code class="language-systemverilog">
+        module baud_gen #(
+            parameter CLOCK_FREQ = 100_000_000, // 100 MHz
+            parameter BAUD_RATE  = 115_200
+        ) (
+            input  logic clk,
+            input  logic rst_n,
+            input  logic en,
+            output logic sample_tick
+        );
+                </code></pre>
+            </details>
 
-        <div 
-        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
-        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">UART Block Diagram</h4>
-        <img 
-            class="clickable-img zoom-trigger"
-            src="images/image1.png" 
-            alt="UART Block Diagram"
-            class="clickable-img"
-        >
-        </div>
-       
-        <p>This diagram shows the high-level flow from the CPU, through our UART and Baud Generator blocks, out to the Receiver.</p>
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+    <h4>2. Baud Generator Architecture</h4>
+    <p>To manage the timing logic, we must define the parameters and internal registers that control the frequency division.</p>
+    <ul>
+        <li><code>TICK_LIMIT</code>: A calculated constant that defines how many system clock cycles must pass to equal one "tick" period.</li>
+        <li><code>TICK_WIDTH</code>: The minimum number of bits required to represent the <code>TICK_LIMIT</code> value.</li>
+        <li><code>tick_count</code>: The internal counter that tracks elapsed clock cycles. When this reaches the <code>TICK_LIMIT</code>, a tick is generated and the counter resets.</li>
+    </ul>
+    <p>To create an accurate timing pulse, we need to calculate the divider ratio.</p>
+    <p><strong>The Math:</strong> Since we want 16 ticks per baud bit, the formula used for the tick limit is:</p>
+    
+    <div class="math-container">
+        \[ \text{TICK_LIMIT} = \frac{\text{CLOCK_FREQ}}{\text{BAUD_RATE} \times 16} \]
     </div>
+    
+    <p>For a 100MHz clock and 115,200 Baud:</p>
+    
+    <div class="math-container">
+        \[ \text{TICK_LIMIT} = \frac{100,000,000}{115,200 \times 16} \approx 54.25 \]
+    </div>
+    
+    <p>The counter will count from 0 to 53 (54 total steps) to approximate this timing.</p>
+   
+    <p><strong>Bit-Width Calculation:</strong> We use <code>TICK_WIDTH = clog2(TICK_LIMIT)</code> to ensure the <code>tick_count</code> register is exactly the right size to hold the maximum value of the limit.</p>
+    <details>
+        <summary>View Parameters and Internal Signals</summary>
+        <pre><code class="language-systemverilog">
+    // Calculate the number of clock cycles per baud tick
+    localparam integer TICK_LIMIT = CLOCK_FREQ / (BAUD_RATE*16);
+    localparam integer TICK_WIDTH = $clog2(TICK_LIMIT);
 
-    <div class="section">
-        <h2>Deep Dive 1: The Baud Rate Generator</h2>
-        <p>To get those 16 ticks per bit, we will need a heartbeat. This will be our Baud Rate Generator.</p>
+    // count signal
+    logic [TICK_WIDTH-1:0] tick_count;
+        </code></pre>
+    </details>
 
-        <h3>The Logic: Why we won't let it run free</h3>
-        <p>We don't want our baud_gen to be free-running; instead, we want it to only be enabled when a transmission starts.</p>
+    <p>We use <code>localparam</code> for these values because they are derived constants. Unlike the <code>parameter</code> values in the module header, which the user can change during instantiation, a <code>localparam</code> cannot be modified from the outside. This protects the design by ensuring the math remains consistent with the provided clock and baud rate.</p>
 
-        <p>If the generator is free-running, it is constantly counting in the background. If the tx_start signal arrives just as the generator was about to finish a count, our first bit (the Start Bit) might be cut extremely short. In a worst-case scenario, the '0' bit that signals the start of communication would only be a few clock cycles wide instead of the full 16-tick period. This would cause the receiver to miss the message entirely. By using a baud_en signal from the UART, we will "reset" the timer so it starts fresh at the exact moment we begin sending data.</p>
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+    <h4>3. How the Generator Works (Step-by-Step)</h4>
+    <p>Imagine the system is configured for 115,200 Baud on a 100MHz clock. We can trace how the hardware responds by looking at the logical flow of the module:</p>
+    
+    <p><strong>Scenario 1: Reset or Disabled</strong></p>
+    <p>If <code>rst_n</code> is low or <code>en</code> is low, the logic enters a "forced idle" state. The <code>tick_count</code> is cleared to 0 and <code>sample_tick</code> stays at 0. The "heartbeat" is stopped.</p>
+    
+    <p><strong>Scenario 2: Normal Counting</strong></p>
+    <p>When the module is enabled, <code>tick_count</code> increments by 1 on every rising edge of <code>clk</code>. It acts as a stopwatch counting system clock cycles.</p>
+    
+    <p><strong>Scenario 3: Reaching the Limit (The Tick)</strong></p>
+    <p>Once <code>tick_count</code> reaches the threshold (<code>TICK_LIMIT - 1</code>, which is 53 in our example), it wraps back to 0 on the next clock edge. At that exact moment, <code>sample_tick</code> is driven to 1 for that single clock cycle. This "tick" acts as a strobe for the UART state machine we will build next.</p>
 
-        <div 
-        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
-        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">Baud Generator Timing Diagram</h4>
-        <img 
-            class="clickable-img zoom-trigger"
-            src="images/image2.png" 
-            alt="Baud Generator Timing Diagram"
-            class="clickable-img"
-        >
-        </div>
-        
-        <p>This illustrates the timing collision that happens if we don't synchronize the generator.</p>
-
-        <h3>Implementation: Step-by-Step</h3>
-        <p><strong>Step 1: Defining the Interface and the Math</strong> We will start by defining our parameters. We need the CLOCK_FREQ of our board and the BAUD_RATE we want to achieve. We will then use a localparam to calculate the TICK_LIMIT. This limit tells our counter exactly how many system clock cycles must pass to equal one sample_tick.</p>
-
-        <details>
-            <summary>View Code: Interface and Math</summary>
-            <pre>
-module baud_gen #(
-    parameter CLOCK_FREQ = 100_000_000,
-    parameter BAUD_RATE  = 115200
-)(
-    input  logic clk, rst_n, en,
-    output logic sample_tick
-);
-    // Formula: System Clock / (Desired Baud * 16 ticks per bit)
-    localparam TICK_LIMIT = CLOCK_FREQ / (BAUD_RATE * 16);
-    logic [$clog2(TICK_LIMIT)-1:0] count;
-            </pre>
-        </details>
-
-        <p><strong>Step 2: The Counting Logic</strong> Now we will implement the actual counter. When en is high, the counter will increment. Once it hits the TICK_LIMIT, it will pulse the sample_tick for exactly one clock cycle and wrap back to zero. If en is low, the counter will be held at zero, ensuring we are perfectly synchronized for the next start bit.</p>
-
-        <details>
-            <summary>View Code: Counting Logic</summary>
-            <pre>
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+    <h4>4. Implementation</h4>
+    
+    <p>To translate our requirements into hardware, we utilize an <code>always_ff</code> procedural block to model synchronous, edge-triggered behavior. This section of the code is responsible for managing the three distinct operational states of the generator:</p>
+    <ul>
+        <li>
+        <strong>Asynchronous Reset <code>(!rst_n)</code>:</strong> We use a high-priority check for the reset signal. This ensures that the <code>tick_count</code> and <code>sample_tick</code> are immediately forced to zero, putting the system in a known, safe state regardless of the clock.
+        </li>
+        <li>    
+        <strong>Synchronous Enable <code>(!en)</code>:</strong> The logic explicitly checks the enable signal on every clock edge. By resetting the <code>tick_count</code> to zero whenever en is low, we ensure that the "stopwatch" starts from a clean slate the moment the UART transmission begins. This prevents the first bit from being shorter than the others - which can cause an entire transmission to be lost.
+        </li>
+        <li>
+        <strong>The Rollover Comparator:</strong> The heart of the implementation is a conditional check: if <code>(tick_count == TICK_LIMIT - 1)</code>. When this condition is met, the code performs two simultaneous actions: it wraps the counter back to 0 and drives <code>sample_tick</code> high for one cycle.
+        </li>
+        <p>
+        The following code implements this logic using non-blocking assignments (<=), which is essential for modeling sequential logic accurately in SystemVerilog.</p>
+        </p>
+    </ul>
+    <details>
+        <summary>View Baud Generator Code</summary>
+        <pre><code class="language-systemverilog">
+    // baud tick generation and counter logic
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            count <= 0;
-            sample_tick <= 0;
-        end else if (en) begin
-            if (count == TICK_LIMIT - 1) begin
-                count <= 0;
-                sample_tick <= 1;
+        if(!rst_n) begin
+            tick_count <= '0;
+            sample_tick <= 1'b0;
+        end else if(!en) begin
+            tick_count <= '0;
+            sample_tick <= 1'b0; // no tick when disabled
+        end else begin                
+            if(tick_count == TICK_LIMIT - 1) begin
+                tick_count <= '0;
+                sample_tick <= 1'b1; // generate sample tick
             end else begin
-                count <= count + 1'b1;
-                sample_tick <= 0;
+                tick_count <= tick_count + 1;
+                sample_tick <= 1'b0;  // no tick     
             end
-        end else begin
-            count <= 0;
-            sample_tick <= 0;
         end
     end
-endmodule
-            </pre>
-        </details>
-    </div>
+        </code></pre>
+    </details>
 
-    <div class="section">
-        <h2>Deep Dive 2: The UART TX Controller</h2>
-        <p>Now that we have our baud_gen to control the timing, we can start working on the UART_TX itself. This will be the "Brain" of the operation.</p>
+    <p>The Baud Rate Generator is now complete. In the next section, we will implement the UART Transmitter, which will "listen" to the <code>sample_tick</code> to know when to shift data out onto the TX line.</p>
+</div>
 
-        <h3>Designing for Stability: The Registered Moore Machine</h3>
-        <p>We will implement a Moore State Machine, where the output is determined solely by the current state. To ensure our output is perfectly stable and free of combinational logic "glitches," we will make it a Registered State Machine. This means we will use a register to hold the state, ensuring that the tx_out signal only changes exactly on the clock edge.</p>
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
     
-        <div 
-        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
-        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">State Register Block Diagram</h4>
-        <img 
-            class="clickable-img zoom-trigger"
-            src="images/image3.png" 
-            alt="State Register Block Diagram"
-            class="clickable-img"
-        >
-        </div>
+    
+<div class="section">
+    <h2>RTL Module: UART Transmitter (uart_tx.sv)</h2>
+    
+    <h3>Introduction</h3>
+    <p>The UART Transmitter is the subsystem responsible for executing the outbound leg of asynchronous serial communication. Its primary role is to act as a serializer: it accepts a multi-bit parallel data word from the system's internal bus and systematically broadcasts it over a single physical wire. Beyond simple data movement, the transmitter is the "protocol architect", it enforces the UART standard by encapsulating raw data into a structured frame, adding the necessary start and stop bits that allow a remote receiver to synchronize and capture the data without a shared clock signal.</p>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+   <h3>Component Interactivity</h3>
+    <p>Before diving into the RTL, it is important to understand how the transmitter sits within a larger system. It acts as the bridge between the high-speed internal logic (CPU/FPGA) and the external serial world.</p>
         
-        
+    <div class="image-container">
+        <img src="images/system_block_diagram.png" alt="System Block Diagram">
+        <p class="figure-caption">Figure 1: UART System Block Diagram</p>
     </div>
 
-    <div class="section">
-        <h3>The Philosophy of Registered State Machines</h3>
-        <p>As we move into professional-grade RTL, we will adopt the industry-standard practice of separating our logic into two distinct domains. For every signal that controls our output, the state, the data buffer, and internal counters we will create a <code>_next</code> (combinational) and a <code>_reg</code> (sequential) pair.</p>
+    <p>In Figure 1 we can see the relationship between CPU, Baud Generator, and Transmitter </p>
+    
 
-        <ul>
-            <li><strong>Combinational Logic (<code>_next</code>):</strong> This acts as the "brain," calculating the next value based on current inputs and the current state.</li>
-            <li><strong>Sequential Logic (<code>_reg</code>):</strong> This acts as the "memory," latching those values exactly on the clock edge.</li>
-        </ul>
+    
+    <p>To ensure successful data transmission, four distinct entities must work in concert:</p>
+    <ul>
+        <li><strong>The CPU/Control Logic:</strong> This is the master of the operation. It provides the parallel data (<code>din</code>) and pulses the start signal (<code>tx_start</code>). To prevent data corruption, the CPU must not send new data while a transmission is in progress. The done signal (<code>tx_done</code>) acts as a critical feedback pulse (or "handshake"), informing the CPU that the previous frame is complete and the transmitter is ready for the next byte.</li>
+        <li><strong>The Baud Rate Generator:</strong> This serves as the system "metronome." It remains idle until the Transmitter enables it via the <code>baud_en</code> signal. Once active, it sends steady sample ticks to the transmitter, ensuring that every bit sent out onto the wire has a consistent and accurate duration (the bit period).</li>
+        <li><strong>The UART Transmitter (The Bridge):</strong> This module manages the state machine. It consumes the parallel data from the CPU and uses the timing from the Baud Generator to "shift" that data out one bit at a time. It is responsible for wrapping the raw data in a Start bit and a Stop bit.</li>
+        <li><strong>The External Receiver:</strong> This is the destination. It sits at the other end of the <code>tx_out</code> wire, waiting for the signal to drop from High to Low (the Start Bit) so it can begin sampling the incoming serial data.</li>
+    </ul>
 
-        <p>We are doing this to separate the combinational logic from the sequential logic. This is the industry standard because it prevents electrical "glitches" (tiny, unwanted pulses) from appearing on our output pins and ensures our design can meet strict timing requirements. By latching the next state into a register, our signals remain stable and clean for the rest of the hardware.</p>
+    <p>A standard transmission frame consists of:</p>
+    <ul>
+        <li><strong>Start Bit (Logic 0):</strong> Signals the receiver to start its clock.</li>
+        <li><strong>Data Bits:</strong> Usually 8 bits, sent Least Significant Bit (LSB) first.</li>
+        <li><strong>Stop Bit (Logic 1):</strong> Signals the end of the frame.</li>
+    </ul>
+
+    <h4>Transmission Pattern Example:</h4>
+    <p>To transmit the character 'A' (ASCII 0x41 / Binary 01000001), the serial line transitions through the following frame structure:</p>
+
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>Idle</th>
+                    <th>Start</th>
+                    <th>D0 (LSB)</th>
+                    <th>D1</th>
+                    <th>D2</th>
+                    <th>D3</th>
+                    <th>D4</th>
+                    <th>D5</th>
+                    <th>D6</th>
+                    <th>D7 (MSB)</th>
+                    <th>Stop</th>
+                    <th>Idle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Logic</strong></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <td><strong>Bit #</strong></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>4</td>
+                    <td>5</td>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>8</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="section">
-        <h3>Engineering Specification: <code>uart_tx.sv</code></h3>
+    <p><strong>Visual Sequence:</strong><br>
+    [IDLE: 1] → [START: 0] → [DATA: 10000010] → [STOP: 1]</p>
+    
+    <blockquote>
+        Note: The <code>tx_done</code> signal pulses high immediately after the Stop bit duration is complete, signaling the CPU to prepare the next frame.
+    </blockquote>
 
-        <h4>1. Parameters and Ports</h4>
-        <p>We will define the interface of our sequencer. We use <code>TICKS_PER_BIT</code> (typically 16) and <code>DATA_WIDTH</code> (8 bits) as parameters to make the module reusable. Our ports include the system clock, reset, and the control signals from the CPU, the pulse from the Baud Generator and the Baud enable signal.</p>
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
-        <details>
-            <summary>View Code: Parameters and Ports</summary>
-            <pre>
-module uart_tx
-#(
-    parameter TICKS_PER_BIT = 16, 
-    parameter DATA_WIDTH    = 8   
-)
-(
-    input  logic clk,
-    input  logic rst_n,
-    input  logic [DATA_WIDTH-1:0] din,
-    input  logic tx_start,
-    input  logic sample_tick,
-    output logic tx_out,
-    output logic tx_done,
-    output logic baude_en
+    <h3>Part 2: The UART Transmitter Module</h3>
+    <p>The following section defines the physical and logical interface of the module. As illustrated in the System Block Diagram above, these signals facilitate the handshake between the CPU and the Baud Generator.</p>
+
+    <h4>Interface Definition</h4>
+    <div class="interface-table-wrapper">
+        <table class="interface-table">
+            <thead>
+                <tr>
+                    <th>Signal Name</th>
+                    <th>Direction</th>
+                    <th>Width</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>clk</code></td><td>Input</td><td>1</td><td>System clock.</td></tr>
+                <tr><td><code>rst_n</code></td><td>Input</td><td>1</td><td>Active-low reset.</td></tr>
+                <tr><td><code>din</code></td><td>Input</td><td>DATA_WIDTH</td><td>The parallel byte to be sent.</td></tr>
+                <tr><td><code>tx_start</code></td><td>Input</td><td>1</td><td>Triggers the transmission process.</td></tr>
+                <tr><td><code>sample_tick</code></td><td>Input</td><td>1</td><td>The "heartbeat" from the Baud Rate Generator.</td></tr>
+                <tr><td><code>tx_out</code></td><td>Output</td><td>1</td><td>The serial output line.</td></tr>
+                <tr><td><code>tx_done</code></td><td>Output</td><td>1</td><td>High for one cycle after the Stop bit finishes.</td></tr>
+                <tr><td><code>baud_en</code></td><td>Output</td><td>1</td><td>Enables the Baud Generator during active transmission.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>According to our interface definition table we declare the module and its ports. Additionally we declare two parameters <code>DATA_WIDTH</code> and <code>TICKS_PER_BIT</code> to keep our model adjustable</p>
+    <details>
+        <summary>View Module Header Code</summary>
+<pre><code class="language-systemverilog">
+module uart_tx #(
+    parameter TICKS_PER_BIT = 16, // Number of baud ticks per bit
+    parameter DATA_WIDTH    = 8   // Number of data bits
+) (
+    input  logic                   clk,
+    input  logic                   rst_n,
+    input  logic [DATA_WIDTH-1:0]  din,
+    input  logic                   tx_start,
+    input  logic                   sample_tick,
+    output logic                   tx_out,
+    output logic                   tx_done,
+    output logic                   baud_en
 );
-            </pre>
-        </details>
+</code></pre>
+    </details>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
 
-        <h4>2. Internal Signals</h4>
-        <p>We will declare the registers and their corresponding combinational "next" signals. Every internal signal that controls our output generation, including the <code>tick_count_reg</code> (to track the 16 ticks) and <code>bit_count_reg</code> (to track which of the 8 bits we are sending) - will have a matching <code>_next</code> signal. We use <code>$clog2</code> to determine the exact number of bits needed for our counters to save hardware area.</p>
+    <h4>2. Internal Signals and Registers</h4>
+    <p>The transmitter is implemented as a Registered State Machine. This architecture uses a "Next State / Register" logic pattern to ensure timing stability. In this design, a combinational logic block calculates the next value of every signal based on the current state and inputs, while the sequential logic (flip-flops) only updates the <code>reg</code> values on the rising edge of the clock.</p>
 
-        <details>
-            <summary>View Code: Internal Signals</summary>
-            <pre>
+    <div class="image-container">
+        <img src="images/image3.png" alt="Registered State Machine Diagram">
+        <p class="figure-caption">Figure 2: Registered State Machine conceptual architecture diagram</p>
+    </div>
+
+    <p>By registering the state and outputs, we effectively isolate the combinational delays from the rest of the system, preventing "glitches" from propagating to the output pins and ensuring the design meets timing requirements at higher clock frequencies.</p>
+
+    <p>In order to get a better understanding of the transmitter we will look at the following block diagram illustrating its internal design:</p>
+    
+    <div class="image-container">
+        <img src="images/uart_int_sig.png" alt="UART Internal Signals Diagram">
+        <p class="figure-caption">Figure 3: Internal logic blocks including FSM Control, Counter, and Shift Register</p>
+    </div>
+    
+
+    <ul>
+        <li>The <strong>FSM Control Unit</strong> acts as the brain, orchestrating the transition between states, and controlling the transmission done output, the baud enable signal, and the shifts of the shift register.</li>
+        <li>The <strong>Counting Logic</strong> unit counts the <code>sample_tick</code> signal from the baud generator giving the timing for the FSM Control Unit.</li>
+        <li>The <strong>Shift Register</strong> is the muscle, holding the parallel data and shifting it out bit-by-bit to the <code>tx_out</code> pin whenever the FSM signals that a full bit period has elapsed.</li>
+    </ul>
+
+    <p>From this diagram we can see all the internal signals needed for our module:</p>
+    <ul>
+        <li><strong>Output Logic and Register:</strong> Holds the state of the serial line to ensure a clean, stable output.</li>
+        <li><strong>Tick Counter:</strong> Tracks the number of sample ticks received to determine when a full bit period has passed.</li>
+        <li><strong>Bit Counter:</strong> Tracks the number of data bits transmitted to know when to move to the STOP state.</li>
+        <li><strong>Transmit Data Register:</strong> A shift register used to store the parallel input and shift it out serially.</li>
+        <li><strong>Transmission Done Signal:</strong> Logic to generate the handshake pulse for the CPU.</li>
+        <li><strong>Baud Enable Signal:</strong> Logic to trigger the external Baud Rate Generator.</li>
+    </ul>
+
+    <details>
+        <summary>View Internal Signals</summary>
+<pre><code class="language-systemverilog">
+    // Internal signals
     // 1. output logic and register
     logic tx_next; 
     logic tx_reg; 
@@ -352,227 +602,69 @@ module uart_tx
     logic tx_done_next;
     logic tx_done_reg;
 
-    // 6. baude enable signal
-    logic baude_en_next;
-    logic baude_en_reg;
-            </pre>
-        </details>
+    // 6. baud enable signal
+    logic baud_en_next;
+    logic baud_en_reg;
+</code></pre>
+    </details>
 
-        <h4>3. State Machine Sequential Logic</h4>
-        <p>We will use an <code>typedef enum</code> to define our states. This replaces "magic numbers" with human-readable labels (<code>IDLE</code>, <code>START</code>, <code>DATA</code>, <code>STOP</code>), making the FSM logic easy to follow and debug.</p>
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+    <h4>3. The State Machine Logic</h4>
+    <p>The UART transmitter operates as a Finite State Machine (FSM). It transitions between four distinct states based on the <code>sample_tick</code> counter.</p>
+    <p>This FSM is considered a <strong>Sequencer</strong> because its behavior follows a strict, predetermined path once it leaves the initial state. In many FSMs, multiple inputs might branch the logic into different directions; however, this transmitter is essentially a "one-way street." There is only one external control input (<code>tx_start</code>) that influences the state transitions, and it only affects the machine when it is in the IDLE state.</p>
+    <p>The following diagram illustrates our FSM:</p>
+    
+    <div class="image-container">
+        <img src="images/image4.png" alt="FSM State Diagram">
+        <p class="figure-caption">Figure 4: FSM Transition Diagram</p>
+    </div>
+    
 
-        <details>
-            <summary>View Code: State Machine Enum</summary>
-            <pre>
+    <p>To manage these transitions in SystemVerilog, we define an enumerated type for the states. This makes the code more readable and allows the synthesis tool to optimize the state encoding.</p>
+ <details>   
+<summary>View State Definition code</summary>
+<pre><code class="language-systemverilog">
+// State machine states definition
 typedef enum logic [1:0] {
     IDLE,
     START,
     DATA,
     STOP
 } state_t; 
+
 state_t state_next;
 state_t state_reg;
-            </pre>
-        </details>
+</code></pre>
+</details>
 
-        <h4>4. Combinational Assignments</h4>
-        <p>We will link our physical output ports directly to our internal registers. This ensures that the outside world only sees the stable, latched values from our registers.</p>
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">  
+    
+    <h4>4. Implementation</h4>
+    <p>The implementation follows the Two-Block RTL Style, separating the hardware into its <strong>Sequential Logic</strong> and <strong>Combinational Logic</strong> components.</p>
+    <p>This separation is standard in professional hardware design for several reasons:</p>
+    <ul>
+        <li><strong>Timing Predictability:</strong> By separating the memory from the logic, it is much easier for Synthesis tools to optimize timing paths.</li>
+        <li><strong>Readability:</strong> It creates a clear distinction between "What the state is" (Registers) and "How the state changes" (Logic).</li>
+        <li><strong>Debugging:</strong> If a signal behaves unexpectedly, the designer can immediately tell if the error lies in the transition logic or the physical flip-flop update.</li>
+    </ul>
 
-        <details>
-            <summary>View Code: Combinational Assignments</summary>
-            <pre>
-assign tx_out = tx_reg;
-assign tx_done = tx_done_reg;
-assign baude_en = baude_en_reg;
-            </pre>
-        </details>
+    <h4>Sequential Logic</h4>
+    <p><strong>Objective:</strong> The goal of this block is to physically implement the registers (Flip-Flops). On every rising edge of the clock, this block copies the "calculated" next values into the "current" registers. It also handles the system reset, ensuring the transmitter starts in a known, safe state <code>(IDLE)</code>.</p>
 
-        <h4>5. Sequential Logic</h4>
-        <p>This is the only section where we use the <code>posedge clk</code>. On a reset (<code>rst_n</code> low), we will initialize our registers to safe values, specifically, <code>tx_reg</code> will be set to '1' (the idle state). On every clock edge, we will simply move the "next" values into the "registers."</p>
-
-        <details>
-            <summary>View Code: Sequential Logic</summary>
-            <pre>
-always_ff @(posedge clk or negedge rst_n) begin
-    if(!rst_n) begin
-        state_reg <= IDLE;
-        tx_reg <= 1'b1;
-        tick_count_reg <= '0;
-        bit_count_reg <= '0;
-        tx_data_reg <= '0;
-        tx_done_reg <= 1'b0;
-        baude_en_reg <= 1'b0;
-    end else begin
-        state_reg <= state_next;
-        tx_reg <= tx_next;
-        tick_count_reg <= tick_count_next;
-        bit_count_reg <= bit_count_next;
-        tx_data_reg <= tx_data_next;
-        tx_done_reg <= tx_done_next;
-        baude_en_reg <= baude_en_next;
-    end
-end
-            </pre>
-        </details>
-
-        <h4>6. Combinational Logic</h4>
-        <p>In this block, we will define the defaults to prevent "latches." We will ensure <code>baude_en_next</code> is automatically high whenever we are not in <code>IDLE</code>, which keeps our timing generator active exactly when we need it.</p>
-
-        <details>
-            <summary>View Code: Combinational Logic Defaults</summary>
-            <pre>
-always_comb begin
-     state_next = state_reg;
-     tx_next = tx_reg;
-     tick_count_next = tick_count_reg;
-     bit_count_next = bit_count_reg;
-     tx_data_next = tx_data_reg;
-     tx_done_next = 1'b0; 
-     baude_en_next = (state_reg != IDLE);
-            </pre>
-        </details>
-    </div>
-
-    <div class="section">
-        <h4>7. State Machine Case Logic</h4>
-        <p>We will implement the sequencer using a <code>case</code> statement. Our controller will follow the pre-determined path: <code>IDLE</code> -> <code>START</code> -> <code>DATA</code> -> <code>STOP</code>. In each state, we will count 16 <code>sample_tick</code> pulses before moving to the next. In the <code>DATA</code> state, we will use the right-shift operator (<code>>></code>) to move the next bit into position every time a bit period finishes.</p>
-
-        <div 
-        style="background: var(--code-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 20px;">
-        <h4 style="margin-top: 0; text-align: center; font-size: 0.8rem; color: #8b949e; text-transform: none;">FSM State Diagram</h4>
-        <img 
-            class="clickable-img zoom-trigger"
-            src="images/image4.png" 
-            alt="FSM State Diagram"
-            class="clickable-img"
-        >
-        </div>
-        
-
-        <details>
-            <summary>View Code: State Machine Logic</summary>
-            <pre>
-     case(state_reg)
-        IDLE: begin
-            tx_next = 1'b1;
-            if (tx_start) begin
-                state_next = START;
-                tx_data_next = din; 
-                tick_count_next = '0;
-            end
-        end   
-
-        START: begin
-            tx_next = 1'b0; 
-            if (sample_tick) begin
-                if (tick_count_reg == TICKS_PER_BIT - 1) begin
-                    state_next = DATA;
-                    tick_count_next = '0;
-                    bit_count_next = '0;
-                end else begin
-                    tick_count_next = tick_count_reg + 1;
-                end
-            end
-        end
-
-        DATA: begin 
-            tx_next = tx_data_reg[0];
-            if (sample_tick) begin
-                if (tick_count_reg == TICKS_PER_BIT - 1) begin
-                    tick_count_next = '0; 
-                    if (bit_count_reg == DATA_WIDTH - 1) begin
-                        state_next = STOP;
-                        bit_count_next = '0;
-                    end else begin
-                        bit_count_next = bit_count_reg + 1;
-                        tx_data_next = tx_data_reg >> 1; 
-                    end
-                end else begin
-                    tick_count_next = tick_count_reg + 1;
-                end
-            end
-        end
-
-        STOP: begin
-            tx_next = 1'b1; 
-            if (sample_tick) begin
-                if (tick_count_reg == TICKS_PER_BIT - 1) begin
-                    state_next = IDLE;
-                    tx_done_next = 1'b1;
-                    tick_count_next = '0;
-                end else begin
-                    tick_count_next = tick_count_reg + 1;
-                end
-            end
-        end
-    endcase
-end
-            </pre>
-        </details>
-    </div>
-
-    <div class="section">
-        <hr>
-        <h3>Complete Code: <code>uart_tx.sv</code></h3>
-        <p>Here is the full implementation, combining all the steps above into a single, clean module that we can copy-paste into our project.</p>
-
-        <details>
-            <summary>View Full <code>uart_tx.sv</code> Code</summary>
-            <pre>
-`timescale 1ns / 1ps
-module uart_tx
-#(
-    parameter TICKS_PER_BIT = 16, 
-    parameter DATA_WIDTH    = 8   
-)
-(
-    input  logic clk,
-    input  logic rst_n,
-    input  logic [DATA_WIDTH-1:0] din,
-    input  logic tx_start,
-    input  logic sample_tick,
-    output logic tx_out,
-    output logic tx_done,
-    output logic baude_en
-);
-
-    typedef enum logic [1:0] {
-        IDLE,
-        START,
-        DATA,
-        STOP
-    } state_t;
-
-    state_t state_next;
-    state_t state_reg;
-
-    logic tx_next; 
-    logic tx_reg; 
-    logic tx_done_next;
-    logic tx_done_reg;
-    logic baude_en_next;
-    logic baude_en_reg;
-
-    logic [$clog2(TICKS_PER_BIT)-1:0] tick_count_next; 
-    logic [$clog2(TICKS_PER_BIT)-1:0] tick_count_reg; 
-    logic [$clog2(DATA_WIDTH)-1:0] bit_count_next; 
-    logic [$clog2(DATA_WIDTH)-1:0] bit_count_reg; 
-    logic [DATA_WIDTH-1:0] tx_data_next; 
-    logic [DATA_WIDTH-1:0] tx_data_reg; 
-
-    assign tx_out   = tx_reg;
-    assign tx_done  = tx_done_reg;
-    assign baude_en = baude_en_reg;
-
+    <details>
+        <summary>View Sequential Logic Code</summary>
+<pre><code class="language-systemverilog">
+    // Sequential Logic: Register Updates
     always_ff @(posedge clk or negedge rst_n) begin
-        if(!rst_n) begin
+        if (!rst_n) begin
             state_reg      <= IDLE;
-            tx_reg         <= 1'b1;
+            tx_reg         <= 1'b1; // Idle high
             tick_count_reg <= '0;
             bit_count_reg  <= '0;
             tx_data_reg    <= '0;
             tx_done_reg    <= 1'b0;
-            baude_en_reg   <= 1'b0;
+            baud_en_reg    <= 1'b0;
         end else begin
             state_reg      <= state_next;
             tx_reg         <= tx_next;
@@ -580,20 +672,40 @@ module uart_tx
             bit_count_reg  <= bit_count_next;
             tx_data_reg    <= tx_data_next;
             tx_done_reg    <= tx_done_next;
-            baude_en_reg   <= baude_en_next;
+            baud_en_reg    <= baud_en_next;
         end
     end
+</code></pre>
+    </details>
 
+    <h4>Combinational Logic</h4>
+    <p>This block acts as the "intelligence" of the module, calculated inside an <code>always_comb</code> block. We divide this logic into two functional segments:</p>
+    
+    <p><strong>1. Default Assignments:</strong> Before entering the state machine logic, we assign every <code>_next</code> signal a default value (usually its current <code>_reg</code> value). This is a critical safety measure in RTL design. It prevents the unintended creation of latches, which occur if a combinational path is not defined for every possible condition. By setting defaults first, we ensure every signal has a valid value even if no state-specific logic applies.</p>
+    <p><strong>Baud Enable signal:</strong> for the <code>baud_en</code>signal we will use a more specific assignment, making sure it is kept low when the machine is in <code>IDLE</code> state, and switched to high for all other states</p>
+
+    <details>
+        <summary>View Default Assignments Code</summary>
+<pre><code class="language-systemverilog">
+    // 1. Default assignments (prevent latches)
     always_comb begin
-         state_next      = state_reg;
-         tx_next         = tx_reg;
-         tick_count_next = tick_count_reg;
-         bit_count_next  = bit_count_reg;
-         tx_data_next    = tx_data_reg;
-         tx_done_next    = 1'b0; 
-         baude_en_next   = (state_reg != IDLE);
+        state_next      = state_reg;
+        tx_next         = tx_reg;
+        tick_count_next = tick_count_reg;
+        bit_count_next  = bit_count_reg;
+        tx_data_next    = tx_data_reg;
+        tx_done_next    = 1'b0;               // Pulse only in specific states
+        baud_en_next    = (state_reg != IDLE); // Only enable baud gen when busy
+</code></pre>
+    </details>
 
-         case(state_reg)
+    <p><strong>2. State Machine Logic:</strong> in the same <code>always_comb</code> block we start a case statement for our states:</p>
+
+    <p><strong>State 1: IDLE</strong><br>
+    The line is held high (Logic 1). The FSM waits for the <code>tx_start</code> signal. When detected, it loads the input data into <code>tx_data_reg</code>, clears the tick counter, and moves to the START state.</p>
+ <details>
+        <summary>View <code>IDLE</code> State Code</summary>
+<pre><code class="language-systemverilog">
             IDLE: begin
                 tx_next = 1'b1;
                 if (tx_start) begin
@@ -601,7 +713,165 @@ module uart_tx
                     tx_data_next    = din;
                     tick_count_next = '0;
                 end
-            end   
+            end
+</code></pre>
+</details>
+
+    <p><strong>State 2: START</strong><br>
+    The output line <code>tx_next</code> is pulled low (Logic 0). The machine waits for exactly 16 <code>sample_tick</code> pulses (one full bit duration). This signals the receiver that a transmission has begun.</p>
+ <details>
+        <summary>View <code>START</code> State Code</summary>
+<pre><code class="language-systemverilog">
+            START: begin
+                tx_next = 1'b0;
+                if (sample_tick) begin
+                    if (tick_count_reg == TICKS_PER_BIT - 1) begin
+                        state_next      = DATA;
+                        tick_count_next = '0;
+                        bit_count_next  = '0;
+                    end else begin
+                        tick_count_next = tick_count_reg + 1;
+                    end
+                end
+            end
+</code></pre>
+</details>
+    <p><strong>State 3: DATA</strong><br>
+    For each of the 8 bits, the LSB is placed on the output line for 16 ticks. After 16 ticks, the register shifts right to bring the next bit to the LSB position and increments the <code>bit_count</code>. After all bits are sent, it moves to STOP.</p>
+ <details>
+        <summary>View <code>DATA</code> State Code</summary>
+<pre><code class="language-systemverilog">
+            DATA: begin
+                tx_next = tx_data_reg[0];
+                if (sample_tick) begin
+                    if (tick_count_reg == TICKS_PER_BIT - 1) begin
+                        tick_count_next = '0;
+                        if (bit_count_reg == DATA_WIDTH - 1) begin
+                            state_next     = STOP;
+                        end else begin
+                            bit_count_next = bit_count_reg + 1;
+                            tx_data_next   = tx_data_reg >> 1; // Shift Right
+                        end
+                    end else begin
+                        tick_count_next = tick_count_reg + 1;
+                    end
+                end
+            end
+</code></pre>
+</details>
+    <p><strong>State 4: STOP</strong><br>
+    The line is pulled high (Logic 1) for 16 ticks. Once complete, the <code>tx_done</code> pulse is generated for one cycle, and the FSM returns to IDLE to wait for new data.</p>
+ <details>
+        <summary>View <code>STOP</code> State Code</summary>
+<pre><code class="language-systemverilog">
+            STOP: begin
+                tx_next = 1'b1;
+                if (sample_tick) begin
+                    if (tick_count_reg == TICKS_PER_BIT - 1) begin
+                        state_next      = IDLE;
+                        tx_done_next    = 1'b1; // Pulse done handshake
+                        tick_count_next = '0;
+                    end else begin
+                        tick_count_next = tick_count_reg + 1;
+                    end
+                end
+            end
+        endcase
+    end
+</code></pre>
+</details>
+    <h4>Final Output Assignments</h4>
+    <p>These simple continuous assignments link our stable, registered values to the physical output pins of the module.</p>
+ <details>
+        <summary>View Continuous Assignment Code:</summary>
+<pre><code class="language-systemverilog">
+    assign tx_out   = tx_reg;
+    assign tx_done  = tx_done_reg;
+    assign baud_en  = baud_en_reg;
+
+endmodule
+</code></pre>
+</details>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
+    
+<h4>The Consolidated UART Code</h4>
+    <details>
+        <summary>View Full Module Code: uart_tx.sv</summary>
+<pre><code class="language-systemverilog">
+module uart_tx #(
+    parameter TICKS_PER_BIT = 16,
+    parameter DATA_WIDTH    = 8
+) (
+    input  logic                   clk,
+    input  logic                   rst_n,
+    input  logic [DATA_WIDTH-1:0]  din,
+    input  logic                   tx_start,
+    input  logic                   sample_tick,
+    output logic                   tx_out,
+    output logic                   tx_done,
+    output logic                   baud_en
+);
+
+    // State machine states definition
+    typedef enum logic [1:0] {
+        IDLE,
+        START,
+        DATA,
+        STOP
+    } state_t;
+
+    state_t state_reg, state_next;
+
+    // Internal signals
+    logic tx_reg, tx_next;
+    logic [$clog2(TICKS_PER_BIT)-1:0] tick_count_reg, tick_count_next;
+    logic [$clog2(DATA_WIDTH)-1:0] bit_count_reg, bit_count_next;
+    logic [DATA_WIDTH-1:0] tx_data_reg, tx_data_next;
+    logic tx_done_reg, tx_done_next;
+    logic baud_en_reg, baud_en_next;
+
+    // Sequential Logic: Register Updates
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state_reg      <= IDLE;
+            tx_reg         <= 1'b1;
+            tick_count_reg <= '0;
+            bit_count_reg  <= '0;
+            tx_data_reg    <= '0;
+            tx_done_reg    <= 1'b0;
+            baud_en_reg    <= 1'b0;
+        end else begin
+            state_reg      <= state_next;
+            tx_reg         <= tx_next;
+            tick_count_reg <= tick_count_next;
+            bit_count_reg  <= bit_count_next;
+            tx_data_reg    <= tx_data_next;
+            tx_done_reg    <= tx_done_next;
+            baud_en_reg    <= baud_en_next;
+        end
+    end
+
+    // Combinational Logic: Next State and Output Logic
+    always_comb begin
+        // Default assignments
+        state_next      = state_reg;
+        tx_next         = tx_reg;
+        tick_count_next = tick_count_reg;
+        bit_count_next  = bit_count_reg;
+        tx_data_next    = tx_data_reg;
+        tx_done_next    = 1'b0;
+        baud_en_next    = (state_reg != IDLE);
+
+        case (state_reg)
+            IDLE: begin
+                tx_next = 1'b1;
+                if (tx_start) begin
+                    state_next      = START;
+                    tx_data_next    = din;
+                    tick_count_next = '0;
+                end
+            end
 
             START: begin
                 tx_next = 1'b0;
@@ -616,14 +886,13 @@ module uart_tx
                 end
             end
 
-            DATA: begin 
+            DATA: begin
                 tx_next = tx_data_reg[0];
                 if (sample_tick) begin
                     if (tick_count_reg == TICKS_PER_BIT - 1) begin
                         tick_count_next = '0;
                         if (bit_count_reg == DATA_WIDTH - 1) begin
                             state_next     = STOP;
-                            bit_count_next = '0;
                         end else begin
                             bit_count_next = bit_count_reg + 1;
                             tx_data_next   = tx_data_reg >> 1;
@@ -646,15 +915,28 @@ module uart_tx
                     end
                 end
             end
-         endcase
+        endcase
     end
+
+    // Output assignments
+    assign tx_out  = tx_reg;
+    assign tx_done = tx_done_reg;
+    assign baud_en = baud_en_reg;
+
 endmodule
-            </pre>
-        </details>
-    </div>
-    <a href="https://tomerhabany.github.io/Chip_design_journey/" class="back-link">← Back to Portfolio</a>
+</code></pre>
+    </details>
+
+  
+
+    <h3>Building the Subsystem</h3>
+    <p>To create a fully functional UART communication link, the Transmitter and the Baud Rate Generator must operate as a unified subsystem. While we have designed them as separate, modular components, they cannot fulfill their purpose in isolation. In the next stage of our development, we will create a new SystemVerilog file for our UART Subsystem. This top-level module will instantiate both the baud generator and the transmitter, physically wiring them together to form a complete serial transmission engine ready for integration into a larger FPGA or SoC design.</p>
 </div>
-    // <!-- IMAGE ZOOM OVERLAY LOGIC -->
+
+
+
+
+<!-- IMAGE ZOOM OVERLAY LOGIC -->
 <div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); cursor: pointer; align-items: center; justify-content: center;" onclick="closeModal(event)">
     <span style="position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer;">&times;</span>
     <img id="img01" style="margin: auto; display: block; width: 80%; max-width: 1000px; border-radius: 8px; border: 2px solid #30363d; transition: transform 0.1s ease-out; transform-origin: center;">
@@ -705,8 +987,22 @@ endmodule
             modalImg.style.transform = `scale(${currentScale})`;
         }
     }, { passive: false });
+    
+    </script>
+    <script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true
+    },
+    svg: {
+      fontCache: 'global'
+    }
+  };
 </script>
 
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </body>
 </html>

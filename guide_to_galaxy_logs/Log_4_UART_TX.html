@@ -308,15 +308,15 @@ layout: null
         \[ \text{TICK_LIMIT} = \frac{\text{CLOCK_FREQ}}{\text{BAUD_RATE} \times 16} \]
     </div>
     
-    <p>For a 100MHz clock and 115,200 Baud:</p>
+    <p>For a 100MHz clock and 115,200 Baud:<br>Why 115200 baud rate? - Baud rates can be different but 115200 is a standard rate for UART communication.</p>
     
     <div class="math-container">
         \[ \text{TICK_LIMIT} = \frac{100,000,000}{115,200 \times 16} \approx 54.25 \]
     </div>
     
-    <p>The counter will count from 0 to 53 (54 total steps) to approximate this timing.</p>
+    <p>The counter will count from 0 to 53 (54 total clock cycles) for each baud tick.</p>
    
-    <p><strong>Bit-Width Calculation:</strong> We use <code>TICK_WIDTH = clog2(TICK_LIMIT)</code> to ensure the <code>tick_count</code> register is exactly the right size to hold the maximum value of the limit.</p>
+    <p><strong>Bit-Width Calculation:</strong> We use <code>TICK_WIDTH = $clog2(TICK_LIMIT)</code> to ensure the <code>tick_count</code> register is exactly the right size to hold the maximum value of the limit.</p>
     <details>
         <summary>View Parameters and Internal Signals</summary>
         <pre><code class="language-systemverilog">
@@ -333,7 +333,7 @@ layout: null
 
     <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0;">
     
-    <h4>3. How the Generator Works (Step-by-Step)</h4>
+    <h4>3. How the Baud Generator Works (Step-by-Step)</h4>
     <p>Imagine the system is configured for 115,200 Baud on a 100MHz clock. We can trace how the hardware responds by looking at the logical flow of the module:</p>
     
     <p><strong>Scenario 1: Reset or Disabled</strong></p>

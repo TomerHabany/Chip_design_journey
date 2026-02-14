@@ -561,6 +561,7 @@ module uart_tx #(
         <div class="img-caption">Figure 3: Internal logic blocks including FSM Control, Counter, and Shift Register</div>
     </div>
     
+    <p>The UART is composed of three main internal logic blocks:</p>
 
     <ul>
         <li>The <strong>FSM Control Unit</strong> acts as the brain, orchestrating the transition between states, and controlling the transmission done output, the baud enable signal, and the shifts of the shift register.</li>
@@ -568,15 +569,17 @@ module uart_tx #(
         <li>The <strong>Shift Register</strong> is the muscle, holding the parallel data and shifting it out bit-by-bit to the <code>tx_out</code> pin whenever the FSM signals that a full bit period has elapsed.</li>
     </ul>
 
-    <p>From this diagram we can see all the internal signals needed for our module:</p>
+    <p>In this block diagram we can see all the internal signals needed for our module:</p>
     <ul>
-        <li><strong>Output Logic and Register:</strong> Holds the state of the serial line to ensure a clean, stable output.</li>
-        <li><strong>Tick Counter:</strong> Tracks the number of sample ticks received to determine when a full bit period has passed.</li>
-        <li><strong>Bit Counter:</strong> Tracks the number of data bits transmitted to know when to move to the STOP state.</li>
-        <li><strong>Transmit Data Register:</strong> A shift register used to store the parallel input and shift it out serially.</li>
-        <li><strong>Transmission Done Signal:</strong> Logic to generate the handshake pulse for the CPU.</li>
-        <li><strong>Baud Enable Signal:</strong> Logic to trigger the external Baud Rate Generator.</li>
+        <li><strong>tx_next and tx_reg:</strong> The next state and current state of the transmit output line.</li>
+        <li><strong>tick_count_next and tick_count_reg:</strong> The next value and current value of the tick counter that tracks the number of sample ticks received to determine when a full bit period has passed.</li>
+        <li><strong>bit_count_next and bit_count_reg:</strong> The next value and current value of the bit counter that tracks the number of data bits transmitted to know when to move to the STOP state.</li>
+        <li><strong>tx_data_next and tx_data_reg:</strong> The next value and current value of the transmit data register, a shift register used to store the parallel input and shift it out serially.</li>
+        <li><strong>tx_done_next and tx_done_reg:</strong> The next value and current value of the transmission done signal, which generates a handshake pulse for the CPU.</li>
+        <li><strong>baud_en_next and baud_en_reg:</strong> The next value and current value of the baud enable signal, which triggers the external Baud Rate Generator.</li>
     </ul>
+
+    <p>Now that we know all the internal signals, we can define them in our SystemVerilog module:</p>
 
     <details>
         <summary>View Internal Signals</summary>
@@ -612,7 +615,7 @@ module uart_tx #(
     
     <h4>3. The State Machine Logic</h4>
     <p>The UART transmitter operates as a Finite State Machine (FSM). It transitions between four distinct states based on the <code>sample_tick</code> counter.</p>
-    <p>This FSM is considered a <strong>Sequencer</strong> because its behavior follows a strict, predetermined path once it leaves the initial state. In many FSMs, multiple inputs might branch the logic into different directions; however, this transmitter is essentially a "one-way street." There is only one external control input (<code>tx_start</code>) that influences the state transitions, and it only affects the machine when it is in the IDLE state.</p>
+    <p>This FSM is actually considered a <strong>Sequencer.</strong> meaning its behavior follows a strict, predetermined path once it leaves the initial state. In many FSMs, multiple inputs might branch the logic into different directions; however, this transmitter is essentially a "one-way street." There is only one external control input (<code>tx_start</code>) that influences the state transitions, and it only affects the machine when it is in the IDLE state.</p>
     <p>The following diagram illustrates our FSM:</p>
     
     <div class="image-container">

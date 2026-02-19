@@ -18,90 +18,40 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: radial-gradient(circle at top, #1a1f2e 0%, var(--space-black) 100%);
             color: var(--stardust); 
-            margin: 0; 
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
         }
 
         .container { max-width: 900px; width: 100%; padding-top: 20px; }
 
         header { text-align: center; margin-bottom: 40px; }
+        h1 { color: var(--star-blue); text-transform: uppercase; letter-spacing: 3px; font-size: 2rem; text-shadow: 0 0 15px rgba(88, 166, 255, 0.3); }
 
-        h1 { 
-            color: var(--star-blue); 
-            text-transform: uppercase; 
-            letter-spacing: 3px; 
-            font-size: 2rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
-        }
-
-        .back-link {
-            color: var(--star-blue);
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        .back-link:hover { transform: translateX(-5px); text-shadow: 0 0 10px var(--star-blue); }
+        .back-link { color: var(--star-blue); text-decoration: none; font-weight: bold; margin-bottom: 20px; display: inline-block; transition: 0.3s; }
+        .back-link:hover { transform: translateX(-5px); }
 
         .media-card {
             background: rgba(22, 27, 34, 0.8);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
+            padding: 30px; margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
         }
 
-        .audio-container { text-align: center; }
+        audio { width: 100%; max-width: 600px; filter: invert(100%) hue-rotate(180deg) brightness(1.5); margin-top: 10px; }
 
-        audio { 
-            width: 100%; max-width: 600px; height: 40px;
-            filter: invert(100%) hue-rotate(180deg) brightness(1.5); 
-            margin-top: 10px;
+        .presentation-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .presentation-controls { text-align: center; margin-bottom: 25px; }
-
-        .launch-btn {
-            background: var(--nebula-purple);
-            color: white;
-            border: none;
-            padding: 15px 35px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(110, 64, 201, 0.4);
-        }
-
-        .launch-btn:hover {
-            transform: translateY(-3px);
-            background: #8250df;
-            box-shadow: 0 8px 20px rgba(110, 64, 201, 0.6);
-        }
-
-        .instruction-box {
-            background: rgba(88, 166, 255, 0.1);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            font-size: 0.85rem;
-            color: #c9d1d9;
-            display: inline-block;
-            border: 1px solid rgba(88, 166, 255, 0.2);
-        }
-
-        iframe {
+        /* This is the magic part for centering in fullscreen */
+        #pdfViewer {
             width: 100%;
             height: 600px;
             border: 1px solid var(--border-color);
@@ -109,7 +59,33 @@
             background: #000;
         }
 
-        footer { text-align: center; margin-top: 40px; color: #484f58; font-size: 0.8rem; padding-bottom: 40px; }
+        #pdfViewer:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            border-radius: 0;
+            object-fit: contain; /* Encourages centering */
+        }
+
+        .launch-btn {
+            background: var(--nebula-purple);
+            color: white; border: none;
+            padding: 15px 35px; border-radius: 8px;
+            font-weight: bold; font-size: 1.1rem;
+            cursor: pointer; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(110, 64, 201, 0.4);
+            margin-bottom: 20px;
+        }
+
+        .launch-btn:hover { transform: translateY(-3px); background: #8250df; }
+
+        .instruction-box {
+            background: rgba(88, 166, 255, 0.1);
+            border-radius: 8px; padding: 12px;
+            font-size: 0.85rem; color: #c9d1d9;
+            margin-bottom: 20px; border: 1px solid rgba(88, 166, 255, 0.2);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -124,13 +100,9 @@
 
         <div class="media-card">
             <h3 style="margin-top:0; color: var(--nebula-purple);">🎙️ Audio Briefing</h3>
-            <div class="audio-container">
-                <p style="font-size: 0.9rem; color: #8b949e; margin-bottom: 15px;">
-                    Listen to the high-level project summary while following the slides below.
-                </p>
+            <div style="text-align: center;">
                 <audio controls>
                     <source src="multimedia/Designing_Professional_Silicon_From_Adders_To_UARTs.m4a" type="audio/x-m4a">
-                    Your browser does not support audio.
                 </audio>
             </div>
         </div>
@@ -138,61 +110,51 @@
         <div class="media-card">
             <h3 style="margin-top:0; color: var(--star-blue);">📊 Project Presentation</h3>
             
-            <div class="presentation-controls">
+            <div class="presentation-container">
                 <button class="launch-btn" onclick="launchFullscreen()">
                     Launch Fullscreen Deck
                 </button>
+                
                 <div class="instruction-box">
-                    <strong>Navigation:</strong> Use <strong>Arrow Keys</strong> or <strong>Spacebar</strong> to flip slides.<br>
-                    <small style="color: var(--star-blue); opacity: 0.8;">Note: If keys don't respond, click once on the slide to focus.</small>
+                    <strong>Keys Active:</strong> Arrows/Space to advance. <br>
+                    <small>If focus is lost, click once on the slide.</small>
                 </div>
-            </div>
 
-            <iframe id="pdfViewer" src="multimedia/guide presentation.pdf#toolbar=0&navpanes=0&view=FitH"></iframe>
+                <iframe id="pdfViewer" src="multimedia/guide presentation.pdf#toolbar=0&navpanes=0&view=Fit"></iframe>
+            </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="multimedia/guide presentation.pdf" download style="color: var(--star-blue); font-size: 0.8rem; text-decoration: none; border-bottom: 1px solid var(--star-blue);">
+                <a href="multimedia/guide presentation.pdf" download style="color: var(--star-blue); font-size: 0.8rem; text-decoration: none;">
                     Download PDF Version
                 </a>
             </div>
         </div>
-
-        <footer>
-            &copy; 2024 Tomer | The Chip Designer's Guide to the Galaxy
-        </footer>
     </div>
 
     <script>
         function launchFullscreen() {
             const iframe = document.getElementById('pdfViewer');
             
-            // Standard Fullscreen Request
             if (iframe.requestFullscreen) {
                 iframe.requestFullscreen();
             } else if (iframe.webkitRequestFullscreen) {
                 iframe.webkitRequestFullscreen();
             }
 
-            // The "Double-Focus" Logic:
-            // 1. Immediate focus attempt
-            iframe.focus();
-            
-            // 2. Delayed focus attempt after the browser animation finishes
+            // Forced focus sequence
             setTimeout(() => {
                 iframe.focus();
-                // Access the inner window for better key capture
                 if (iframe.contentWindow) {
                     iframe.contentWindow.focus();
                 }
             }, 500);
         }
 
-        // Global key listener to catch stray events
-        document.addEventListener('keydown', function(e) {
+        // Global key capture to refocus if the browser steals the event
+        document.addEventListener('keydown', () => {
             if (document.fullscreenElement) {
                 const iframe = document.getElementById('pdfViewer');
                 iframe.focus();
-                if(iframe.contentWindow) iframe.contentWindow.focus();
             }
         });
     </script>

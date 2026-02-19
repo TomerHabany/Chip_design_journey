@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Briefing | Chip Design Journey</title>
+    <style>
+        :root {
+            --space-black: #0b0e14;
+            --deep-slate: #161b22;
+            --nebula-purple: #6e40c9;
+            --star-blue: #58a6ff;
+            --stardust: #e6edf3;
+            --border-color: #30363d;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--space-black); 
+            color: var(--stardust); 
+            margin: 0; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { max-width: 1000px; width: 100%; }
+
+        h1 { color: var(--star-blue); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+
+        .media-card {
+            background: var(--deep-slate);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .audio-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: linear-gradient(90deg, rgba(110, 64, 201, 0.1), transparent);
+        }
+
+        audio { width: 100%; max-width: 500px; filter: invert(100%) hue-rotate(180deg) brightness(1.5); }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .back-link {
+            color: var(--star-blue);
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Main Logs</a>
+        <h1>Project Mission Briefing</h1>
+
+        <div class="media-card audio-section">
+            <div style="text-align: center;">
+                <h3 style="margin: 0 0 10px 0; color: var(--nebula-purple);">🎙️ Technical Podcast Summary</h3>
+                <p style="font-size: 0.9rem; color: #8b949e;">Hit play for a 5-minute deep dive while you scroll the slides below.</p>
+                <audio controls>
+                    <source src="multimedia/Designing_Professional_Silicon_From_Adders_To_UARTs.m4a" type="audio/x-m4a">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </div>
+
+        <div class="media-card">
+            <h3 style="margin: 0 0 15px 0; color: var(--star-blue);">📊 Technical Presentation</h3>
+            <iframe src="multimedia/guide presentation.pdf" class="pdf-viewer"></iframe>
+            <p style="text-align: center; margin-top: 10px;">
+                <a href="multimedia/guide presentation.pdf" download style="color: var(--star-blue); font-size: 0.8rem;">Download PDF instead</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

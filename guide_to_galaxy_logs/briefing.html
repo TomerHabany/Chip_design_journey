@@ -26,7 +26,6 @@
         }
 
         .container { max-width: 1000px; width: 100%; }
-
         h1 { color: var(--star-blue); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
 
         .media-card {
@@ -38,31 +37,55 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        .audio-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            background: linear-gradient(90deg, rgba(110, 64, 201, 0.1), transparent);
-        }
-
-        audio { width: 100%; max-width: 500px; filter: invert(100%) hue-rotate(180deg) brightness(1.5); }
-
-        .pdf-viewer {
+        /* Presentation Wrapper */
+        .presentation-wrapper {
+            position: relative;
             width: 100%;
             height: 600px;
-            border: none;
+            background: #000;
             border-radius: 8px;
+            overflow: hidden;
         }
 
-        .back-link {
-            color: var(--star-blue);
-            text-decoration: none;
-            font-weight: bold;
-            margin-bottom: 20px;
-            display: inline-block;
+        /* The actual PDF */
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
+
+        /* The Transparent Click Layer */
+        .click-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            cursor: zoom-in;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .click-layer:hover {
+            background: rgba(110, 64, 201, 0.1);
+        }
+
+        .overlay-hint {
+            background: var(--nebula-purple);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Fullscreen Mode specifics */
+        :fullscreen .click-layer { cursor: pointer; }
+        :-webkit-full-screen .click-layer { cursor: pointer; }
+
+        audio { width: 100%; max-width: 500px; filter: invert(100%) hue-rotate(180deg) brightness(1.5); }
+        .back-link { color: var(--star-blue); text-decoration: none; font-weight: bold; margin-bottom: 20px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -70,24 +93,59 @@
         <a href="index.html" class="back-link">← Back to Main Logs</a>
         <h1>Project Mission Briefing</h1>
 
-        <div class="media-card audio-section">
-            <div style="text-align: center;">
-                <h3 style="margin: 0 0 10px 0; color: var(--nebula-purple);">🎙️ Technical Podcast Summary</h3>
-                <p style="font-size: 0.9rem; color: #8b949e;">Hit play for a 5-minute deep dive while you scroll the slides below.</p>
-                <audio controls>
-                    <source src="multimedia/Designing_Professional_Silicon_From_Adders_To_UARTs.m4a" type="audio/x-m4a">
-                    Your browser does not support the audio element.
-                </audio>
-            </div>
+        <div class="media-card" style="text-align: center; background: linear-gradient(90deg, rgba(110, 64, 201, 0.1), transparent); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+            <h3 style="margin: 0 0 10px 0; color: var(--nebula-purple);">️ Technical Podcast Summary</h3>
+            <audio controls>
+                <source src="multimedia/Designing_Professional_Silicon_From_Adders_To_UARTs.m4a" type="audio/x-m4a">
+            </audio>
         </div>
 
         <div class="media-card">
-            <h3 style="margin: 0 0 15px 0; color: var(--star-blue);">📊 Technical Presentation</h3>
-            <iframe src="multimedia/guide presentation.pdf" class="pdf-viewer"></iframe>
-            <p style="text-align: center; margin-top: 10px;">
-                <a href="multimedia/guide presentation.pdf" download style="color: var(--star-blue); font-size: 0.8rem;">Download PDF instead</a>
+            <h3 style="margin: 0 0 15px 0; color: var(--star-blue);"> Technical Presentation</h3>
+            
+            <div class="presentation-wrapper" id="presentationArea">
+                <div class="click-layer" id="clickLayer" onclick="handleInteraction()">
+                    <div class="overlay-hint" id="hint">CLICK TO ENTER FULLSCREEN</div>
+                </div>
+                
+                <iframe src="multimedia/guide presentation.pdf#toolbar=0&navpanes=0" class="pdf-viewer" id="myPdf"></iframe>
+            </div>
+
+            <p style="text-align: center; margin-top: 15px;">
+                <a href="multimedia/guide presentation.pdf" download style="color: var(--star-blue); font-size: 0.8rem;">Download PDF Presentation</a>
             </p>
         </div>
     </div>
+
+    <script>
+        const area = document.getElementById('presentationArea');
+        const hint = document.getElementById('hint');
+
+        function handleInteraction() {
+            if (!document.fullscreenElement) {
+                launchFullscreen();
+            } else {
+                // In fullscreen, we can't "force" a PDF page turn via JS click,
+                // but we can tell the user how to do it.
+                alert("Use your Arrow Keys or Spacebar to advance slides!");
+            }
+        }
+
+        function launchFullscreen() {
+            if (area.requestFullscreen) {
+                area.requestFullscreen();
+            } else if (area.webkitRequestFullscreen) {
+                area.webkitRequestFullscreen();
+            }
+            hint.style.display = 'none';
+        }
+
+        // Listen for exit to show the hint again
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                hint.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>

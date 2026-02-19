@@ -79,12 +79,10 @@
 
         .launch-btn:hover { transform: translateY(-3px); background: #8250df; }
 
-        .instruction-box {
-            background: rgba(88, 166, 255, 0.1);
-            border-radius: 8px; padding: 12px;
-            font-size: 0.85rem; color: #c9d1d9;
-            margin-bottom: 20px; border: 1px solid rgba(88, 166, 255, 0.2);
-            text-align: center;
+         .instruction-text {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -99,8 +97,8 @@
         </header>
 
         <div class="media-card">
-            <h3 style="margin-top:0; color: var(--nebula-purple);">🎙️ Audio Briefing</h3>
-            <div style="text-align: center;">
+            <h3 style="text-align: center; margin-top:0; color: var(--nebula-purple);"> Audio Summary</h3>
+            <div style="text-align: center;">  <p style="font-size: 0.9rem; color: #8b949e;">Hit play for a 15-minute deep dive while you scroll the slides below.</p>
                 <audio controls>
                     <source src="multimedia/Designing_Professional_Silicon_From_Adders_To_UARTs.m4a" type="audio/x-m4a">
                 </audio>
@@ -108,17 +106,16 @@
         </div>
 
         <div class="media-card">
-            <h3 style="margin-top:0; color: var(--star-blue);">📊 Project Presentation</h3>
+            <h3 style="text-align: center; margin-top:0; color: var(--star-blue);"> Project Presentation</h3>
             
             <div class="presentation-container">
                 <button class="launch-btn" onclick="launchFullscreen()">
                     Launch Fullscreen Deck
                 </button>
                 
-                <div class="instruction-box">
-                    <strong>Keys Active:</strong> Arrows/Space to advance. <br>
-                    <small>If focus is lost, click once on the slide.</small>
-                </div>
+                <p class="instruction-text">
+                    <b>Fullscreen Instructions:</b> Use <b>Arrow Keys</b> or <b>Spacebar</b> to flip slides. Press <b>ESC</b> to return.
+                </p>
 
                 <iframe id="pdfViewer" src="multimedia/guide presentation.pdf#toolbar=0&navpanes=0&view=Fit"></iframe>
             </div>

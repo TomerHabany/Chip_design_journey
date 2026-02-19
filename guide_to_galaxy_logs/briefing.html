@@ -15,137 +15,200 @@
         }
 
         body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--space-black); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: radial-gradient(circle at top, #1a1f2e 0%, var(--space-black) 100%);
             color: var(--stardust); 
             margin: 0; 
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
 
-        .container { max-width: 1000px; width: 100%; }
-        h1 { color: var(--star-blue); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        .container { 
+            max-width: 900px; 
+            width: 100%; 
+            padding-top: 20px;
+        }
 
+        /* Header Styling */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 { 
+            color: var(--star-blue); 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
+
+        .back-link {
+            color: var(--star-blue);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            text-shadow: 0 0 10px var(--star-blue);
+            transform: translateX(-5px);
+        }
+
+        /* Cards */
         .media-card {
-            background: var(--deep-slate);
+            background: rgba(22, 27, 34, 0.8);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
         }
 
-        /* Presentation Wrapper */
-        .presentation-wrapper {
-            position: relative;
-            width: 100%;
-            height: 600px;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        /* The actual PDF */
-        .pdf-viewer {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* The Transparent Click Layer */
-        .click-layer {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            cursor: zoom-in;
-            z-index: 10;
+        h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
         }
 
-        .click-layer:hover {
-            background: rgba(110, 64, 201, 0.1);
+        /* Audio Player Styling */
+        .audio-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
         }
 
-        .overlay-hint {
+        audio { 
+            width: 100%; 
+            max-width: 600px; 
+            height: 40px;
+            filter: invert(100%) hue-rotate(180deg) brightness(1.5); /* Inverts to dark theme */
+            margin-top: 10px;
+        }
+
+        /* Presentation Section */
+        .presentation-controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .launch-btn {
             background: var(--nebula-purple);
             color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
             font-weight: bold;
-            pointer-events: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(110, 64, 201, 0.4);
         }
 
-        /* Fullscreen Mode specifics */
-        :fullscreen .click-layer { cursor: pointer; }
-        :-webkit-full-screen .click-layer { cursor: pointer; }
+        .launch-btn:hover {
+            transform: translateY(-3px);
+            background: #8250df;
+            box-shadow: 0 8px 20px rgba(110, 64, 201, 0.6);
+        }
 
-        audio { width: 100%; max-width: 500px; filter: invert(100%) hue-rotate(180deg) brightness(1.5); }
-        .back-link { color: var(--star-blue); text-decoration: none; font-weight: bold; margin-bottom: 20px; display: inline-block; }
+        .instruction-text {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-top: 15px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 550px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #000;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-bottom: 40px;
+            color: #484f58;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-link">← Back to Main Logs</a>
-        <h1>Project Mission Briefing</h1>
 
-        <div class="media-card" style="text-align: center; background: linear-gradient(90deg, rgba(110, 64, 201, 0.1), transparent); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-            <h3 style="margin: 0 0 10px 0; color: var(--nebula-purple);">️ Technical Podcast Summary</h3>
-            <audio controls>
-                <source src="multimedia/Designing_Professional_Silicon_From_Adders_To_UARTs.m4a" type="audio/x-m4a">
-            </audio>
+    <div class="container">
+        <a href="index.html" class="back-link">← Return to Galaxy Map</a>
+        
+        <header>
+            <h1>Mission Briefing</h1>
+            <p style="color: #8b949e;">Technical Overview & Architectural Deep-Dive</p>
+        </header>
+
+        <div class="media-card">
+            <h3 style="color: var(--nebula-purple);">🎙️ Audio Summary</h3>
+            <div class="audio-container">
+                <p style="font-size: 0.9rem; color: #8b949e; margin-bottom: 15px;">
+                    Listen to the AI-generated overview of the design philosophy and technical goals.
+                </p>
+                <audio controls>
+                    <source src="multimedia/Designing_Professional_Silicon_From_Adders_To_UARTs.m4a" type="audio/x-m4a">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
         </div>
 
         <div class="media-card">
-            <h3 style="margin: 0 0 15px 0; color: var(--star-blue);"> Technical Presentation</h3>
+            <h3 style="color: var(--star-blue);">📊 Technical Presentation</h3>
             
-            <div class="presentation-wrapper" id="presentationArea">
-                <div class="click-layer" id="clickLayer" onclick="handleInteraction()">
-                    <div class="overlay-hint" id="hint">CLICK TO ENTER FULLSCREEN</div>
-                </div>
-                
-                <iframe src="multimedia/guide presentation.pdf#toolbar=0&navpanes=0" class="pdf-viewer" id="myPdf"></iframe>
+            <div class="presentation-controls">
+                <button class="launch-btn" onclick="launchFullscreen()">
+                    Launch Fullscreen Slideshow
+                </button>
+                <p class="instruction-text">
+                    <b>Fullscreen Instructions:</b> Use <b>Arrow Keys</b> or <b>Spacebar</b> to flip slides. Press <b>ESC</b> to return.
+                </p>
             </div>
 
-            <p style="text-align: center; margin-top: 15px;">
-                <a href="multimedia/guide presentation.pdf" download style="color: var(--star-blue); font-size: 0.8rem;">Download PDF Presentation</a>
-            </p>
+            <iframe id="pdfViewer" src="multimedia/guide presentation.pdf#toolbar=0&navpanes=0&view=FitH"></iframe>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="multimedia/guide presentation.pdf" download style="color: var(--star-blue); font-size: 0.8rem; text-decoration: none; border-bottom: 1px solid var(--star-blue);">
+                    Download PDF Version
+                </a>
+            </div>
         </div>
+
+        <footer>
+            &copy; 2024 Tomer | The Chip Designer's Guide to the Galaxy
+        </footer>
     </div>
 
     <script>
-        const area = document.getElementById('presentationArea');
-        const hint = document.getElementById('hint');
-
-        function handleInteraction() {
-            if (!document.fullscreenElement) {
-                launchFullscreen();
-            } else {
-                // In fullscreen, we can't "force" a PDF page turn via JS click,
-                // but we can tell the user how to do it.
-                alert("Use your Arrow Keys or Spacebar to advance slides!");
-            }
-        }
-
         function launchFullscreen() {
-            if (area.requestFullscreen) {
-                area.requestFullscreen();
-            } else if (area.webkitRequestFullscreen) {
-                area.webkitRequestFullscreen();
+            const iframe = document.getElementById('pdfViewer');
+            
+            if (iframe.requestFullscreen) {
+                iframe.requestFullscreen();
+            } else if (iframe.webkitRequestFullscreen) { /* Safari */
+                iframe.webkitRequestFullscreen();
+            } else if (iframe.msRequestFullscreen) { /* IE11 */
+                iframe.msRequestFullscreen();
             }
-            hint.style.display = 'none';
-        }
 
-        // Listen for exit to show the hint again
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                hint.style.display = 'block';
-            }
-        });
+            // Ensure the iframe has focus so it catches the arrow-key inputs immediately
+            iframe.focus();
+        }
     </script>
 </body>
 </html>
